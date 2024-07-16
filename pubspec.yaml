@@ -31,7 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_screenutil: ^5.9.0
-  image_picker: ^0.8.7
+  image_picker: ^0.8.4+4
   logger: ^2.3.0
 
 
@@ -63,6 +63,7 @@ flutter:
   assets:
     - assets/loading_image.png
     - assets/login_background.png
+    - assets/SN Logo.jpg
 
   # To add assets to your application, add an assets section, like this:
   # assets:

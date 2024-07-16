@@ -10,10 +10,11 @@ class Splash extends StatefulWidget {
 
 class _SplashState extends State<Splash> {
   @override
-  void initState(){
+  void initState() {
     super.initState();
     _navigateToLogin();
   }
+
   _navigateToLogin() async {
     await Future.delayed(Duration(milliseconds: 3000), () {});
     Navigator.pushReplacementNamed(context, '/login');

@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
@@ -25,7 +23,7 @@ class _SignupState extends State<Signup> {
       print('이름: $_name');
       print('전화번호: $_phoneNumber');
 
-      //얼굴사진 찍고 표시할까말까
+      // Additional logic can be added here
       Navigator.pop(context);
     }
   }
@@ -95,13 +93,11 @@ class _SignupState extends State<Signup> {
               ElevatedButton(
                 onPressed: _signup,
                 child: Text('회원가입'),
-
               ),
             ],
           ),
         ),
       ),
     );
-
   }
 }

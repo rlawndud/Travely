@@ -5,7 +5,7 @@ class Login extends StatelessWidget {
   final TextEditingController _passwordController = TextEditingController();
 
   void _login(BuildContext context) {
-    //검사
+    // Validate inputs here if needed
     Navigator.pushReplacementNamed(context, '/home');
   }
 
@@ -51,15 +51,14 @@ class Login extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () => _login(context),
                     child: Text('로그인'),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(110, 35),
-                        backgroundColor: Colors.deepPurpleAccent,
-                        foregroundColor: Colors.white,
-                        shadowColor: Colors.deepPurpleAccent,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15), // 버튼의 모서리 둥글기
-                        ),
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(110, 35),
+                      backgroundColor: Colors.deepPurpleAccent,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
                       ),
+                    ),
                   ),
                   ElevatedButton(
                     onPressed: () => _signup(context),
@@ -69,7 +68,7 @@ class Login extends StatelessWidget {
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.deepPurpleAccent,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15), // 버튼의 모서리 둥글기
+                        borderRadius: BorderRadius.circular(15),
                       ),
                     ),
                   ),
