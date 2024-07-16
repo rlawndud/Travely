@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -17,7 +20,7 @@ class _SignupState extends State<Signup> {
   void _signup() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      print('아이디: $_username');
+      Logger().i('아이디 : $_username');
       print('비밀번호: $_password');
       print('이름: $_name');
       print('전화번호: $_phoneNumber');
@@ -92,6 +95,7 @@ class _SignupState extends State<Signup> {
               ElevatedButton(
                 onPressed: _signup,
                 child: Text('회원가입'),
+
               ),
             ],
           ),
