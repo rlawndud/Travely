@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:test2/home.dart';
-import 'package:test2/image_upload_page.dart';
 import 'package:test2/login.dart';
 import 'package:test2/signup.dart';
 import 'package:test2/splash.dart';

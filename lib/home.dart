@@ -18,47 +18,40 @@ class _HomeState extends State<Home> {
       title: 'chat used firebase',
       theme: ThemeData(primaryColor: Colors.white),
       home: DefaultTabController(
-          length: 4,
+          length: 5,
           child: Scaffold(
             appBar: AppBar(
               title: Text('share album App'),
             ),
             body: TabBarView(
               children: [
-                // ImageUploadePage(),
-                // Text('참여 그룹 화면'),
-                // Text('검색 화면'),
-                // Text('내 정보 화면'),
-                TeamSettingScreen(),
-                PhotoFolderScreen(),
-                ImageUploadePage(),  // 여기를 수정했습니다.
-                Text('사진 찾기'),
+                Text('팀'),
+                Text('앨범'),
+                Text('홈'),
+                Text('촬영'),
+                Text('AI텍스트'),
               ],
             ),
             bottomNavigationBar: TabBar(tabs: [
               Tab(
-                // icon: Icon(Icons.photo_library),
-                // text: '내 앨범',
                 icon: Icon(Icons.group, color: Colors.black),
-                text: '팀 설정',
+                text: '팀',
               ),
               Tab(
-                // icon: Icon(Icons.groups),
-                // text: '참여 그룹',
                 icon: Icon(Icons.photo_album, color: Colors.black),
-                text: '사진 폴더',
+                text: '앨범',
               ),
               Tab(
-                // icon: Icon(Icons.search),
-                // text: '사진 찾기',
+                icon: Icon(Icons.home, color: Colors.black),
+                text: '홈',
+              ),
+              Tab(
                 icon: Icon(Icons.camera_alt, color: Colors.black),
-                text: '촬영하기',
+                text: '촬영',
               ),
               Tab(
-                // icon: Icon(Icons.person),
-                // text: '내 정보',
-                icon: Icon(Icons.search, color: Colors.black),
-                text: '사진 찾기',
+                icon: Icon(Icons.edit_note, color: Colors.black),
+                text: 'SnapNote',
               )
             ]),
           )),
