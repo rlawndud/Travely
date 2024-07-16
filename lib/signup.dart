@@ -95,13 +95,11 @@ class _SignupState extends State<Signup> {
               ElevatedButton(
                 onPressed: _signup,
                 child: Text('회원가입'),
-
               ),
             ],
           ),
         ),
       ),
     );
-
   }
 }
