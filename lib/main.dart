@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:test2/home.dart';
 import 'package:test2/login.dart';
+import 'package:test2/album/photo_folder_screen.dart';
 import 'package:test2/signup.dart';
 import 'package:test2/splash.dart';
 
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => Login(),
         '/home': (context) => Home(),
         '/signup': (context) => Signup(),
+        '/photo_folder_screen': (context) => PhotoFolderScreen(),
       },
     );
   }
