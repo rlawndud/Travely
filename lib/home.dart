@@ -1,3 +1,4 @@
+// 홈화면 , 구글맵 , 마커 , 마커에 히트맵기능 구현
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test2/TeamSearch.dart';
@@ -142,9 +143,75 @@ class GoogleMapSample extends StatefulWidget {
 
 class _GoogleMapSampleState extends State<GoogleMapSample> {
   late GoogleMapController _controller;
+  final Set<Marker> _markers = {};
+  final Map<MarkerId, int> _markerClickCounts = {};
+  bool _isAddingMarker = false;
+  bool _isDeletingMarker = false;
 
   void _onMapCreated(GoogleMapController controller) {
     _controller = controller;
+  }
+
+  void _toggleAddMarkerMode() {
+    setState(() {
+      _isAddingMarker = !_isAddingMarker;
+      if (_isAddingMarker) _isDeletingMarker = false;
+    });
+  }
+
+  void _toggleDeleteMarkerMode() {
+    setState(() {
+      _isDeletingMarker = !_isDeletingMarker;
+      if (_isDeletingMarker) _isAddingMarker = false;
+    });
+  }
+
+  void _addMarker(LatLng position) {
+    setState(() {
+      final markerId = MarkerId(position.toString());
+      if (!_markerClickCounts.containsKey(markerId)) {
+        _markerClickCounts[markerId] = 0;
+      }
+      final marker = Marker(
+        markerId: markerId,
+        position: position,
+        infoWindow: InfoWindow(
+          title: 'Custom Location',
+          snippet: '${position.latitude}, ${position.longitude}',
+        ),
+        icon: BitmapDescriptor.defaultMarkerWithHue(
+          _markerClickCounts[markerId]! > 5 ? BitmapDescriptor.hueRed : BitmapDescriptor.hueBlue,
+        ),
+        onTap: () {
+          if (_isDeletingMarker) {
+            _removeMarker(markerId);
+          } else {
+            _incrementMarkerClickCount(markerId);
+          }
+        },
+      );
+      _markers.add(marker);
+    });
+  }
+
+  void _removeMarker(MarkerId markerId) {
+    setState(() {
+      _markers.removeWhere((marker) => marker.markerId == markerId);
+      _markerClickCounts.remove(markerId);
+    });
+  }
+
+  void _incrementMarkerClickCount(MarkerId markerId) {
+    setState(() {
+      _markerClickCounts[markerId] = _markerClickCounts[markerId]! + 1;
+      final updatedMarker = _markers.firstWhere((marker) => marker.markerId == markerId);
+      _markers.remove(updatedMarker);
+      _markers.add(updatedMarker.copyWith(
+        iconParam: BitmapDescriptor.defaultMarkerWithHue(
+          _markerClickCounts[markerId]! > 5 ? BitmapDescriptor.hueRed : BitmapDescriptor.hueBlue,
+        ),
+      ));
+    });
   }
 
   void _zoomIn() {
@@ -163,10 +230,16 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
           GoogleMap(
             onMapCreated: _onMapCreated,
             initialCameraPosition: CameraPosition(
-              target: LatLng(37.5665, 126.978), // 구글 지도의 LatLng 사용
-              zoom: 11.0,
+              target: LatLng(36.2048, 127.7669), // 대한민국 중심 좌표
+              zoom: 7.0, // 대한민국만 보이도록 줌 레벨 조정
             ),
             zoomControlsEnabled: false, // 기본 줌 컨트롤 비활성화
+            markers: _markers,
+            onTap: (position) {
+              if (_isAddingMarker) {
+                _addMarker(position);
+              }
+            },
           ),
           Positioned(
             top: 50,
@@ -185,6 +258,29 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
                   materialTapTargetSize: MaterialTapTargetSize.padded,
                   mini: true,
                   child: Icon(Icons.remove),
+                ),
+              ],
+            ),
+          ),
+          Positioned(
+            bottom: 50,
+            left: 10,
+            child: Column(
+              children: [
+                FloatingActionButton(
+                  onPressed: _toggleAddMarkerMode,
+                  materialTapTargetSize: MaterialTapTargetSize.padded,
+                  mini: true,
+                  backgroundColor: _isAddingMarker ? Colors.green : Colors.blue,
+                  child: Icon(Icons.add_location),
+                ),
+                SizedBox(height: 10),
+                FloatingActionButton(
+                  onPressed: _toggleDeleteMarkerMode,
+                  materialTapTargetSize: MaterialTapTargetSize.padded,
+                  mini: true,
+                  backgroundColor: _isDeletingMarker ? Colors.red : Colors.blue,
+                  child: Icon(Icons.delete),
                 ),
               ],
             ),
