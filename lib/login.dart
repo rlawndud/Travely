@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class Login extends StatelessWidget {
   final TextEditingController _idController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _pwController = TextEditingController();
 
   void _login(BuildContext context) {
     //검사
@@ -29,14 +29,6 @@ class Login extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  /*TextField(
-                    controller: _idController,
-                    decoration: InputDecoration(
-                      labelText: '아이디',
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                  ),*/
                   Container(
                     child: TextField(
                       controller: _idController,
@@ -47,12 +39,12 @@ class Login extends StatelessWidget {
 
                       ),
                     ),
-                    width: 180,
+                    padding: EdgeInsets.fromLTRB(100.0, 0.0, 100.0, 0.0),
                   ),
                   SizedBox(height: 50),
                   Container(
                     child: TextField(
-                      controller: _passwordController,
+                      controller: _pwController,
                       decoration: InputDecoration(
                         hintText: 'PW',
                         filled: true,
@@ -60,7 +52,7 @@ class Login extends StatelessWidget {
                       ),
                       obscureText: true,
                     ),
-                    width: 180,
+                    padding: EdgeInsets.fromLTRB(100.0, 0.0, 100.0, 0.0),
                   ),
                   SizedBox(height: 30),
                   Row(
@@ -75,7 +67,7 @@ class Login extends StatelessWidget {
                           foregroundColor: Colors.white,
                           shadowColor: Colors.deepPurpleAccent,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15), // 버튼의 모서리 둥글기
+                            borderRadius: BorderRadius.circular(10), // 버튼의 모서리 둥글기
                           ),
                         ),
                       ),
@@ -84,9 +76,7 @@ class Login extends StatelessWidget {
                         onPressed: () => _signup(context),
                         child: Text('회원가입'),
                         style: ElevatedButton.styleFrom(
-                          minimumSize: Size(70, 30),
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.deepPurpleAccent,
+                          minimumSize: Size(110, 35),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10), // 버튼의 모서리 둥글기
                           ),

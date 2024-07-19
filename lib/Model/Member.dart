@@ -3,9 +3,9 @@ class Member {
   String id;
   String pw;
   String name;
-  List<String> img;
+  String phone;
 
-  Member(this.idx,this.id, this.pw, this.name, this.img);
+  Member(this.idx,this.id, this.pw, this.name, this.phone);
 
   // JSON에서 Member 객체를 생성하는 팩토리 메서드
 /*  factory Member.fromJson(Map<String, dynamic> json) {
@@ -28,5 +28,5 @@ class Member {
   String toString() {
     // TODO: implement toString
     return "idx: $idx, name: $name, img: $img";
-  }
-}*/
+  }*/
+}

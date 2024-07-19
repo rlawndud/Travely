@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:test2/TeamSettingScreen.dart';
-import 'package:test2/image_upload_page.dart';
-import 'package:test2/photo_folder_screen.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
