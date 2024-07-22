@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:test2/model/auto_login.dart';
+import 'package:test2/value/color.dart';
+
 
 class Login extends StatelessWidget {
+  final RxBool _isAutoLogin = true.obs;
+
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _pwController = TextEditingController();
 
-  void _login(BuildContext context) {
-    //검사
-    Navigator.pushReplacementNamed(context, '/home');
+  void _login(BuildContext context)async{
+    //SharedPreferences에 로그인 정보 저장
+    AutoLogin autoLogin = new AutoLogin();
+    autoLogin.setLoginInfo(_isAutoLogin, _idController.text, _pwController.text);
+    //서버에 로그인 정보 전달 및 회원정보 획득
+
+    Navigator.pushNamed(context, '/home');
   }
 
   void _signup(BuildContext context) {
@@ -20,7 +31,7 @@ class Login extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           Image.asset(
-            'assets/login_background.png',
+            'assets/background.png',
             fit: BoxFit.cover,
           ),
           Center(
@@ -36,12 +47,13 @@ class Login extends StatelessWidget {
                         hintText: 'ID',
                         filled: true,
                         fillColor: Colors.white,
-
+                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: mainColor,),),
                       ),
+                      cursorColor:mainColor,
                     ),
-                    padding: EdgeInsets.fromLTRB(100.0, 0.0, 100.0, 0.0),
+                    padding: EdgeInsets.fromLTRB(82.0, 0.0, 82.0, 0.0),
                   ),
-                  SizedBox(height: 50),
+                  SizedBox(height: 30),
                   Container(
                     child: TextField(
                       controller: _pwController,
@@ -49,36 +61,65 @@ class Login extends StatelessWidget {
                         hintText: 'PW',
                         filled: true,
                         fillColor: Colors.white,
+                        focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: mainColor,),),
                       ),
+                      cursorColor:mainColor,
                       obscureText: true,
                     ),
-                    padding: EdgeInsets.fromLTRB(100.0, 0.0, 100.0, 0.0),
+                    padding: EdgeInsets.fromLTRB(82.0, 0.0, 82.0, 0.0),
+                  ),
+                  SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Obx((){
+                        return Checkbox(
+                            materialTapTargetSize:
+                            MaterialTapTargetSize.shrinkWrap,
+                            activeColor: mainColor,
+                            checkColor: Colors.white,
+                            side: BorderSide(color: Color.fromARGB(195, 58, 58, 58),),
+                            value: _isAutoLogin.value,
+                            onChanged: (bool? value) {
+                              _isAutoLogin.value = value!;
+                            });
+                      }),
+                      Text('자동 로그인',
+                      style: TextStyle(
+                        color: Color.fromARGB(195, 58, 58, 58),
+                        fontWeight: FontWeight.bold,
+                      ),),
+                    ],
                   ),
                   SizedBox(height: 30),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ElevatedButton(
-                        onPressed: () => _login(context),
+                        onPressed: () =>
+                            _login(context),
                         child: Text('로그인'),
                         style: ElevatedButton.styleFrom(
                           minimumSize: Size(110, 35),
-                          backgroundColor: Colors.deepPurpleAccent,
+                          backgroundColor: mainColor,
                           foregroundColor: Colors.white,
                           shadowColor: Colors.deepPurpleAccent,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10), // 버튼의 모서리 둥글기
+                            borderRadius:
+                                BorderRadius.circular(10), // 버튼의 모서리 둥글기
                           ),
                         ),
                       ),
-                      SizedBox(width: 40),
+                      SizedBox(width: 30),
                       ElevatedButton(
                         onPressed: () => _signup(context),
-                        child: Text('회원가입'),
+                        child: Text('회원가입', style: TextStyle(color: Color.fromARGB(255, 252, 132, 119),),),
                         style: ElevatedButton.styleFrom(
                           minimumSize: Size(110, 35),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10), // 버튼의 모서리 둥글기
+                            borderRadius:
+                                BorderRadius.circular(10), // 버튼의 모서리 둥글기
                           ),
                         ),
                       ),

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
-import 'package:test2/home.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -74,7 +72,7 @@ class _SignupState extends State<Signup> {
             fit: BoxFit.cover,
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(100.0,160.0,100.0,80.0),
+            padding: const EdgeInsets.fromLTRB(98.0,160.0,98.0,80.0),
             child: Form(
               key: _formKey,
               child: ListView(
