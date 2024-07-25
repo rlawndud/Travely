@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class WebSocketService{
   static final WebSocketService _webSocketService = WebSocketService._internal();
@@ -9,36 +12,42 @@ class WebSocketService{
 
   WebSocketService._internal();
 
-  IOWebSocketChannel? channel;
-  String websocketUrl = 'ws://220.90.180.89:8080';
+  late WebSocketChannel channel;
+  Uri websocketUrl = Uri.parse('ws://220.90.180.89:8080');
+  bool _isInitialized = false;
 
   void init(){
+    if (_isInitialized) return;
+
     channel = IOWebSocketChannel.connect(websocketUrl);
-    if(channel!=null){
-      channel!.stream.listen(_eventListener).onDone(_reconnect);
-    }
+/*    final signal = {'signal': '@'};
+    final command = {'command':'ping'};
+    List<Map<String,String>> data = [command,signal];
+    String jsonData = jsonEncode(data);
+    print(jsonData);
+    channel.sink.add(jsonData);*/
+    _isInitialized = true;
   }
 
-  void transmit(dynamic data){
-    if(channel!=null){
-      channel!.sink.add(data);
-    }
+  Future<Map<String, dynamic>> transmit(dynamic data, String commandType) async {
+
+    dynamic command_type = {'command': commandType};
+    dynamic signal = {'signal': '@'};
+    List<Map<String,dynamic>> message = [command_type,data,signal];
+    String jsonData = jsonEncode(message);
+    channel.sink.add(jsonData);
+
+    var response = await _webSocketService.channel.stream.first;
+    var jsonResponse = jsonDecode(response);
+    return jsonResponse;
   }
 
-  void _eventListener(dynamic event){
-    if(event=='message'){
+  Future<dynamic> receive() async{
 
-    }
   }
 
-  void _reconnect(){
-    if(channel!=null){
-      channel!.sink.close();
-      init();
-    }
-  }
 
   void dispose(){
-    channel!.sink.close();
+    channel.sink.close();
   }
 }
