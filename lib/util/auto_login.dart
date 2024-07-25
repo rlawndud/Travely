@@ -20,22 +20,14 @@ class AutoLogin{
     }
   }
 
-  Future<Object> getLoginInfo()async{
-    List<String?> idPassword = [null, null];
-    try{
-      SharedPreferences prefs = await getPreferences();
-      String? Id = prefs.getString('id');
-      String? Pw = prefs.getString('password');
-      idPassword[0] = Id;
-      idPassword[1] = Pw;
+  Future<List<String>?> getLoginInfo()async{
+    final prefs = await SharedPreferences.getInstance();
+    final String? id = prefs.getString('id');
+    final String? pw = prefs.getString('passwaord');
 
-      return {
-        'id': Id ?? '',
-        'password': Pw ?? '',
-      };
-    }catch(e){
-      e.printError();
+    if (id != null && pw != null) {
+      return [id, pw];
     }
-    return idPassword;
+    return null;
   }
 }

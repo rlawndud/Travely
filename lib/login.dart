@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test2/network/web_socket.dart';
 import 'package:test2/util/auto_login.dart';
 import 'package:test2/value/color.dart';
@@ -16,8 +15,12 @@ class Login extends StatelessWidget {
   void _login(BuildContext context) async {
     //SharedPreferences에 로그인 정보 저장
     AutoLogin autoLogin = new AutoLogin();
-    autoLogin.setLoginInfo(
-        _isAutoLogin, _idController.text, _pwController.text);
+    if(_isAutoLogin.value){
+      autoLogin.setLoginInfo(
+          _isAutoLogin, _idController.text, _pwController.text);
+    }else{
+
+    }
     //서버에 로그인 정보 전달 및 회원정보 획득
     UserLoginState loginInfo =
         new UserLoginState(_idController.text, _pwController.text);
@@ -144,6 +147,7 @@ class Login extends StatelessWidget {
                             ),
                             style: ElevatedButton.styleFrom(
                               minimumSize: Size(110, 35),
+                              overlayColor: mainColor30,
                               shape: RoundedRectangleBorder(
                                 borderRadius:
                                 BorderRadius.circular(10), // 버튼의 모서리 둥글기
