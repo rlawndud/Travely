@@ -4,6 +4,7 @@ import 'package:test2/network/web_socket.dart';
 import 'package:test2/util/auto_login.dart';
 import 'package:test2/value/color.dart';
 
+import 'model/member.dart';
 import 'model/userLoginState.dart';
 
 class Login extends StatelessWidget {
@@ -13,11 +14,14 @@ class Login extends StatelessWidget {
   final TextEditingController _pwController = TextEditingController();
 
   void _login(BuildContext context) async {
+
+    String id = _idController.text.toString();
+    String pw = _pwController.text.toString();
     //SharedPreferences에 로그인 정보 저장
     AutoLogin autoLogin = new AutoLogin();
     if(_isAutoLogin.value){
       autoLogin.setLoginInfo(
-          _isAutoLogin, _idController.text, _pwController.text);
+          _isAutoLogin, id, pw);
     }else{
 
     }
@@ -25,8 +29,10 @@ class Login extends StatelessWidget {
     UserLoginState loginInfo =
         new UserLoginState(_idController.text, _pwController.text);
     WebSocketService _webSocketService = WebSocketService();
-    _webSocketService.transmit(loginInfo.toJson(), 'Login');
-
+    var result = _webSocketService.transmit(loginInfo.toJson(), 'Login');
+    if(result is Member){
+      Navigator.pushReplacementNamed(context, '/home', arguments: result);
+    }
     Navigator.pushNamed(context, '/home');
   }
 

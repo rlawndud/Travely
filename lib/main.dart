@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:test2/home.dart';
 import 'package:test2/login.dart';
+import 'package:test2/model/member.dart';
 import 'package:test2/signup.dart';
 import 'package:test2/splash.dart';
 
@@ -23,11 +24,22 @@ class MyApp extends StatelessWidget {
       home: const Splash(),
       routes: {
         '/login': (context) => Login(),
-        '/home': (context) => Home(),
         '/signup': (context) => Signup(),
       },
+      onGenerateRoute: (settings) => generateRoute(settings),
     );
   }
 }
 
+Route? generateRoute(RouteSettings routeSettings){
+  switch(routeSettings.name){
+    case '/home':
+      return MaterialPageRoute(builder: (context){
+        var user = routeSettings.arguments as Member;
+        return Home(user: user);
+      }, settings: routeSettings,);
+    default:
+      return null;
+  }
+}
 

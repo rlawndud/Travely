@@ -1,13 +1,24 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:test2/model/member.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  final Member user;
+  const Home({super.key, required this.user});
 
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
+  late Member _user;
+
+  @override
+  void initState() {
+    super.initState();
+    _user = widget.user;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -24,7 +35,7 @@ class _HomeState extends State<Home> {
               children: [
                 Text('팀'),
                 Text('앨범'),
-                Text('홈'),
+                Text('홈,${_user.name}'),
                 Text('촬영'),
                 Text('AI텍스트'),
               ],

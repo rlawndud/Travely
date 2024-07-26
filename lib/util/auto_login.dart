@@ -1,33 +1,33 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:test2/login.dart';
 
 class AutoLogin{
   static String PREFERENCES_NAME = 'auto_login';
 
-  Future<SharedPreferences> getPreferences() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs;
+  static final AutoLogin _instance = AutoLogin._internal();
+  final Future<SharedPreferences> _manager = SharedPreferences.getInstance();
+
+  AutoLogin._internal(){}
+
+  factory AutoLogin(){
+    return _instance;
   }
 
   Future<void> setLoginInfo(RxBool state, String id, String pw)async{
-    final SharedPreferences prefs = await getPreferences();
+    final manager = await _manager;
     if(state.isTrue){
-      prefs.setString('id', id);
-      prefs.setString('password', pw);
+      manager.setString('id', id);
+      manager.setString('password', pw);
     }
     else{
-      prefs.clear();
+      manager.clear();
     }
   }
 
-  Future<List<String>?> getLoginInfo()async{
-    final prefs = await SharedPreferences.getInstance();
-    final String? id = prefs.getString('id');
-    final String? pw = prefs.getString('passwaord');
-
-    if (id != null && pw != null) {
-      return [id, pw];
-    }
-    return null;
+  Future<List<String>> getLoginInfo()async{
+    final manager = await _manager;
+    return [manager.getString('id')??'',manager.getString('password')??''];
   }
 }
