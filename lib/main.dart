@@ -35,8 +35,10 @@ Route? generateRoute(RouteSettings routeSettings){
   switch(routeSettings.name){
     case '/home':
       return MaterialPageRoute(builder: (context){
-        var user = routeSettings.arguments as Member;
-        return Home(user: user);
+        var map = routeSettings.arguments as Map<String, dynamic>;
+        return Home(
+          user: map['user'] as Member,
+        );
       }, settings: routeSettings,);
     default:
       return null;

@@ -35,7 +35,7 @@ class _HomeState extends State<Home> {
               children: [
                 Text('팀'),
                 Text('앨범'),
-                Text('홈,${_user.name}'),
+                Text('홈,${_user.id}'),
                 Text('촬영'),
                 Text('AI텍스트'),
               ],

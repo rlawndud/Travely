@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:test2/network/web_socket.dart';
 import 'package:test2/util/auto_login.dart';
@@ -19,21 +20,30 @@ class Login extends StatelessWidget {
     String pw = _pwController.text.toString();
     //SharedPreferences에 로그인 정보 저장
     AutoLogin autoLogin = new AutoLogin();
-    if(_isAutoLogin.value){
-      autoLogin.setLoginInfo(
-          _isAutoLogin, id, pw);
-    }else{
 
-    }
     //서버에 로그인 정보 전달 및 회원정보 획득
     UserLoginState loginInfo =
         new UserLoginState(_idController.text, _pwController.text);
     WebSocketService _webSocketService = WebSocketService();
-    var result = _webSocketService.transmit(loginInfo.toJson(), 'Login');
-    if(result is Member){
-      Navigator.pushReplacementNamed(context, '/home', arguments: result);
+    try{
+      var result = await _webSocketService.transmit(loginInfo.toJson(), 'Login');
+      Member mem = Member.fromJson(result);
+      //Member mem = new Member('id', 'password', 'name', 'phone');
+      if(mem is Member){
+        autoLogin.setLoginInfo(_isAutoLogin, id, pw);
+        Navigator.pushReplacementNamed(context, '/home', arguments: {'user':mem});
+      }else{
+        Fluttertoast.showToast(
+            msg: '등록되지 않은 아이디이거나 잘못된 비밀번호를 입력하였습니다.',
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.white70,
+            fontSize: 12,
+            textColor: Colors.black,
+            toastLength: Toast.LENGTH_SHORT);
+      }
+    }catch(e){
+      e.printError();
     }
-    Navigator.pushNamed(context, '/home');
   }
 
   void _signup(BuildContext context) {

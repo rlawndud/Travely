@@ -16,7 +16,7 @@ class WebSocketService {
   WebSocketService._internal();
 
   late WebSocketChannel channel;
-  Uri websocketUrl = Uri.parse('ws://10.101.154.50:8080');
+  Uri websocketUrl = Uri.parse('ws://10.101.152.35:8080');
   bool _isInitialized = false;
   late StreamSubscription _subscription;
   final _responseController =
@@ -26,6 +26,7 @@ class WebSocketService {
     if (_isInitialized) return;
 
     channel = IOWebSocketChannel.connect(websocketUrl);
+    debugPrint(_isInitialized.toString());
 
     _subscription = channel.stream.listen((message) {
       try {

@@ -151,7 +151,6 @@ class _SignupState extends State<Signup> {
 
   void _handleFocusChange() {
     if (!_focusNode.hasFocus) {
-      debugPrint('##### focus off #####');
       _checkId();
     }
   }
