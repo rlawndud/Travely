@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:test2/Friend.dart';
 //import 'package:test2/TeamSettingScreen.dart';
 //import 'package:test2/image_upload_page.dart';
 //import 'package:test2/album/photo_folder_screen.dart';
@@ -23,7 +24,7 @@ class _HomeState extends State<Home> {
           length: 5,
           child: Scaffold(
             appBar: AppBar(
-              title: Text('𝒮𝓃𝒶𝓅 𝒩ℴ𝓉ℯ'),
+              title: Text('𝑺𝒏𝒂𝒑 𝑵𝒐𝒕𝒆'),
               centerTitle: true,
               elevation: 0.0,
               backgroundColor: Colors.blueAccent,
@@ -65,6 +66,19 @@ class _HomeState extends State<Home> {
                       Navigator.push(
                           context,
                         MaterialPageRoute(builder: (context) => const MyPage()),
+                      );
+                    },
+                    trailing: Icon(Icons.navigate_next),
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.group),
+                    iconColor: Colors.black38,
+                    focusColor: Colors.black38,
+                    title: Text('Friend'),
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const Friend()),
                       );
                     },
                     trailing: Icon(Icons.navigate_next),
