@@ -174,11 +174,6 @@ class _HomeState extends State<Home> {
   }
 }
 
-void main() {
-  runApp(const MaterialApp(
-    home: Home(),
-  ));
-}
 
 class GoogleMapSample extends StatefulWidget {
   @override
