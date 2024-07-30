@@ -88,7 +88,7 @@ class Login extends StatelessWidget {
                           ),
                           cursorColor: mainColor,
                         ),
-                        padding: EdgeInsets.fromLTRB(82.0, 0.0, 82.0, 0.0),
+                        padding: EdgeInsets.fromLTRB(82.0, 90.0, 82.0, 0.0),
                       ),
                       SizedBox(height: 30),
                       Container(

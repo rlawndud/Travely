@@ -101,7 +101,7 @@ class _SignupState extends State<Signup> {
         hintText: hintText,
         filled: true,
         fillColor: Colors.white,
-        suffixIcon: hintText == 'ID'
+        suffixIcon: hintText == 'ID' && controller.text.isNotEmpty
             ? _isIdAvailable != null
                 ? _isIdAvailable == true
                     ? Icon(Icons.check_circle, color: Colors.green)
@@ -164,6 +164,10 @@ class _SignupState extends State<Signup> {
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           appBar: AppBar(
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: mainColor, size: 28),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
             foregroundColor: Colors.white,
             backgroundColor: Colors.transparent,
             elevation: 0.0,
@@ -177,7 +181,7 @@ class _SignupState extends State<Signup> {
                 fit: BoxFit.cover,
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(98.0, 60.0, 98.0, 0.0),
+                padding: const EdgeInsets.fromLTRB(98.0, 90.0, 98.0, 0.0),
                 child: Form(
                   key: _formKey,
                   child: ListView(
