@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:test2/model/member.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test2/TeamSearch.dart';
 import 'package:test2/FriendAdd.dart';
@@ -11,13 +13,22 @@ import 'package:test2/invite_user_page.dart';
 import 'package:test2/My_Page.dart';
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  final Member user;
+  const Home({super.key, required this.user});
 
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
+  late Member _user;
+
+  @override
+  void initState() {
+    super.initState();
+    _user = widget.user;
+  }
+
   int _selectedIndex = 0;
   String? _teamName = '팀 미설정';
 

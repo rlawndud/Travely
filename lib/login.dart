@@ -1,12 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
+import 'package:test2/network/web_socket.dart';
+import 'package:test2/util/auto_login.dart';
+import 'package:test2/value/color.dart';
+
+import 'model/member.dart';
+import 'model/userLoginState.dart';
 
 class Login extends StatelessWidget {
-  final TextEditingController _idController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  final RxBool _isAutoLogin = false.obs;
 
-  void _login(BuildContext context) {
-    // Validate inputs here if needed
-    Navigator.pushReplacementNamed(context, '/home');
+  final TextEditingController _idController = TextEditingController();
+  final TextEditingController _pwController = TextEditingController();
+
+  void _login(BuildContext context) async {
+
+    String id = _idController.text.toString();
+    String pw = _pwController.text.toString();
+    //SharedPreferences에 로그인 정보 저장
+    AutoLogin autoLogin = new AutoLogin();
+
+    //서버에 로그인 정보 전달 및 회원정보 획득
+    UserLoginState loginInfo =
+        new UserLoginState(_idController.text, _pwController.text);
+    WebSocketService _webSocketService = WebSocketService();
+    try{
+      //처리 정상
+      var response = await _webSocketService.transmit(loginInfo.toJson(), 'Login');
+      debugPrint(response.toString());
+      Member mem = Member.fromJson(response);
+      debugPrint(mem.toString());
+      //Member mem = new Member('id', 'password', 'name', 'phone');
+      if(mem is Member){
+        autoLogin.setLoginInfo(_isAutoLogin, id, pw);
+        Navigator.pushReplacementNamed(context, '/home', arguments: {'user':mem});
+      }else{
+        Fluttertoast.showToast(
+            msg: '등록되지 않은 아이디이거나 잘못된 비밀번호를 입력하였습니다.',
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.white70,
+            fontSize: 12,
+            textColor: Colors.black,
+            toastLength: Toast.LENGTH_SHORT);
+      }
+    }catch(e){
+      e.printError();
+    }
   }
 
   void _signup(BuildContext context) {
@@ -15,68 +55,134 @@ class Login extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(
-            'assets/login_background.png',
-            fit: BoxFit.cover,
-          ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextField(
-                    controller: _idController,
-                    decoration: InputDecoration(
-                      labelText: '아이디',
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  TextField(
-                    controller: _passwordController,
-                    decoration: InputDecoration(
-                      labelText: '비밀번호',
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                    obscureText: true,
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () => _login(context),
-                    child: Text('로그인'),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size(110, 35),
-                      backgroundColor: Colors.deepPurpleAccent,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => _signup(context),
-                    child: Text('회원가입'),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size(70, 30),
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.deepPurpleAccent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                  ),
-                ],
+    return GestureDetector(
+      onTap: ()=>FocusManager.instance.primaryFocus?.unfocus(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.asset(
+                'assets/login_background.png',
+                fit: BoxFit.cover,
               ),
-            ),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        child: TextField(
+                          controller: _idController,
+                          decoration: InputDecoration(
+                            hintText: 'ID',
+                            filled: true,
+                            fillColor: Colors.white,
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                color: mainColor,
+                              ),
+                            ),
+                          ),
+                          cursorColor: mainColor,
+                        ),
+                        padding: EdgeInsets.fromLTRB(82.0, 0.0, 82.0, 0.0),
+                      ),
+                      SizedBox(height: 30),
+                      Container(
+                        child: TextField(
+                          controller: _pwController,
+                          decoration: InputDecoration(
+                            hintText: 'PW',
+                            filled: true,
+                            fillColor: Colors.white,
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                color: mainColor,
+                              ),
+                            ),
+                          ),
+                          cursorColor: mainColor,
+                          obscureText: true,
+                        ),
+                        padding: EdgeInsets.fromLTRB(82.0, 0.0, 82.0, 0.0),
+                      ),
+                      SizedBox(height: 15),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Obx(() {
+                            return Checkbox(
+                                materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                                activeColor: mainColor,
+                                checkColor: Colors.white,
+                                side: BorderSide(
+                                  color: Color.fromARGB(195, 58, 58, 58),
+                                ),
+                                value: _isAutoLogin.value,
+                                onChanged: (bool? value) {
+                                  _isAutoLogin.value = value!;
+                                });
+                          }),
+                          Text(
+                            '자동 로그인',
+                            style: TextStyle(
+                              color: Color.fromARGB(195, 58, 58, 58),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 30),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () => _login(context),
+                            child: Text('로그인'),
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: Size(110, 35),
+                              backgroundColor: mainColor,
+                              foregroundColor: Colors.white,
+                              shadowColor: mainColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                BorderRadius.circular(10), // 버튼의 모서리 둥글기
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 30),
+                          ElevatedButton(
+                            onPressed: () => _signup(context),
+                            child: Text(
+                              '회원가입',
+                              style: TextStyle(
+                                color: mainColor,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              minimumSize: Size(110, 35),
+                              overlayColor: mainColor30,
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                BorderRadius.circular(10), // 버튼의 모서리 둥글기
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 80),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
