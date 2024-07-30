@@ -26,8 +26,11 @@ class Login extends StatelessWidget {
         new UserLoginState(_idController.text, _pwController.text);
     WebSocketService _webSocketService = WebSocketService();
     try{
-      var result = await _webSocketService.transmit(loginInfo.toJson(), 'Login');
-      Member mem = Member.fromJson(result);
+      //처리 정상
+      var response = await _webSocketService.transmit(loginInfo.toJson(), 'Login');
+      debugPrint(response.toString());
+      Member mem = Member.fromJson(response);
+      debugPrint(mem.toString());
       //Member mem = new Member('id', 'password', 'name', 'phone');
       if(mem is Member){
         autoLogin.setLoginInfo(_isAutoLogin, id, pw);

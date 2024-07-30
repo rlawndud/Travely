@@ -26,11 +26,13 @@ class WebSocketService {
     if (_isInitialized) return;
 
     channel = IOWebSocketChannel.connect(websocketUrl);
-    debugPrint(_isInitialized.toString());
-
+    debugPrint(channel.toString());
     _subscription = channel.stream.listen((message) {
       try {
         var jsonData = jsonDecode(message);
+        //형식 확인용
+        /*debugPrint('message: ${message.toString()}');
+        debugPrint('jsonData: ${jsonData.toString()}');*/
         if (jsonData is Map<String, dynamic>) {
           _responseController.add(jsonData);
         } else {

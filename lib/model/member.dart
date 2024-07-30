@@ -9,10 +9,10 @@ class Member {
   // JSON에서 Member 객체를 생성하는 팩토리 메서드
   factory Member.fromJson(Map<String, dynamic> json) {
     return Member(
-      json['id'],
-      json['password'],
-      json['name'],
-      json['phone'],
+      json['id'] as String,
+      json['pw'] as String,
+      json['name'] as String,
+      json['phone'] as String,
     );
   }
 
@@ -20,7 +20,7 @@ class Member {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'password': password,
+      'pw': password,
       'name': name,
       'phone': phone,
     };
@@ -28,6 +28,6 @@ class Member {
   @override
   String toString() {
     // TODO: implement toString
-    return "id: $id, password: $password, name: $name, phone: $phone ";
+    return "id: $id, pw: $password, name: $name, phone: $phone ";
   }
 }
