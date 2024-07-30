@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:test2/Friend.dart';
+import 'package:test2/My_Page.dart';
+import 'package:test2/Settings.dart';
 import 'package:test2/model/member.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test2/TeamSearch.dart';
@@ -82,7 +85,7 @@ class _HomeState extends State<Home> {
             backgroundColor: Colors.pinkAccent[200],
             actions: <Widget>[
               IconButton(
-                icon: const Icon(Icons.person_add),
+                icon: const Icon(Icons.person_add_alt_sharp),
                 onPressed: () => _onItemTapped(1),
               ),
               IconButton(
@@ -122,6 +125,19 @@ class _HomeState extends State<Home> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const MyPage()),
+                    );
+                  },
+                  trailing: Icon(Icons.navigate_next),
+                ),
+                ListTile(
+                  leading: Icon(Icons.group),
+                  iconColor: Colors.black38,
+                  focusColor: Colors.black38,
+                  title: Text('Friend'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const Friend()),
                     );
                   },
                   trailing: Icon(Icons.navigate_next),
