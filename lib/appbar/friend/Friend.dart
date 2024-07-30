@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:test2/AddFrindPage.dart'; // 오타 수정
+import 'package:test2/appbar/friend/AddFriendPage.dart'; // 오타 수정
 import 'FriendRequestsPage.dart';
 import 'FriendRequestModel.dart';
 

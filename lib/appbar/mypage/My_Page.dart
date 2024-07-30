@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:test2/EditInfo.dart';
+import 'package:test2/appbar/mypage/EditInfo.dart';
 
 class MyPage extends StatelessWidget {
   const MyPage({super.key});

@@ -1,19 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:test2/Friend.dart';
-import 'package:test2/My_Page.dart';
+import 'package:test2/appbar/friend/Friend.dart';
+import 'package:test2/appbar/mypage/My_Page.dart';
 import 'package:test2/Settings.dart';
 import 'package:test2/model/member.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test2/TeamSearch.dart';
-import 'package:test2/FriendAdd.dart';
 import 'package:test2/Settings.dart'; // 올바른 Settings 파일 import
 import 'package:test2/image_upload_page.dart';
 import 'package:test2/TeamSettingScreen.dart';
 import 'package:test2/photo_folder_screen.dart';
 import 'package:test2/team_page.dart';
 import 'package:test2/invite_user_page.dart';
-import 'package:test2/My_Page.dart';
 
 class Home extends StatefulWidget {
   final Member user;
@@ -37,7 +35,6 @@ class _HomeState extends State<Home> {
 
   static List<Widget> _pages = <Widget>[
     const TeamSearchPage(),
-    const FriendAddPage(),
     const SettingsPage(), // 여기도 수정
     const TeamPage(),
     const PhotoFolderScreen(),
@@ -85,16 +82,12 @@ class _HomeState extends State<Home> {
             backgroundColor: Colors.pinkAccent[200],
             actions: <Widget>[
               IconButton(
-                icon: const Icon(Icons.person_add_alt_sharp),
-                onPressed: () => _onItemTapped(1),
-              ),
-              IconButton(
                 icon: const Icon(Icons.search),
                 onPressed: () => _onItemTapped(0),
               ),
               IconButton(
                 icon: const Icon(Icons.settings),
-                onPressed: () => _onItemTapped(2),
+                onPressed: () => _onItemTapped(1),
               ),
             ],
           ),
