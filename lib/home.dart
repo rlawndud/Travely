@@ -34,12 +34,10 @@ class _HomeState extends State<Home> {
   String? _teamName = '팀 미설정';
 
   static List<Widget> _pages = <Widget>[
-    const TeamSearchPage(),
-    const SettingsPage(), // 여기도 수정
-    const TeamPage(),
-    const PhotoFolderScreen(),
-    GoogleMapSample(),
-    const ImageUploadPage(),
+    const TeamPage(), // 팀 페이지
+    const PhotoFolderScreen(), // 앨범 페이지
+    GoogleMapSample(), // 홈 페이지
+    const ImageUploadPage(), // 촬영 페이지
   ];
 
   void _onItemTapped(int index) {
@@ -67,16 +65,16 @@ class _HomeState extends State<Home> {
       title: 'Travely',
       theme: ThemeData(primaryColor: Colors.white),
       home: DefaultTabController(
-        length: 5,
+        length: 4, // Tab의 개수에 맞게 수정
         child: Scaffold(
           appBar: AppBar(
             title: const Text('travely',
-            style: TextStyle(
-              fontFamily: 'Open Sans',
-              fontSize: 22,
-              fontWeight: FontWeight.normal,
-              color: Colors.white,
-            )),
+                style: TextStyle(
+                  fontFamily: 'Open Sans',
+                  fontSize: 22,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.white,
+                )),
             centerTitle: true,
             elevation: 0.0,
             backgroundColor: Colors.pinkAccent[200],
@@ -160,21 +158,20 @@ class _HomeState extends State<Home> {
             ),
           ),
           body: TabBarView(
-            children: _pages.sublist(3),
+            children: _pages, // 전체 리스트를 참조
           ),
           bottomNavigationBar: TabBar(
             onTap: (index) {
-              _onItemTapped(index + 3);
+              _onItemTapped(index); // 인덱스 그대로 전달
             },
             tabs: const [
               Tab(icon: Icon(Icons.group, color: Colors.black), text: '팀'),
               Tab(icon: Icon(Icons.photo_album, color: Colors.black), text: '앨범'),
               Tab(icon: Icon(Icons.home, color: Colors.black), text: '홈'),
               Tab(icon: Icon(Icons.camera_alt, color: Colors.black), text: '촬영'),
-              Tab(
-                icon: Icon(Icons.edit_note, color: Colors.black),
-                text: 'SnapNote',
-              ),
+              //Tab(icon: Icon(Icons.edit_note, color: Colors.black),
+                //text: 'SnapNote',
+              //),
             ],
           ),
         ),
@@ -296,37 +293,26 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
               children: [
                 FloatingActionButton(
                   onPressed: _zoomIn,
-                  materialTapTargetSize: MaterialTapTargetSize.padded,
                   mini: true,
+                  heroTag: null,
                   child: Icon(Icons.add),
                 ),
                 SizedBox(height: 10),
                 FloatingActionButton(
                   onPressed: _zoomOut,
-                  materialTapTargetSize: MaterialTapTargetSize.padded,
                   mini: true,
+                  heroTag: null,
                   child: Icon(Icons.remove),
                 ),
-              ],
-            ),
-          ),
-          Positioned(
-            bottom: 50,
-            left: 10,
-            child: Column(
-              children: [
+                SizedBox(height: 20),
                 FloatingActionButton(
                   onPressed: _toggleAddMarkerMode,
-                  materialTapTargetSize: MaterialTapTargetSize.padded,
-                  mini: true,
                   backgroundColor: _isAddingMarker ? Colors.green : Colors.blue,
-                  child: Icon(Icons.add_location),
+                  child: Icon(Icons.add_location_alt),
                 ),
                 SizedBox(height: 10),
                 FloatingActionButton(
                   onPressed: _toggleDeleteMarkerMode,
-                  materialTapTargetSize: MaterialTapTargetSize.padded,
-                  mini: true,
                   backgroundColor: _isDeletingMarker ? Colors.red : Colors.blue,
                   child: Icon(Icons.delete),
                 ),
