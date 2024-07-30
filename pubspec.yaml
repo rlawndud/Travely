@@ -10,6 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  cloud_firestore: ^5.0.0  #
+  firebase_auth: ^5.0.0    #
   google_maps_flutter: ^2.0.6
   flutter_screenutil: ^5.9.0
   image_picker: ^0.8.4+4
@@ -20,6 +23,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.10.0 # Added flutter_launcher_icons
+  build_runner: ^2.1.8  # 최신 버전을 사용하세요.
 
 flutter:
   uses-material-design: true
@@ -27,3 +32,13 @@ flutter:
     - assets/loading_image.png
     - assets/login_background.png
     - assets/SN Logo.jpg
+    - assets/images/background.jpg
+    - assets/images/season.jpg
+    - assets/images/region.jpg
+    - assets/images/team_album.jpg
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/app_icon.png"
+  remove_alpha_ios: true
