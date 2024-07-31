@@ -47,7 +47,6 @@ class _SignupState extends State<Signup> {
     //중복 검사
     //서버로 입력받은 아이디를 보내 해당 아이디가 이미 존재하는 지 확인
     Map<String, dynamic> data = {'id': _idController.text};
-    print(data);
 
     var jsonResponse = await _webSocketService.transmit(data, 'IdDuplicate');
     print(jsonResponse);
@@ -57,12 +56,12 @@ class _SignupState extends State<Signup> {
         _errorMsg = "이미 존재하는 아이디입니다.";
         _isIdAvailable = false;
       });
-    } else if(jsonResponse['result'] == 'False'){
+    } else if (jsonResponse['result'] == 'False') {
       setState(() {
         _errorMsg = "";
         _isIdAvailable = true;
       });
-    }else if(jsonResponse.containsKey('error')){
+    } else if (jsonResponse.containsKey('error')) {
       debugPrint(jsonResponse['error']);
       _errorMsg = "";
       _isIdAvailable = false;
@@ -140,13 +139,31 @@ class _SignupState extends State<Signup> {
     Member mem = new Member(_idController.text, _pwController.text,
         _nameController.text, _phoneController.text);
     var images_string = '';
-    images.forEach((img){
-      images_string+=XFileToBytes(img!)+'\$';
+    images.forEach((img) {
+      images_string += XFileToBytes(img!) + '\$';
     });
-    MemberImg memImg = new MemberImg(_idController.text, _nameController.text, images_string);
-    _webSocketService.transmit(mem.toJson(), 'AddMember');
-    _webSocketService.transmit(memImg.toJson(), 'AddMemImg');
-    Navigator.pop(context);
+    MemberImg memImg =
+        new MemberImg(_idController.text, _nameController.text, images_string);
+    try {
+      _webSocketService.transmit(mem.toJson(), 'AddMember');
+      _webSocketService.transmit(memImg.toJson(), 'AddMemImg');
+      Fluttertoast.showToast(
+          msg: '회원가입 성공!',
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.white70,
+          fontSize: 12,
+          textColor: Colors.black,
+          toastLength: Toast.LENGTH_LONG);
+      Navigator.pop(context);
+    } catch (e) {
+      Fluttertoast.showToast(
+          msg: '회원가입 중 오류가 발생했습니다',
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.white70,
+          fontSize: 12,
+          textColor: Colors.black,
+          toastLength: Toast.LENGTH_LONG);
+    }
   }
 
   void _handleFocusChange() {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:test2/login.dart';
+import 'package:test2/model/userLoginState.dart';
 
 class AutoLogin{
   static String PREFERENCES_NAME = 'auto_login';
@@ -15,13 +16,20 @@ class AutoLogin{
     return _instance;
   }
 
-  Future<void> setLoginInfo(RxBool state, String id, String pw)async{
+  Future<void> setLoginInfo(RxBool state, UserLoginState IdPw)async{
     final manager = await _manager;
     if(state.isTrue){
-      manager.setString('id', id);
-      manager.setString('password', pw);
+      manager.setString('id', IdPw.id);
+      manager.setString('password', IdPw.password);
     }
     else{
+      manager.clear();
+    }
+  }
+
+  Future<void> setLoginState(RxBool state) async {
+    final manager = await _manager;
+    if (state.isFalse) {
       manager.clear();
     }
   }

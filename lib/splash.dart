@@ -34,6 +34,7 @@ class _SplashState extends State<Splash> {
       Id = loginInfo[0];
       Pw = loginInfo[1];
     }
+    debugPrint(_isAuth.toString());
     super.didChangeDependencies();
   }
   _navigateToLogin() async {
@@ -47,7 +48,7 @@ class _SplashState extends State<Splash> {
       //서버로 아이디 비밀번호 전달 후 회원정보 획득
       var userDTO = new UserLoginState(Id!, Pw!);
       debugPrint('$Id,$Pw');
-      var response = await _webSocketService.transmit(userDTO.toJson(),'login');
+      var response = await _webSocketService.transmit(userDTO.toJson(),'Login');
       debugPrint(response.toString());
       Member mem = Member.fromJson(response);
       //Member mem = new Member('id', 'password', 'name', 'phone');

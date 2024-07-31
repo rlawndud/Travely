@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:test2/appbar/friend/Friend.dart';
 import 'package:test2/appbar/mypage/My_Page.dart';
 import 'package:test2/Settings.dart';
+import 'package:test2/model/imgtest.dart';
 import 'package:test2/model/member.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:test2/TeamSearch.dart';
 import 'package:test2/Settings.dart'; // 올바른 Settings 파일 import
 import 'package:test2/image_upload_page.dart';
-import 'package:test2/TeamSettingScreen.dart';
+import 'package:test2/model/team.dart';
 import 'package:test2/photo_folder_screen.dart';
 import 'package:test2/team_page.dart';
 import 'package:test2/invite_user_page.dart';
@@ -32,9 +32,14 @@ class _HomeState extends State<Home> {
 
   int _selectedIndex = 0;
   String? _teamName = '팀 미설정';
+  Team newt = new Team(null,'aa','rlawndud');
+  Team newt2 = new Team(null,'bb','rlawndud');
+  //TeamDB.teams.add(newt);
 
   static List<Widget> _pages = <Widget>[
-    const TeamPage(), // 팀 페이지
+    //TeamDB.teams.add(newt);
+    // const TeamPage(userId: 'rlawndud',teams: TeamDB.teams,), // 팀 페이지
+    const TeamPage(),
     const PhotoFolderScreen(), // 앨범 페이지
     GoogleMapSample(), // 홈 페이지
     const ImageUploadPage(), // 촬영 페이지
@@ -44,18 +49,6 @@ class _HomeState extends State<Home> {
     setState(() {
       _selectedIndex = index;
     });
-  }
-
-  void _openTeamSettingScreen() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => TeamSettingScreen()),
-    );
-    if (result != null && result is String) {
-      setState(() {
-        _teamName = result;
-      });
-    }
   }
 
   @override
@@ -141,7 +134,7 @@ class _HomeState extends State<Home> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const SettingsPage()), // 여기 수정
+                      MaterialPageRoute(builder: (context) => SettingsPage(user: _user,)), // 여기 수정
                     );
                   },
                   trailing: Icon(Icons.navigate_next),
@@ -151,7 +144,12 @@ class _HomeState extends State<Home> {
                   iconColor: Colors.black38,
                   focusColor: Colors.black38,
                   title: Text('도움말'),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => album()), // 여기 수정
+                    );
+                  },
                   trailing: Icon(Icons.navigate_next),
                 ),
               ],

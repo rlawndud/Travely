@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'model/team.dart';
+
 class TeamPage extends StatefulWidget {
-  const TeamPage({Key? key}) : super(key: key);
+  const TeamPage({Key? key,}) : super(key: key);
+  // final String userId;
+  // final List<Team> teams;
+  // const TeamPage({Key? key, required this.userId, required this.teams,}) : super(key: key);
 
   @override
   _TeamPageState createState() => _TeamPageState();
