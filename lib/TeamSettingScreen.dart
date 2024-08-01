@@ -13,17 +13,19 @@ class TeamSettingScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            ElevatedButton(
-              onPressed: () {},
-              child: Text('팀 이름'),
+            TextField(
+              decoration: InputDecoration(labelText: '팀 이름'),
+              onSubmitted: (value) {
+                // 서버로 팀 생성 요청
+              },
             ),
             ElevatedButton(
               onPressed: () {},
-              child: Text('팀 초대'),
+              child: Text('팀 생성'),
             ),
             ElevatedButton(
               onPressed: () {},
-              child: Text('팀 찾기'),
+              child: Text('사용자 초대'),
             ),
           ],
         ),
