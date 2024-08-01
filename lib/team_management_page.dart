@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'model/team.dart';
 
 class TeamManagementPage extends StatelessWidget {
-  final List<String> teams;
+  final List<Team> teams;
   final Map<String, List<String>> teamMembers;
   final String currentTeam;
   final ValueChanged<String> onTeamSwitch;
@@ -26,7 +27,7 @@ class TeamManagementPage extends StatelessWidget {
       body: ListView.builder(
         itemCount: teams.length,
         itemBuilder: (context, index) {
-          final teamName = teams[index];
+          final teamName = teams[index].teamName;
           return ListTile(
             title: Text(teamName),
             leading: teamName == currentTeam
