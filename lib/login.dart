@@ -27,11 +27,11 @@ class Login extends StatelessWidget {
     WebSocketService _webSocketService = WebSocketService();
     try{
       //처리 정상
-      // var response = await _webSocketService.transmit(loginInfo.toJson(), 'Login');
-      // debugPrint(response.toString());
-      // Member mem = Member.fromJson(response);
+      var response = await _webSocketService.transmit(loginInfo.toJson(), 'Login');
+      debugPrint(response.toString());
+      Member mem = Member.fromJson(response);
       // debugPrint(mem.toString());
-      Member mem = new Member('id', 'password', 'name', 'phone');
+      // Member mem = new Member('id', 'password', 'name', 'phone');
       if(mem is Member){
         autoLogin.setLoginInfo(_isAutoLogin, id, pw);
         Navigator.pushReplacementNamed(context, '/home', arguments: {'user':mem});
