@@ -1,29 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:test2/value/color.dart';
 
 import '../network/web_socket.dart';
 
 class Team {
-  int? teamNo;
+  int teamNo;
   String teamName;
-  String leaderId;
+  String leaderId; //이게머야
 
   Team(this.teamNo, this.teamName, this.leaderId);
 
   factory Team.fromJson(Map<String, dynamic> json) {
     return Team(
-      json['teamNo'] as int?,
+      json['teamno'] as int,
       json['teamName'] as String,
-      json['leaderId'] as String,
+      json['LeaderID'] as String,
     );
   }
 
   // Member 객체를 JSON으로 변환하는 메서드
   Map<String, dynamic> toJson() {
     return {
-      'teamNo': teamNo,
+      'teamno': teamNo,
       'teamName': teamName,
-      'leaderId': leaderId,
+      'LeaderID': leaderId,
     };
   }
 }
@@ -47,33 +48,30 @@ class TeamDB {
     }
   }
 
-  void createTeam(String teamName, String leaderId) async {
-    List<String> teamMember = [];
-    teamMember.add(leaderId);
-    Team team = new Team(null, teamName, leaderId);
-    _webSocketService.transmit(team.toJson(), 'AddTeam');
-  }
-
   Future<Map<String, dynamic>> inviteTeamMember(
-      int teamNo, String addMember) async {
+      int teamNo, String teamName, String addMember) async {
     Map<String, dynamic> data = {
-      'teamNo': teamNo,
-      'member': addMember,
+      'teamno': teamNo,
+      'teamName': teamName,
+      'addid': addMember,
     };
     return await _webSocketService.transmit(data, 'InviteTeam');
   }
 
   Future<Map<String, dynamic>> acceptTeamMember(
-      int teamNo, String addMember) async {
+      int teamNo, String teamName, String memberId, bool isExcept) async {
     Map<String, dynamic> data = {
-      'teamNo': teamNo,
-      'member': addMember,
+      'teamno': teamNo,
+      'teamName': teamName,
+      'addid': memberId,
+      'isexcept': isExcept,
     };
-    return await _webSocketService.transmit(data, 'InviteTeam');
+    return await _webSocketService.transmit(data, 'AcceptTeamRequest');
   }
 }
 
 void showInviteDialog(BuildContext context, int teamNo, String teamName, String memberId) {
+  TeamDB tDB = new TeamDB();
   showDialog(
       barrierDismissible: false,
       context: context,
@@ -83,23 +81,38 @@ void showInviteDialog(BuildContext context, int teamNo, String teamName, String 
           content: Text('$memberId 님을 $teamName 팀에 초대하였습니다. 수락하시겠습니까?'),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
+              onPressed: () async {
+                Navigator.of(context, rootNavigator: true).pop();
                 // 초대 수락 시 팀 멤버 목록에 추가
+                await tDB.acceptTeamMember(teamNo, teamName, memberId, true);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('$memberId 님이 초대를 수락하였습니다')),
+                  SnackBar(content: Text('$teamName 팀의 초대를 수락하였습니다')),
                 );
               },
-              child: Text('수락'),
+              child: const Text(
+                '수락',
+                style: TextStyle(
+                  color: mainColor,
+                ),
+              ),
             ),
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
+              style: TextButton.styleFrom(
+                backgroundColor: mainColor,
+              ),
+              onPressed: () async {
+                Navigator.of(context, rootNavigator: true).pop();
+                await tDB.acceptTeamMember(teamNo, teamName, memberId, false);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('$memberId 님이 초대를 거절하였습니다')),
+                  SnackBar(content: Text('$teamName 팀의 초대를 거절하였습니다')),
                 );
               },
-              child: Text('거절'),
+              child: const Text(
+                '거절',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
             ),
           ],
         );

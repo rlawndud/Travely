@@ -8,10 +8,8 @@ import 'package:test2/model/member.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test2/Settings.dart'; // 올바른 Settings 파일 import
 import 'package:test2/image_upload_page.dart';
-import 'package:test2/model/team.dart';
 import 'package:test2/photo_folder_screen.dart';
 import 'package:test2/team_page.dart';
-import 'package:test2/invite_user_page.dart';
 
 class Home extends StatefulWidget {
   final Member user;
@@ -28,22 +26,17 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     _user = widget.user;
+    _pages = <Widget>[
+      TeamPage(userId: _user.id,),
+      const PhotoFolderScreen(), // 앨범 페이지
+      GoogleMapSample(), // 홈 페이지
+      const ImageUploadPage(), // 촬영 페이지
+    ];
   }
 
   int _selectedIndex = 0;
   String? _teamName = '팀 미설정';
-  Team newt = new Team(null,'aa','rlawndud');
-  Team newt2 = new Team(null,'bb','rlawndud');
-  //TeamDB.teams.add(newt);
-
-  static List<Widget> _pages = <Widget>[
-    //TeamDB.teams.add(newt);
-    // const TeamPage(userId: 'rlawndud',teams: TeamDB.teams,), // 팀 페이지
-    const TeamPage(),
-    const PhotoFolderScreen(), // 앨범 페이지
-    GoogleMapSample(), // 홈 페이지
-    const ImageUploadPage(), // 촬영 페이지
-  ];
+  late List<Widget> _pages;
 
   void _onItemTapped(int index) {
     setState(() {

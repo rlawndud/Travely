@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'model/team.dart';
+import 'network/web_socket.dart';
 
 class TeamPage extends StatefulWidget {
-  const TeamPage({Key? key,}) : super(key: key);
-  // final String userId;
+  // const TeamPage({Key? key,}) : super(key: key);
+  final String userId;
+
   // final List<Team> teams;
-  // const TeamPage({Key? key, required this.userId, required this.teams,}) : super(key: key);
+  const TeamPage({Key? key, required this.userId}) : super(key: key);
 
   @override
   _TeamPageState createState() => _TeamPageState();
@@ -15,26 +18,38 @@ class TeamPage extends StatefulWidget {
 class _TeamPageState extends State<TeamPage> {
   final TextEditingController _teamNameController = TextEditingController();
   final TextEditingController _inviteIdController = TextEditingController();
-  final TextEditingController _searchTeamNameController = TextEditingController();
+  final TextEditingController _searchTeamNameController =
+      TextEditingController();
 
-  final List<String> _teams = [];
+  final List<Team> _teams = [];
   final Map<String, List<String>> _teamMembers = {};
   String _currentTeam = '';
+  final WebSocketService _webSocketService = WebSocketService();
+  TeamDB tDB = new TeamDB();
 
-  void _createTeam() {
+  void _createTeam() async {
     String teamName = _teamNameController.text;
-    if (teamName.isNotEmpty && !_teams.contains(teamName)) {
-      setState(() {
-        _teams.add(teamName);
-        _teamMembers[teamName] = ['MyID']; // 팀 생성 시 자신을 팀에 추가
-        _currentTeam = teamName; // 생성한 팀을 현재 팀으로 설정
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$teamName 팀을 생성하였습니다')),
-      );
+    if (teamName.isNotEmpty) {
+      var response = await _webSocketService.transmit(
+          {'teamName': teamName, 'LeaderId': widget.userId}, 'AddTeam');
+      if(response['result']=='False'){
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('팀이름이 이미 존재합니다.')),
+        );
+      }else{
+        Team newTeam = Team.fromJson(response);
+        setState(() {
+          _teams.add(newTeam);
+          _teamMembers[teamName] = [widget.userId]; // 팀 생성 시 자신을 팀에 추가
+          _currentTeam = newTeam.teamName; // 생성한 팀을 현재 팀으로 설정
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$teamName 팀을 생성하였습니다')),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('팀이름이 이미 존재하거나 팀이름이 비어있습니다')),
+        SnackBar(content: Text('팀이름이 비어있습니다')),
       );
     }
   }
@@ -43,97 +58,14 @@ class _TeamPageState extends State<TeamPage> {
     String inviteId = _inviteIdController.text;
     if (inviteId.isNotEmpty && _currentTeam.isNotEmpty) {
       // 상대방에게 팝업 알림 띄우기
-      _showInvitationDialog(inviteId, _currentTeam);
+      tDB.inviteTeamMember(_teams.contains(_currentTeam) as int, _currentTeam, inviteId);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invalid invite ID or no team selected.')),
+        SnackBar(content: Text('초대 ID가 잘못되었거나 팀이 선택되지 않았습니다.')),
       );
     }
   }
 
-  void _showInvitationDialog(String inviteId, String teamName) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('팀 초대'),
-          content: Text('$inviteId 님을 $_currentTeam 팀에 초대하였습니다. 수락하시겠습니까?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // 초대 수락 시 팀 멤버 목록에 추가
-                setState(() {
-                  _teamMembers[teamName]?.add(inviteId);
-                });
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('$inviteId 님이 초대를 수락하였습니다')),
-                );
-              },
-              child: Text('수락'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('$inviteId 님이 초대를 거절하였습니다')),
-                );
-              },
-              child: Text('거절'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _joinTeam() {
-    String teamName = _searchTeamNameController.text;
-    if (_teams.contains(teamName)) {
-      // 팀 생성자에게 가입 요청 팝업 알림 띄우기
-      _showJoinRequestDialog(teamName);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('팀이 존재하지 않습니다')),
-      );
-    }
-  }
-
-  void _showJoinRequestDialog(String teamName) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('팀 가입 요청'),
-          content: Text('팀 $teamName에 가입 요청이 도착했습니다. 수락하시겠습니까?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('가입 요청을 수락하였습니다')),
-                );
-                setState(() {
-                  _teamMembers[teamName]?.add('MyID');
-                  _currentTeam = teamName;
-                });
-              },
-              child: Text('수락'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('가입 요청을 거절하였습니다')),
-                );
-              },
-              child: Text('거절'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   void _navigateToTeamManagement() {
     Navigator.push(
@@ -175,7 +107,6 @@ class _TeamPageState extends State<TeamPage> {
                   const SizedBox(height: 10), // Reduced spacing
                   _buildInviteSection(),
                   const SizedBox(height: 10), // Reduced spacing
-                  _buildSearchSection(),
                 ],
               ),
             ),
@@ -188,10 +119,14 @@ class _TeamPageState extends State<TeamPage> {
                     onPressed: _navigateToTeamManagement,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.pinkAccent,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), // Reduced border radius
-                      padding: const EdgeInsets.symmetric(vertical: 12), // Adjusted vertical padding
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                      // Reduced border radius
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12), // Adjusted vertical padding
                     ),
-                    child: const Text('팀 관리', style: TextStyle(color: Colors.white)),
+                    child: const Text('팀 관리',
+                        style: TextStyle(color: Colors.white)),
                   ),
                 ),
               ),
@@ -205,8 +140,10 @@ class _TeamPageState extends State<TeamPage> {
   Widget _buildCreateTeamSection() {
     return Card(
       color: Colors.white,
-      elevation: 2, // Reduced elevation
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), // Reduced border radius
+      elevation: 2,
+      // Reduced elevation
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      // Reduced border radius
       child: Padding(
         padding: const EdgeInsets.all(8.0), // Reduced padding
         child: Column(
@@ -214,19 +151,26 @@ class _TeamPageState extends State<TeamPage> {
           children: [
             Text(
               '팀 생성',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black), // Reduced font size
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black), // Reduced font size
             ),
             const SizedBox(height: 5), // Reduced spacing
             TextField(
               controller: _teamNameController,
               decoration: InputDecoration(
                 labelText: '팀 이름',
-                labelStyle: TextStyle(color: Colors.black, fontSize: 14), // Reduced font size
+                labelStyle: TextStyle(color: Colors.black, fontSize: 14),
+                // Reduced font size
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.pinkAccent),
-                  borderRadius: BorderRadius.circular(8), // Reduced border radius
+                  borderRadius:
+                      BorderRadius.circular(8), // Reduced border radius
                 ),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), // Reduced border radius
+                border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(8)), // Reduced border radius
               ),
             ),
             const SizedBox(height: 5), // Reduced spacing
@@ -234,7 +178,9 @@ class _TeamPageState extends State<TeamPage> {
               onPressed: _createTeam,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.pinkAccent,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), // Reduced border radius
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                // Reduced border radius
                 padding: const EdgeInsets.all(12), // Reduced padding
               ),
               child: const Text('팀 생성', style: TextStyle(color: Colors.white)),
@@ -248,8 +194,10 @@ class _TeamPageState extends State<TeamPage> {
   Widget _buildInviteSection() {
     return Card(
       color: Colors.white,
-      elevation: 2, // Reduced elevation
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), // Reduced border radius
+      elevation: 2,
+      // Reduced elevation
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      // Reduced border radius
       child: Padding(
         padding: const EdgeInsets.all(8.0), // Reduced padding
         child: Column(
@@ -257,19 +205,26 @@ class _TeamPageState extends State<TeamPage> {
           children: [
             Text(
               '팀 초대',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black), // Reduced font size
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black), // Reduced font size
             ),
             const SizedBox(height: 5), // Reduced spacing
             TextField(
               controller: _inviteIdController,
               decoration: InputDecoration(
                 labelText: '상대방 ID',
-                labelStyle: TextStyle(color: Colors.black, fontSize: 14), // Reduced font size
+                labelStyle: TextStyle(color: Colors.black, fontSize: 14),
+                // Reduced font size
                 focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.pinkAccent),
-                  borderRadius: BorderRadius.circular(8), // Reduced border radius
+                  borderRadius:
+                      BorderRadius.circular(8), // Reduced border radius
                 ),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), // Reduced border radius
+                border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(8)), // Reduced border radius
               ),
             ),
             const SizedBox(height: 5), // Reduced spacing
@@ -277,7 +232,9 @@ class _TeamPageState extends State<TeamPage> {
               onPressed: _inviteToTeam,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.pinkAccent,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), // Reduced border radius
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                // Reduced border radius
                 padding: const EdgeInsets.all(12), // Reduced padding
               ),
               child: const Text('초대', style: TextStyle(color: Colors.white)),
@@ -287,53 +244,10 @@ class _TeamPageState extends State<TeamPage> {
       ),
     );
   }
-
-  Widget _buildSearchSection() {
-    return Card(
-      color: Colors.white,
-      elevation: 2, // Reduced elevation
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), // Reduced border radius
-      child: Padding(
-        padding: const EdgeInsets.all(8.0), // Reduced padding
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              '팀 가입',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black), // Reduced font size
-            ),
-            const SizedBox(height: 5), // Reduced spacing
-            TextField(
-              controller: _searchTeamNameController,
-              decoration: InputDecoration(
-                labelText: '팀 이름',
-                labelStyle: TextStyle(color: Colors.black, fontSize: 14), // Reduced font size
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.pinkAccent),
-                  borderRadius: BorderRadius.circular(8), // Reduced border radius
-                ),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), // Reduced border radius
-              ),
-            ),
-            const SizedBox(height: 5), // Reduced spacing
-            ElevatedButton(
-              onPressed: _joinTeam,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.pinkAccent,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)), // Reduced border radius
-                padding: const EdgeInsets.all(12), // Reduced padding
-              ),
-              child: const Text('팀 가입', style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class TeamManagementPage extends StatefulWidget {
-  final List<String> teams;
+  final List<Team> teams;
   final Map<String, List<String>> teamMembers;
   final String currentTeam;
   final ValueChanged<String> onTeamSwitch;
@@ -381,8 +295,8 @@ class _TeamManagementPageState extends State<TeamManagementPage> {
       children: [
         ...widget.teams.map((team) {
           return ListTile(
-            title: Text(team),
-            onTap: () => _selectTeam(team),
+            title: Text(team.teamName),
+            onTap: () => _selectTeam(team.teamName),
           );
         }).toList(),
       ],
@@ -417,8 +331,10 @@ class _TeamManagementPageState extends State<TeamManagementPage> {
               backgroundColor: _selectedTeam == widget.currentTeam
                   ? Colors.grey
                   : Colors.pinkAccent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              padding: const EdgeInsets.symmetric(vertical: 12), // Adjusted vertical padding
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+              padding: const EdgeInsets.symmetric(
+                  vertical: 12), // Adjusted vertical padding
             ),
             child: Text(
               _selectedTeam == widget.currentTeam ? '현재 팀' : '팀 설정',
@@ -442,14 +358,4 @@ class _TeamManagementPageState extends State<TeamManagementPage> {
       Navigator.popUntil(context, (route) => route.isFirst); // 팀 목록 화면으로 돌아감
     }
   }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: const TeamPage(),
-    theme: ThemeData(
-      primarySwatch: Colors.pink,
-      brightness: Brightness.light,
-    ),
-  ));
 }

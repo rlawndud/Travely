@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:test2/value/global_variable.dart';
 import 'package:test2/model/team.dart';
 import 'package:test2/team_page.dart';
 import 'package:web_socket_channel/io.dart';
@@ -10,7 +11,6 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 class WebSocketService {
   static final WebSocketService _webSocketService =
       WebSocketService._internal();
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   factory WebSocketService() {
     return _webSocketService;
@@ -93,15 +93,16 @@ class WebSocketService {
         handleJoinTeamRequest(jsonData);
         break;
       default:
-        debugPrint('처리 안함~ $jsonData');
+        debugPrint('$jsonData');
         break;
     }
   }
+
   void handleJoinTeamRequest(Map<String, dynamic> data) {
     // JoinTeamRequest 처리 로직
     debugPrint('팀 초대 요청 처리: ${data.toString()}');
 
-    final context = navigatorKey.currentContext;
+    final context = GlobalVariable.navigatorKey.currentContext;
     if(context != null){
       showInviteDialog(context, data['teamno'] as int, data['teamName'] as String, data['addid'] as String);
     }else{
