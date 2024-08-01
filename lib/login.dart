@@ -15,6 +15,7 @@ class Login extends StatelessWidget {
   final TextEditingController _pwController = TextEditingController();
 
   void _login(BuildContext context) async {
+
     String id = _idController.text.toString();
     String pw = _pwController.text.toString();
     //SharedPreferences에 로그인 정보 저장
