@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class EditInfoPage extends StatefulWidget {
   @override
@@ -18,6 +20,9 @@ class _EditInfoPageState extends State<EditInfoPage> {
   String currentPassword = 'currentPassword123';
 
   bool isCurrentPasswordValid = false;
+
+  final ImagePicker _picker = ImagePicker();
+  XFile? _image;
 
   void _updateInfo() {
     final String newPhoneNumber = _phoneController.text;
@@ -49,6 +54,57 @@ class _EditInfoPageState extends State<EditInfoPage> {
     });
   }
 
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _image = pickedFile;
+        profileImageUrl = _image!.path;
+      });
+      // 여기에 서버에 이미지를 업로드하는 로직을 추가할 수 있습니다.
+      // 업로드가 완료되면 서버에서 제공하는 URL을 profileImageUrl에 할당
+    }
+  }
+
+  void _removeImage() {
+    setState(() {
+      _image = null;
+      profileImageUrl = 'https://via.placeholder.com/150'; // 기본 이미지 URL로 변경
+    });
+    // 여기에 서버에서 이미지를 제거하는 로직을 추가할 수 있습니다.
+  }
+
+  void _showImageOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('프로필 사진 변경'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage();
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('프로필 사진 삭제'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _removeImage();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,9 +128,14 @@ class _EditInfoPageState extends State<EditInfoPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      backgroundImage: NetworkImage(profileImageUrl),
-                      radius: 40,
+                    GestureDetector(
+                      onTap: _showImageOptions,
+                      child: CircleAvatar(
+                        backgroundImage: _image == null
+                            ? NetworkImage(profileImageUrl)
+                            : FileImage(File(_image!.path)) as ImageProvider,
+                        radius: 40,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     Text('아이디: $userId', style: const TextStyle(color: Colors.white)),

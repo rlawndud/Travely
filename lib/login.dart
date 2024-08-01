@@ -24,10 +24,9 @@ class Login extends StatelessWidget {
     UserLoginState loginInfo =
         new UserLoginState(_idController.text, _pwController.text);
     WebSocketService _webSocketService = WebSocketService();
-    try {
+    try{
       //처리 정상
-      var response =
-          await _webSocketService.transmit(loginInfo.toJson(), 'Login');
+      var response = await _webSocketService.transmit(loginInfo.toJson(), 'Login');
       debugPrint(response.toString());
       if (response['result'] == 'False') {
         Fluttertoast.showToast(
@@ -63,7 +62,7 @@ class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      onTap: ()=>FocusManager.instance.primaryFocus?.unfocus(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
@@ -124,7 +123,7 @@ class Login extends StatelessWidget {
                           Obx(() {
                             return Checkbox(
                                 materialTapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
+                                MaterialTapTargetSize.shrinkWrap,
                                 activeColor: mainColor,
                                 checkColor: Colors.white,
                                 side: BorderSide(
@@ -158,7 +157,7 @@ class Login extends StatelessWidget {
                               shadowColor: mainColor,
                               shape: RoundedRectangleBorder(
                                 borderRadius:
-                                    BorderRadius.circular(10), // 버튼의 모서리 둥글기
+                                BorderRadius.circular(10), // 버튼의 모서리 둥글기
                               ),
                             ),
                           ),
@@ -176,7 +175,7 @@ class Login extends StatelessWidget {
                               overlayColor: mainColor30,
                               shape: RoundedRectangleBorder(
                                 borderRadius:
-                                    BorderRadius.circular(10), // 버튼의 모서리 둥글기
+                                BorderRadius.circular(10), // 버튼의 모서리 둥글기
                               ),
                             ),
                           ),

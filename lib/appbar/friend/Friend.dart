@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:test2/appbar/friend/AddFriendPage.dart'; // 오타 수정
 import 'FriendRequestsPage.dart';
 import 'FriendRequestModel.dart';
+import 'FriendListPage.dart';
+import 'FriendEditPage.dart'; // 새로 추가된 파일
 
 class Friend extends StatefulWidget {
   const Friend({super.key}); // const 생성자
@@ -12,6 +14,7 @@ class Friend extends StatefulWidget {
 
 class _FriendState extends State<Friend> {
   List<FriendRequest> friendRequests = [];
+  List<FriendRequest> acceptedFriends = []; // 수락된 친구 리스트
 
   void _addFriendRequest(String senderId, String senderName) {
     setState(() {
@@ -22,6 +25,7 @@ class _FriendState extends State<Friend> {
   void _acceptFriendRequest(FriendRequest request) {
     setState(() {
       friendRequests.remove(request);
+      acceptedFriends.add(request); // 수락된 친구를 리스트에 추가
     });
     print('Accepted friend request from: ${request.senderName}');
   }
@@ -31,6 +35,13 @@ class _FriendState extends State<Friend> {
       friendRequests.remove(request);
     });
     print('Declined friend request from: ${request.senderName}');
+  }
+
+  void _removeFriend(FriendRequest friend) {
+    setState(() {
+      acceptedFriends.remove(friend); // 친구 삭제
+    });
+    print('Removed friend: ${friend.senderName}');
   }
 
   @override
@@ -62,10 +73,20 @@ class _FriendState extends State<Friend> {
               );
             },
           ),
-          const ListTile(
-            leading: Icon(Icons.group),
-            title: Text('친구 목록'),
-            trailing: Icon(Icons.navigate_next),
+          ListTile(
+            leading: const Icon(Icons.group),
+            title: const Text('친구 목록'),
+            trailing: const Icon(Icons.navigate_next),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FriendListPage(
+                    acceptedFriends: acceptedFriends, // 수락된 친구 리스트 전달
+                  ),
+                ),
+              );
+            },
           ),
           ListTile(
             leading: const Icon(Icons.pending),
@@ -84,10 +105,21 @@ class _FriendState extends State<Friend> {
               );
             },
           ),
-          const ListTile(
-            leading: Icon(Icons.person_add_disabled),
-            title: Text('친구 편집'),
-            trailing: Icon(Icons.navigate_next),
+          ListTile(
+            leading: const Icon(Icons.person_add_disabled),
+            title: const Text('친구 편집'),
+            trailing: const Icon(Icons.navigate_next),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FriendEditPage(
+                    acceptedFriends: acceptedFriends, // 수락된 친구 리스트 전달
+                    removeFriend: _removeFriend, // 친구 삭제 콜백 함수 전달
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),
