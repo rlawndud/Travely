@@ -170,7 +170,7 @@ class _HomeState extends State<Home> {
               Tab(icon: Icon(Icons.home, color: Colors.black), text: '홈'),
               Tab(icon: Icon(Icons.camera_alt, color: Colors.black), text: '촬영'),
               //Tab(icon: Icon(Icons.edit_note, color: Colors.black),
-                //text: 'SnapNote',
+              //text: 'SnapNote',
               //),
             ],
           ),
