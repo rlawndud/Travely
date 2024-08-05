@@ -25,39 +25,20 @@ class _TeamPageState extends State<TeamPage> {
   final Map<String, List<String>> _teamMembers = {};
   String _currentTeam = '';
   final WebSocketService _webSocketService = WebSocketService();
-  TeamManager tDB = new TeamManager();
-
-  // Future<void> _loadTeams() async {
-  //   final Directory directory = await getApplicationDocumentsDirectory();
-  //   final File file = File('${directory.path}/teams.json');
-  //   if (await file.exists()) {
-  //     final String contents = await file.readAsString();
-  //     final data = json.decode(contents) as Map<String, dynamic>;
-  //     setState(() {
-  //       _teams = List<TeamEntity>.from(data['teams'] as List<dynamic>);
-  //       final membersMap = data['members'] as Map<String, dynamic>;
-  //       _teamMembers.addAll(membersMap.map((k, v) => MapEntry(k, List<String>.from(v))));
-  //       _currentTeam = data['currentTeam'] ?? '';
-  //     });
-  //   }
-  // }
+  late TeamManager _teamManager;
 
   Future<void> _loadTeams() async {
-    await tDB.loadTeamsFromFile();
     setState(() {
-      _teams = tDB.getTeamList();
+      _teams = _teamManager.getTeamList();
+      _currentTeam = _teamManager.currentTeam;
     });
   }
 
   @override
   void initState() {
     super.initState();
-    tDB.loadTeam(widget.userId);
-    //     .then((_){
-    //   setState(() {
-    //     _teams = tDB.getTeamList();
-    //   });
-    // });
+    _teamManager = TeamManager();
+    _loadTeams();
   }
   void _showSnackBar(String message) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -66,22 +47,6 @@ class _TeamPageState extends State<TeamPage> {
       );
     });
   }
-
-  Future<void> _saveTeams() async {
-    //await tDB.saveTeams();
-    //await tDB.saveCurTeams(_currentTeam);
-  }
-
-  // Future<void> _saveTeams() async {
-  //   final Directory directory = await getApplicationDocumentsDirectory();
-  //   final File file = File('${directory.path}/teams.json');
-  //   final data = {
-  //     'teams': _teams.map((team)=> team.toJson()).toList(),
-  //     'members': _teamMembers,
-  //     'currentTeam': _currentTeam,
-  //   };
-  //   await file.writeAsString(json.encode(data));
-  // }
 
   Future<void> _createTeam() async {
     String teamName = _teamNameController.text;
@@ -92,14 +57,13 @@ class _TeamPageState extends State<TeamPage> {
           SnackBar(content: Text('팀이름이 이미 존재합니다.')),
         );
       } else {
-
-        tDB.getTeamList();
+        await _teamManager.loadTeam();
         setState(() {
-          // _teams.add(newTeam);
           _currentTeam = teamName; // 생성한 팀을 현재 팀으로 설정
-
-          _createTeamFolder(teamName);
+          _teamManager.currentTeam = teamName;
+          _teams = _teamManager.getTeamList();
         });
+        _createTeamFolder(teamName);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('$teamName 팀을 생성하였습니다')),
         );
@@ -126,9 +90,9 @@ class _TeamPageState extends State<TeamPage> {
     String inviteId = _inviteIdController.text;
     if (inviteId.isNotEmpty && _currentTeam.isNotEmpty) {
       // 상대방에게 팝업 알림 띄우기
-      tDB.inviteTeamMember(_currentTeam, inviteId);
+      _teamManager.inviteTeamMember(_currentTeam, inviteId);
     } else {
-      _showSnackBar('Invalid invite ID or no team selected.');
+      _showSnackBar('초대 ID가 비어있거나 선택된 팀이 없습니다.');
     }
   }
 
@@ -137,32 +101,24 @@ class _TeamPageState extends State<TeamPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            TeamManagementPage(
-              teams: tDB.getTeamList(),
-              currentTeam: _currentTeam,
-              onTeamSwitch: (teamName) {
-                setState(() {
-                  _currentTeam = teamName;
-                });
-                //tDB.saveCurTeams(_currentTeam);
-              },
-              onTeamDelete: (teamName) {
-                setState(() {
-                  // _teams.removeWhere((team) => team.teamName == teamName);
-                  // _teamMembers.remove(teamName);
-                  // if (_currentTeam == teamName) {
-                  //   _currentTeam = '';
-                  // }
-                });
-                //_saveTeams();
-                _showSnackBar('$teamName 팀이 삭제되었습니다');
-              },
-            ),
+        builder: (context) => TeamManagementPage(
+          teams: _teamManager.getTeamList(),
+          initialCurrentTeam: _teamManager.currentTeam,
+          userId: widget.userId,
+          onTeamSwitch: (teamName) {
+            setState(() {
+              _currentTeam = teamName;
+              _teamManager.currentTeam = teamName;
+            });
+          },
+          onTeamDelete: (teamName) {
+            // ... 기존 코드 ...
+          },
+        ),
       ),
     ).then((value) {
       if (value == true) {
-        _loadTeams(); // 팀 관리 후 팀 목록 새로고침
+        _loadTeams();
       }
     });
   }

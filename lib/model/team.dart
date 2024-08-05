@@ -68,11 +68,13 @@ class TeamEntity{
   }
 }
 
-class TeamManager {
+class TeamManager with ChangeNotifier {
   final WebSocketService _webSocketService = WebSocketService();
   static final TeamManager _instance = TeamManager._internal();
   static List<TeamEntity> _teams = [];
-  static String curTeam = '';
+  static String _curTeam = '';
+  static String _userId='';
+  bool _isInitialized = false;
 
   TeamManager._internal();
 
@@ -81,10 +83,23 @@ class TeamManager {
     return _instance;
   }
 
-  List<TeamEntity> getTeamList(){
-    return _teams;
+  Future<void> initialize(String userId) async {
+    if (!_isInitialized) {
+      _userId = userId;
+      await loadTeam();
+      await loadCurTeam();
+      _isInitialized = true;
+    }
   }
 
+  List<TeamEntity> getTeamList() => _teams;
+  String get currentTeam => _curTeam;
+
+  set currentTeam(String teamName) {
+    _curTeam = teamName;
+    saveCurTeam(_userId, teamName);
+    notifyListeners();
+  }
 
   int? getTeamNoByTeamName(String teamName){
     for(var team in _teams){
@@ -95,40 +110,59 @@ class TeamManager {
     return null;
   }
 
-  Future<void> saveTeams(String userId) async {
+  Future<void> saveTeams() async {
     final Directory directory = await getApplicationDocumentsDirectory();
-    final File file = File('${directory.path}/${userId}/teams.json');
+    final String dirPath = '${directory.path}/$_userId';
+    final Directory dir = Directory(dirPath);
+
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+
+    final File file = File('$dirPath/teams.json');
     final data = {
       'teams': _teams.map((team) => team.toJson()).toList(),
     };
-
-
     await file.writeAsString(json.encode(data));
   }
 
-  Future<void> saveCurTeams(String userId, String _currentTeam) async{
+  Future<void> saveCurTeam(String userId, String currentTeam) async{
     final Directory directory = await getApplicationDocumentsDirectory();
-    final File fileCur = File('${directory.path}/${userId}/currentTeam.json');
+    final String dirPath = '${directory.path}/$userId';
+    final Directory dir = Directory(dirPath);
+
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+
+    final File fileCur = File('$dirPath/currentTeam.json');
     final curTeamdata = {
-      'currentTeam': _currentTeam,
+      'currentTeam': currentTeam,
     };
-    curTeam = _currentTeam;
+    _curTeam = currentTeam;
     await fileCur.writeAsString(json.encode(curTeamdata));
   }
 
-  Future<void> loadCurTeamFromFile(String userId, ) async {
+  Future<void> loadCurTeam() async {
     final Directory directory = await getApplicationDocumentsDirectory();
-    final File file = File('${directory.path}/${userId}/currentTeam.json');
+    final File file = File('${directory.path}/$_userId/currentTeam.json');
     if (await file.exists()) {
-      final String contents = await file.readAsString();
-      final Map<String, dynamic> data = json.decode(contents);
-      curTeam = data['currentTeam'] as String;
+      try {
+        final String contents = await file.readAsString();
+        final Map<String, dynamic> data = json.decode(contents);
+        _curTeam = data['currentTeam'] as String;
+      } catch (e) {
+        print('Error loading current team: $e');
+        _curTeam = ''; // 파일 읽기 실패 시 빈 문자열로 설정
+      }
+    } else {
+      _curTeam = ''; // 파일이 없을 경우 빈 문자열로 설정
     }
   }
   // 팀 정보를 로드하는 메서드
   Future<void> loadTeamsFromFile() async {
     final Directory directory = await getApplicationDocumentsDirectory();
-    final File file = File('${directory.path}/teams.json');
+    final File file = File('${directory.path}/${_userId}/teams.json');
     if (await file.exists()) {
       final String contents = await file.readAsString();
       final Map<String, dynamic> data = json.decode(contents);
@@ -138,18 +172,21 @@ class TeamManager {
     }
   }
 
-  Future<void> loadTeam(String userId) async {
-    //await loadTeamsFromFile(); // 파일에서 팀 정보를 먼저 로드
-    Map<String, dynamic> data = {'id': userId};
+  Future<void> loadTeam() async {
+    Map<String, dynamic> data = {'id': _userId};
     var jsonResponse = await _webSocketService.transmit(data, 'GetMyTeamInfo');
-
+    _teams = [];
     if (jsonResponse.containsKey('teams')) {
       List<dynamic> teamsData = jsonResponse['teams'];
       for (var team in teamsData) {
         TeamEntity te = TeamEntity.fromJson(team);
         _teams.add(te);
       }
-      await saveTeams(userId); // 서버에서 로드한 팀 정보를 파일에 저장
+      try {
+        await saveTeams();
+      } catch (e) {
+        print('Error saving teams: $e');
+      }
     }
   }
 

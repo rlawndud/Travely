@@ -33,7 +33,7 @@ class _albumState extends State<album> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    currentTeamName = TeamManager.curTeam;
+    currentTeamName = TeamManager().currentTeam;
     currentTeam = teamManager.getTeamNoByTeamName(currentTeamName);
   }
 

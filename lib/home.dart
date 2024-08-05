@@ -23,17 +23,36 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   late Member _user;
+  late TeamManager _teamManager;
 
   @override
   void initState() {
     super.initState();
     _user = widget.user;
+    _teamManager = TeamManager();
+    _initializeTeamManager();
+    _teamManager.addListener(_updateUI);
     _pages = <Widget>[
-      TeamPage(userId: _user.id,),
+      TeamPage(userId: _user.id),
       const PhotoFolderScreen(), // 앨범 페이지
       GoogleMapSample(), // 홈 페이지
       const ImageUploadPage(), // 촬영 페이지 //키면 바로 카메라 실행되게
     ];
+  }
+
+  @override
+  void dispose() {
+    _teamManager.removeListener(_updateUI);
+    super.dispose();
+  }
+
+  void _updateUI() {
+    setState(() {});  // UI 갱신
+  }
+
+  Future<void> _initializeTeamManager() async {
+    await _teamManager.initialize(_user.id);
+    setState(() {});
   }
 
   int _selectedIndex = 0;
@@ -84,9 +103,8 @@ class _HomeState extends State<Home> {
                   currentAccountPicture: CircleAvatar(
                     backgroundImage: AssetImage('assets/cat.jpg'),
                   ),
-
-                  accountName: Text('$TeamManager.curTeam'),
-                  accountEmail: Text('abc12345@naver.com'),
+                  accountName: Text('${_teamManager.currentTeam}'),
+                  accountEmail: Text('${_user.id}'),
                   decoration: BoxDecoration(
                     color: Colors.pinkAccent[100],
                     borderRadius: BorderRadius.only(
