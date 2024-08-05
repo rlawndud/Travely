@@ -242,6 +242,7 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
         _currentPosition!.longitude,
       );
 
+      //웹소켓으로 위도 경도 보내기
       WebSocketService webSocketService = WebSocketService();
       if (_currentPosition != null) {
         Map<String,dynamic> data = {
