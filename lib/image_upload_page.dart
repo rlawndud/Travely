@@ -31,6 +31,21 @@ class _ImageUploadState extends State<ImageUpload> {
   List<XFile?> multiImage = [];
   List<XFile?> images = [];
 
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      image = await picker.pickImage(source: ImageSource.camera);
+      if (image != null) {
+        setState(() {
+          images.add(image);
+        });
+        uploadImage(image);
+      }
+    });
+  }
+
   Future<void> uploadImage(XFile? image) async {
     if (image == null) return;
 
