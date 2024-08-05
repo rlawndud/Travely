@@ -27,24 +27,31 @@ class Login extends StatelessWidget {
     WebSocketService _webSocketService = WebSocketService();
     try{
       //처리 정상
-      // var response = await _webSocketService.transmit(loginInfo.toJson(), 'Login');
-      // debugPrint(response.toString());
-      // Member mem = Member.fromJson(response);
-      // debugPrint(mem.toString());
-      Member mem = new Member('id', 'password', 'name', 'phone');
-      if(mem is Member){
-        autoLogin.setLoginInfo(_isAutoLogin, id, pw);
-        Navigator.pushReplacementNamed(context, '/home', arguments: {'user':mem});
-      }else{
+      var response = await _webSocketService.transmit(loginInfo.toJson(), 'Login');
+      debugPrint(response.toString());
+      if (response['result'] == 'False') {
         Fluttertoast.showToast(
-            msg: '등록되지 않은 아이디이거나 잘못된 비밀번호를 입력하였습니다.',
+            msg: '등록되지 않은 아이디이거나\n잘못된 비밀번호를 입력하였습니다.',
             gravity: ToastGravity.BOTTOM,
             backgroundColor: Colors.white70,
             fontSize: 12,
             textColor: Colors.black,
-            toastLength: Toast.LENGTH_SHORT);
+            toastLength: Toast.LENGTH_LONG);
+      } else {
+        Member mem = Member.fromJson(response);
+        // Member mem = new Member('id', 'password', 'name', 'phone');
+        autoLogin.setLoginInfo(_isAutoLogin, new UserLoginState(id, pw));
+        Navigator.pushReplacementNamed(context, '/home',
+            arguments: {'user': mem});
       }
-    }catch(e){
+    } catch (e) {
+      Fluttertoast.showToast(
+          msg: '로그인 중 오류가 발생했습니다',
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.white70,
+          fontSize: 12,
+          textColor: Colors.black,
+          toastLength: Toast.LENGTH_LONG);
       e.printError();
     }
   }

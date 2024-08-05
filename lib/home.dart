@@ -7,9 +7,10 @@ import 'package:test2/appbar/friend/Friend.dart';
 import 'package:test2/appbar/mypage/My_Page.dart';
 import 'package:test2/Settings.dart';
 import 'package:test2/model/member.dart';
+import 'package:test2/model/imgtest.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test2/image_upload_page.dart';
-import 'package:test2/TeamSettingScreen.dart';
+import 'package:test2/network/web_socket.dart';
 import 'package:test2/photo_folder_screen.dart';
 import 'package:test2/team_page.dart';
 import 'package:geolocator/geolocator.dart';
@@ -31,34 +32,22 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     _user = widget.user;
+    _pages = <Widget>[
+      TeamPage(userId: _user.id,),
+      const PhotoFolderScreen(), // 앨범 페이지
+      GoogleMapSample(userId: _user.id), // 홈 페이지
+      const ImageUploadPage(), // 촬영 페이지
+    ];
   }
 
   int _selectedIndex = 0;
   String? _teamName = '팀 미설정';
-
-  static List<Widget> _pages = <Widget>[
-    const TeamPage(), // 팀 페이지
-    const PhotoFolderScreen(), // 앨범 페이지
-    GoogleMapSample(), // 홈 페이지
-    const ImageUploadPage(), // 촬영 페이지
-  ];
+  late List<Widget> _pages;
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
-  }
-
-  void _openTeamSettingScreen() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => TeamSettingScreen()),
-    );
-    if (result != null && result is String) {
-      setState(() {
-        _teamName = result;
-      });
-    }
   }
 
   @override
@@ -144,7 +133,7 @@ class _HomeState extends State<Home> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const SettingsPage()), // 여기 수정
+                      MaterialPageRoute(builder: (context) => SettingsPage(user: _user,)), // 여기 수정
                     );
                   },
                   trailing: Icon(Icons.navigate_next),
@@ -154,7 +143,12 @@ class _HomeState extends State<Home> {
                   iconColor: Colors.black38,
                   focusColor: Colors.black38,
                   title: Text('도움말'),
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => album()), // 여기 수정
+                    );
+                  },
                   trailing: Icon(Icons.navigate_next),
                 ),
               ],
@@ -183,7 +177,11 @@ class _HomeState extends State<Home> {
   }
 }
 
+
 class GoogleMapSample extends StatefulWidget {
+  final String userId;
+  const GoogleMapSample({super.key, required this.userId});
+
   @override
   _GoogleMapSampleState createState() => _GoogleMapSampleState();
 }
@@ -243,6 +241,16 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
         _currentPosition!.latitude,
         _currentPosition!.longitude,
       );
+
+      WebSocketService webSocketService = WebSocketService();
+      if (_currentPosition != null) {
+        Map<String,dynamic> data = {
+          'id': widget.userId,
+          'latitude': _currentPosition!.latitude,
+          'longitude': _currentPosition!.longitude
+        };
+        webSocketService.transmit(data, 'UpdateLocation');
+      }
 
       // 지도 위치 업데이트
       mapController.animateCamera(
@@ -446,6 +454,9 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
             zoomControlsEnabled: false,
             markers: _markers,
             onTap: (position) {
+              if (_isAddingMarker) {
+                _addMarker(position);
+              }
               _hideLogContent(); // 지도를 클릭할 때 로그 내용 숨기기
             },
           ),
