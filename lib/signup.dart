@@ -160,7 +160,6 @@ class _SignupState extends State<Signup> {
           msg: '회원가입 중 오류가 발생했습니다',
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.white70,
-          fontSize: 12,
           textColor: Colors.black,
           toastLength: Toast.LENGTH_LONG);
     }

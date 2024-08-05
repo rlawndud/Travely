@@ -6,6 +6,7 @@ import 'package:test2/util/auto_login.dart';
 import 'package:test2/value/color.dart';
 
 import 'model/member.dart';
+import 'model/team.dart';
 import 'model/userLoginState.dart';
 
 class Login extends StatelessWidget {
@@ -34,7 +35,6 @@ class Login extends StatelessWidget {
             msg: '등록되지 않은 아이디이거나\n잘못된 비밀번호를 입력하였습니다.',
             gravity: ToastGravity.BOTTOM,
             backgroundColor: Colors.white70,
-            fontSize: 18,
             textColor: Colors.black,
             toastLength: Toast.LENGTH_LONG,
         );
@@ -42,6 +42,7 @@ class Login extends StatelessWidget {
         Member mem = Member.fromJson(response);
         //Member mem = new Member('id', 'password', 'name', 'phone');
         autoLogin.setLoginInfo(_isAutoLogin, new UserLoginState(id, pw));
+        await TeamManager().initialize(mem.id);
         Navigator.pushReplacementNamed(context, '/home',
             arguments: {'user': mem});
       }
@@ -50,7 +51,6 @@ class Login extends StatelessWidget {
           msg: '로그인 중 오류가 발생했습니다',
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.white70,
-          fontSize: 25,
           textColor: Colors.black,
           toastLength: Toast.LENGTH_LONG);
       e.printError();
