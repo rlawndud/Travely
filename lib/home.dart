@@ -11,6 +11,8 @@ import 'package:test2/image_upload_page.dart';
 import 'package:test2/photo_folder_screen.dart';
 import 'package:test2/team_page.dart';
 
+import 'model/team.dart';
+
 class Home extends StatefulWidget {
   final Member user;
   const Home({super.key, required this.user});
@@ -30,7 +32,7 @@ class _HomeState extends State<Home> {
       TeamPage(userId: _user.id,),
       const PhotoFolderScreen(), // 앨범 페이지
       GoogleMapSample(), // 홈 페이지
-      const ImageUploadPage(), // 촬영 페이지
+      const ImageUploadPage(), // 촬영 페이지 //키면 바로 카메라 실행되게
     ];
   }
 
@@ -82,7 +84,8 @@ class _HomeState extends State<Home> {
                   currentAccountPicture: CircleAvatar(
                     backgroundImage: AssetImage('assets/cat.jpg'),
                   ),
-                  accountName: Text('R 2 B'),
+
+                  accountName: Text('$TeamManager.curTeam'),
                   accountEmail: Text('abc12345@naver.com'),
                   decoration: BoxDecoration(
                     color: Colors.pinkAccent[100],
@@ -140,7 +143,7 @@ class _HomeState extends State<Home> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => album()), // 여기 수정
+                      MaterialPageRoute(builder: (context) => album(id: _user.id,)), // 여기 수정
                     );
                   },
                   trailing: Icon(Icons.navigate_next),

@@ -34,9 +34,10 @@ class Login extends StatelessWidget {
             msg: '등록되지 않은 아이디이거나\n잘못된 비밀번호를 입력하였습니다.',
             gravity: ToastGravity.BOTTOM,
             backgroundColor: Colors.white70,
-            fontSize: 12,
+            fontSize: 18,
             textColor: Colors.black,
-            toastLength: Toast.LENGTH_LONG);
+            toastLength: Toast.LENGTH_LONG,
+        );
       } else {
         Member mem = Member.fromJson(response);
         //Member mem = new Member('id', 'password', 'name', 'phone');
@@ -49,7 +50,7 @@ class Login extends StatelessWidget {
           msg: '로그인 중 오류가 발생했습니다',
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.white70,
-          fontSize: 12,
+          fontSize: 25,
           textColor: Colors.black,
           toastLength: Toast.LENGTH_LONG);
       e.printError();

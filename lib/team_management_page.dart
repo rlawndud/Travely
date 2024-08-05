@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'model/team.dart';
 
 class TeamManagementPage extends StatelessWidget {
-  final List<Team> teams;
-  final Map<String, List<String>> teamMembers;
+  final List<TeamEntity> teams;
   final String currentTeam;
   final ValueChanged<String> onTeamSwitch;
   final ValueChanged<String> onTeamDelete;
 
   const TeamManagementPage({
     required this.teams,
-    required this.teamMembers,
     required this.currentTeam,
     required this.onTeamSwitch,
     required this.onTeamDelete,
@@ -42,18 +40,37 @@ class TeamManagementPage extends StatelessWidget {
     );
   }
 
+  List<Map<String, dynamic>>? findTeamMemberByName(String teamName) {
+    // 리스트를 순회하면서 팀 이름이 일치하는 팀을 찾습니다.
+    for (var team in teams) {
+      if (team.teamName == teamName) {
+        return team.members;
+      }
+      return null;
+    }
+  }
+
+  List<String>? findTeamMemberNamesByName(String teamName) {
+    for (var team in teams) {
+      if (team.teamName == teamName) {
+        return team.members.map((member) => member['name'] as String).toList();
+      }
+    }
+    return null;
+  }
+
   void _showTeamDetailsDialog(BuildContext context, String teamName) {
     showDialog(
       context: context,
       builder: (context) {
-        final members = teamMembers[teamName] ?? [];
+        final memberNames = findTeamMemberNamesByName(teamName) ?? [];
         return AlertDialog(
           title: Text('$teamName 팀 상세 정보'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('팀 멤버 목록:'),
-              ...members.map((member) => Text(member)).toList(),
+              ...memberNames.map((memberName) => Text(memberName)).toList(),
             ],
           ),
           actions: [

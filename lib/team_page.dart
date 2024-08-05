@@ -21,31 +21,43 @@ class _TeamPageState extends State<TeamPage> {
   final TextEditingController _teamNameController = TextEditingController();
   final TextEditingController _inviteIdController = TextEditingController();
 
-  final List<Team> _teams = [];
+  List<TeamEntity> _teams = [];
   final Map<String, List<String>> _teamMembers = {};
   String _currentTeam = '';
   final WebSocketService _webSocketService = WebSocketService();
-  TeamDB tDB = new TeamDB();
+  TeamManager tDB = new TeamManager();
+
+  // Future<void> _loadTeams() async {
+  //   final Directory directory = await getApplicationDocumentsDirectory();
+  //   final File file = File('${directory.path}/teams.json');
+  //   if (await file.exists()) {
+  //     final String contents = await file.readAsString();
+  //     final data = json.decode(contents) as Map<String, dynamic>;
+  //     setState(() {
+  //       _teams = List<TeamEntity>.from(data['teams'] as List<dynamic>);
+  //       final membersMap = data['members'] as Map<String, dynamic>;
+  //       _teamMembers.addAll(membersMap.map((k, v) => MapEntry(k, List<String>.from(v))));
+  //       _currentTeam = data['currentTeam'] ?? '';
+  //     });
+  //   }
+  // }
 
   Future<void> _loadTeams() async {
-    /*final Directory directory = await getApplicationDocumentsDirectory();
-    final File file = File('${directory.path}/teams.json');
-    if (await file.exists()) {
-      final String contents = await file.readAsString();
-      final data = json.decode(contents) as Map<String, dynamic>;
-      setState(() {
-        _teams = List<String>.from(data['teams'] as List<dynamic>);
-        final membersMap = data['members'] as Map<String, dynamic>;
-        _teamMembers.addAll(membersMap.map((k, v) => MapEntry(k, List<String>.from(v))));
-        _currentTeam = data['currentTeam'] ?? '';
-      });
-    }*/
+    await tDB.loadTeamsFromFile();
+    setState(() {
+      _teams = tDB.getTeamList();
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    _loadTeams();
+    tDB.loadTeam(widget.userId);
+    //     .then((_){
+    //   setState(() {
+    //     _teams = tDB.getTeamList();
+    //   });
+    // });
   }
   void _showSnackBar(String message) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -56,31 +68,35 @@ class _TeamPageState extends State<TeamPage> {
   }
 
   Future<void> _saveTeams() async {
-    final Directory directory = await getApplicationDocumentsDirectory();
-    final File file = File('${directory.path}/teams.json');
-    final data = {
-      'teams': _teams,
-      'members': _teamMembers,
-      'currentTeam': _currentTeam,
-    };
-    await file.writeAsString(json.encode(data));
+    await tDB.saveTeams();
+    await tDB.saveCurTeams(_currentTeam);
   }
+
+  // Future<void> _saveTeams() async {
+  //   final Directory directory = await getApplicationDocumentsDirectory();
+  //   final File file = File('${directory.path}/teams.json');
+  //   final data = {
+  //     'teams': _teams.map((team)=> team.toJson()).toList(),
+  //     'members': _teamMembers,
+  //     'currentTeam': _currentTeam,
+  //   };
+  //   await file.writeAsString(json.encode(data));
+  // }
 
   Future<void> _createTeam() async {
     String teamName = _teamNameController.text;
     if (teamName.isNotEmpty) {
-      var response = await _webSocketService.transmit(
-          {'teamName': teamName, 'LeaderId': widget.userId}, 'AddTeam');
+      var response = await _webSocketService.transmit({'teamName': teamName, 'LeaderId': widget.userId}, 'AddTeam');
       if (response['result'] == 'False') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('팀이름이 이미 존재합니다.')),
         );
       } else {
-        Team newTeam = Team.fromJson(response);
+
+        tDB.getTeamList();
         setState(() {
-          _teams.add(newTeam);
-          _teamMembers[teamName] = [widget.userId]; // 팀 생성 시 자신을 팀에 추가
-          _currentTeam = newTeam.teamName; // 생성한 팀을 현재 팀으로 설정
+          // _teams.add(newTeam);
+          _currentTeam = teamName; // 생성한 팀을 현재 팀으로 설정
 
           _createTeamFolder(teamName);
         });
@@ -110,8 +126,7 @@ class _TeamPageState extends State<TeamPage> {
     String inviteId = _inviteIdController.text;
     if (inviteId.isNotEmpty && _currentTeam.isNotEmpty) {
       // 상대방에게 팝업 알림 띄우기
-      tDB.inviteTeamMember(
-          _teams.contains(_currentTeam) as int, _currentTeam, inviteId);
+      tDB.inviteTeamMember(_currentTeam, inviteId);
     } else {
       _showSnackBar('Invalid invite ID or no team selected.');
     }
@@ -124,21 +139,21 @@ class _TeamPageState extends State<TeamPage> {
       MaterialPageRoute(
         builder: (context) =>
             TeamManagementPage(
-              teams: _teams,
-              teamMembers: _teamMembers,
+              teams: tDB.getTeamList(),
               currentTeam: _currentTeam,
               onTeamSwitch: (teamName) {
                 setState(() {
                   _currentTeam = teamName;
                 });
+                tDB.saveCurTeams(_currentTeam);
               },
               onTeamDelete: (teamName) {
                 setState(() {
-                  _teams.removeWhere((team) => team.teamName == teamName);
-                  _teamMembers.remove(teamName);
-                  if (_currentTeam == teamName) {
-                    _currentTeam = '';
-                  }
+                  // _teams.removeWhere((team) => team.teamName == teamName);
+                  // _teamMembers.remove(teamName);
+                  // if (_currentTeam == teamName) {
+                  //   _currentTeam = '';
+                  // }
                 });
                 _saveTeams();
                 _showSnackBar('$teamName 팀이 삭제되었습니다');
