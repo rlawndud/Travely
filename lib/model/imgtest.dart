@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -79,13 +82,13 @@ class _albumState extends State<album> {
         var images_string = XFileToBytes(photo);
         debugPrint('이미지를 바이트로 읽음');
         Map<String, dynamic> data = {
-          'id':widget.id,
-          'teamno':currentTeam,
+          'id': widget.id,
+          'teamno': currentTeam,
           'image': images_string,
         };
         print(data);
         var response = await _webSocketService.transmit(data, 'AddImage');
-        PictureEntity pre_pic =  PictureEntity.fromJson(response);
+        PictureEntity pre_pic = PictureEntity.fromJson(response);
         prediction = pre_pic.toString();
         setState(() {
           pic.add(BytesToImage(pre_pic.img_data));
@@ -99,6 +102,18 @@ class _albumState extends State<album> {
             images.add(PictureEntity.fromJson(response));
             pic.add(BytesToImage(response['img_data']));
           });
+
+          // 현재 팀의 전체사진 폴더에 사진 저장
+          final Directory appDir = await getApplicationDocumentsDirectory();
+          final String teamPath = '${appDir.path}/$currentTeamName/전체사진';
+          final String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+          final String filePath = '$teamPath/$fileName';
+
+          // 디렉토리가 존재하지 않으면 생성
+          await Directory(teamPath).create(recursive: true);
+
+          await File(filePath).writeAsBytes(BytesToImage(response['img_data']));
+          debugPrint('사진이 저장됨: $filePath');
         } else {
           debugPrint('서버로 전달 실패');
         }

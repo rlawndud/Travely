@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'model/team.dart';
+import 'package:test2/model/team.dart';
 
 class TeamManagementPage extends StatelessWidget {
-  final List<TeamEntity> teams;
   final String currentTeam;
   final ValueChanged<String> onTeamSwitch;
   final ValueChanged<String> onTeamDelete;
 
   const TeamManagementPage({
-    required this.teams,
     required this.currentTeam,
     required this.onTeamSwitch,
     required this.onTeamDelete,
@@ -17,6 +15,9 @@ class TeamManagementPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TeamManager teamManager = TeamManager();
+    final List<TeamEntity> teams = teamManager.getTeamList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('팀 관리'),
@@ -32,7 +33,7 @@ class TeamManagementPage extends StatelessWidget {
                 ? Icon(Icons.check, color: Colors.pinkAccent)
                 : null,
             onTap: () {
-              _showTeamDetailsDialog(context, teamName);
+              _showTeamDetailsDialog(context, teamName, teams[index]);
             },
           );
         },
@@ -40,55 +41,34 @@ class TeamManagementPage extends StatelessWidget {
     );
   }
 
-  List<Map<String, dynamic>>? findTeamMemberByName(String teamName) {
-    // 리스트를 순회하면서 팀 이름이 일치하는 팀을 찾습니다.
-    for (var team in teams) {
-      if (team.teamName == teamName) {
-        return team.members;
-      }
-      return null;
-    }
-  }
-
-  List<String>? findTeamMemberNamesByName(String teamName) {
-    for (var team in teams) {
-      if (team.teamName == teamName) {
-        return team.members.map((member) => member['name'] as String).toList();
-      }
-    }
-    return null;
-  }
-
-  void _showTeamDetailsDialog(BuildContext context, String teamName) {
+  void _showTeamDetailsDialog(BuildContext context, String teamName, TeamEntity team) {
     showDialog(
       context: context,
       builder: (context) {
-        final memberNames = findTeamMemberNamesByName(teamName) ?? [];
         return AlertDialog(
           title: Text('$teamName 팀 상세 정보'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('팀 멤버 목록:'),
-              ...memberNames.map((memberName) => Text(memberName)).toList(),
+              Text('팀 멤버:'),
+              ...team.members.map((member) => Text('${member['name']} (${member['id']})')).toList(),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(true); // Notify that a change happened
-                if (teamName != currentTeam) {
-                  onTeamSwitch(teamName);
-                }
+                Navigator.of(context).pop();
+                onTeamSwitch(teamName);
               },
-              child: Text('변경'),
+              child: Text('팀 변경'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close dialog first
+                Navigator.of(context).pop();
                 _showDeleteConfirmationDialog(context, teamName);
               },
-              child: Text('삭제'),
+              child: Text('팀 삭제'),
             ),
           ],
         );
@@ -106,11 +86,8 @@ class TeamManagementPage extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close dialog first
+                Navigator.of(context).pop();
                 onTeamDelete(teamName);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('$teamName 팀이 삭제되었습니다')),
-                );
               },
               child: Text('삭제'),
             ),
