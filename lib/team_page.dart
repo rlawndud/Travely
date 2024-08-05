@@ -68,8 +68,8 @@ class _TeamPageState extends State<TeamPage> {
   }
 
   Future<void> _saveTeams() async {
-    await tDB.saveTeams();
-    await tDB.saveCurTeams(_currentTeam);
+    //await tDB.saveTeams();
+    //await tDB.saveCurTeams(_currentTeam);
   }
 
   // Future<void> _saveTeams() async {
@@ -145,7 +145,7 @@ class _TeamPageState extends State<TeamPage> {
                 setState(() {
                   _currentTeam = teamName;
                 });
-                tDB.saveCurTeams(_currentTeam);
+                //tDB.saveCurTeams(_currentTeam);
               },
               onTeamDelete: (teamName) {
                 setState(() {
@@ -155,7 +155,7 @@ class _TeamPageState extends State<TeamPage> {
                   //   _currentTeam = '';
                   // }
                 });
-                _saveTeams();
+                //_saveTeams();
                 _showSnackBar('$teamName 팀이 삭제되었습니다');
               },
             ),

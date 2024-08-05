@@ -42,13 +42,6 @@ class _albumState extends State<album> {
       Map<String,dynamic> response = await _webSocketService.transmit({'id': widget.id}, 'GetAllImage');
       debugPrint('이미지 로드 응답 : $response');
 
-      if (img != null && img['img_data'] != null) {
-        setState(() {
-          images.add(Picture.fromJson(img));
-        });
-      } else {
-        debugPrint('이미지 로드 실패');
-      }
       if (response != null && response['img_data'] != null) {
         setState(() {
           PictureEntity p_pic = PictureEntity.fromJson(response);
@@ -64,6 +57,7 @@ class _albumState extends State<album> {
   }
 
   void _printImage() {
+
     if (images.isNotEmpty) {
       print('images의 개수:${images.length}');
       setState(() {
@@ -72,30 +66,6 @@ class _albumState extends State<album> {
           pic.add(BytesToImage(img.img_data));
         }
         print('pic의 개수:${pic.length}');
-      });
-    }
-  }
-
-  Future<void> _takePictureAndSend() async {
-    try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? photo = await picker.pickImage(source: ImageSource.camera);
-
-      if (photo != null) {
-        Uint8List imgBytes = await photo.readAsBytes();
-        debugPrint('이미지를 바이트로 읽음');
-        var response = await _webSocketService.transmit({'image': imgBytes}, 'SendImage');
-        debugPrint('서버 응답 : $response');
-
-        if (response != null && response['success'] == true) {
-          // 서버로부터 이미지를 받았다는 가정하에 처리
-          setState(() {
-            images.add(Picture.fromJson(response));
-            pic.add(BytesToImage(response['img_data']));
-          });
-        } else {
-          debugPrint('서버로 전달 실패');
-        }
       });
     }
   }
@@ -159,12 +129,6 @@ class _albumState extends State<album> {
             style: TextButton.styleFrom(
                 backgroundColor: mainColor30, foregroundColor: Colors.white),
           ),
-          TextButton(
-            child: Text('사진 촬영 및 전송'),
-            onPressed: _takePictureAndSend,
-            style: TextButton.styleFrom(
-                backgroundColor: mainColor30, foregroundColor: Colors.white),
-          ),
           SizedBox(height: 50,),
           TextButton(
             child: Text('사진 촬영 및 전송'),
@@ -182,7 +146,7 @@ class _albumState extends State<album> {
                 print(team);
               },
               style: TextButton.styleFrom(
-                  backgroundColor: mainColor, foregroundColor: Colors.white, padding: const EdgeInsets.all(15.0),shape: RoundedRectangleBorder(
+                backgroundColor: mainColor, foregroundColor: Colors.white, padding: const EdgeInsets.all(15.0),shape: RoundedRectangleBorder(
                 borderRadius:
                 BorderRadius.circular(10), // 버튼의 모서리 둥글기
               ),),
@@ -199,7 +163,7 @@ class _albumState extends State<album> {
               itemCount: pic.length,
               itemBuilder: (BuildContext context, int index) {
                 return SizedBox(
-                  height: 200,
+                  height: 300,
                   child: Image.memory(pic[index]),
                 );
               },
