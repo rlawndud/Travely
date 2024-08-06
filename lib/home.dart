@@ -257,6 +257,8 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
       'longitude': _currentPosition!.longitude,
       'teamNo' : teamManager.getTeamNoByTeamName(teamManager.currentTeam)
     };
+    print(teamManager.getTeamNoByTeamName(teamManager.currentTeam));
+    print(teamManager.currentTeam);
     await _webSocketService.transmit(data, 'UpdateLocation');
   }
 
@@ -267,10 +269,12 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
           final friendId = message['id'];
           final latitude = message['latitude'];
           final longitude = message['longitude'];
+          final teamNo = message['teamNo'];
 
           print(friendId);
           print(latitude);
           print(longitude);
+          print(teamNo);
 
           final MarkerId markerId = MarkerId('$friendId');
 

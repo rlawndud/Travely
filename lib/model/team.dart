@@ -110,6 +110,7 @@ class TeamManager with ChangeNotifier {
   int? getTeamNoByTeamName(String teamName){
     for(var team in _userTeams[_currentUserId]!){
       if(team.teamName == teamName){
+        print(team.teamNo);
         return team.teamNo;
       }
     }
