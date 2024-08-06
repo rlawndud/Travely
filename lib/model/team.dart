@@ -93,6 +93,13 @@ class TeamManager with ChangeNotifier {
   }
 
   List<TeamEntity> getTeamList() => _userTeams[_currentUserId] ?? [];
+  List<int> getTeamNoList(){
+    List<int> teamNoList = [];
+    for(TeamEntity team in getTeamList()){
+      teamNoList.add(team.teamNo);
+    }
+    return teamNoList;
+  }
   String get currentTeam => _curTeam;
 
   set currentTeam(String teamName) {

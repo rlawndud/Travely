@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:test2/model/picture.dart';
 import 'package:test2/util/auto_login.dart';
 import 'package:test2/value/color.dart';
 import 'package:test2/model/team.dart';
@@ -61,6 +62,7 @@ class _SettingsPageState extends State<SettingsPage> {
       debugPrint(_isAutoLogin.toString());
 
       await TeamManager().clearCurrentUserData();
+      await PicManager().clearCurrentUserData();
       Navigator.pushReplacementNamed(context, '/login');
     } catch (e) {
       Fluttertoast.showToast(

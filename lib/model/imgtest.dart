@@ -24,6 +24,7 @@ class _albumState extends State<album> {
   List<PictureEntity> images = [];
   List<Uint8List> pic = [];
   TeamManager teamManager = TeamManager();
+  PicManager _picManager = PicManager();
   String currentTeamName = '';
   int? currentTeam;
   String prediction='';
@@ -86,7 +87,8 @@ class _albumState extends State<album> {
         print(data);
         var response = await _webSocketService.transmit(data, 'AddImage');
         PictureEntity pre_pic =  PictureEntity.fromJson(response);
-        prediction = pre_pic.toString();
+        await _picManager.addPicture(pre_pic);
+        prediction = pre_pic.printPredict();
         setState(() {
           pic.add(BytesToImage(pre_pic.img_data));
           print('pic의 개수:${pic.length}');

@@ -8,6 +8,7 @@ import 'package:test2/model/member.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test2/Settings.dart'; // 올바른 Settings 파일 import
 import 'package:test2/image_upload_page.dart';
+import 'package:test2/model/picture.dart';
 import 'package:test2/photo_folder_screen.dart';
 import 'package:test2/team_page.dart';
 
@@ -24,13 +25,15 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   late Member _user;
   late TeamManager _teamManager;
+  late PicManager _picManager;
 
   @override
   void initState() {
     super.initState();
     _user = widget.user;
     _teamManager = TeamManager();
-    _initializeTeamManager();
+    _picManager = PicManager();
+    _initializeManager();
     _teamManager.addListener(_updateUI);
     _pages = <Widget>[
       TeamPage(userId: _user.id),
@@ -50,8 +53,9 @@ class _HomeState extends State<Home> {
     setState(() {});  // UI 갱신
   }
 
-  Future<void> _initializeTeamManager() async {
+  Future<void> _initializeManager() async {
     await _teamManager.initialize(_user.id);
+    await _picManager.initialize(_user.id);
     setState(() {});
   }
 
@@ -103,7 +107,8 @@ class _HomeState extends State<Home> {
                   currentAccountPicture: CircleAvatar(
                     backgroundImage: AssetImage('assets/cat.jpg'),
                   ),
-                  accountName: Text('${_teamManager.currentTeam}'),
+                  accountName: _teamManager.currentTeam.isNotEmpty?Text('${_teamManager.currentTeam}',style: TextStyle(fontWeight: FontWeight.bold),)
+                      :Text('현재 설정된 팀이 없음'),
                   accountEmail: Text('${_user.id}'),
                   decoration: BoxDecoration(
                     color: Colors.pinkAccent[100],
