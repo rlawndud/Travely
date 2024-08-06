@@ -155,10 +155,12 @@ class PicManager with ChangeNotifier {
   Future<void> saveImageToFile(PictureEntity picture) async {
     final Directory appDir = await getApplicationDocumentsDirectory();
     final String teamName = TeamManager().currentTeam;
+
     final List<String> categories = ['전체사진', '지역', '배경', '계절'];
 
     for (String category in categories) {
-      final String path = '${appDir.path}/$teamName/$category';
+      final String path = '${appDir.path}/$_currentUserId/$teamName/$category';
+
       final String fileName = '${picture.img_num}.jpg';
       final File file = File('$path/$fileName');
 

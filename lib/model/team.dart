@@ -117,6 +117,15 @@ class TeamManager with ChangeNotifier {
     return null;
   }
 
+  String? getTeamNameByTeamNo(int teamNo){
+    for(var team in _userTeams[_currentUserId]!){
+      if(team.teamNo==teamNo){
+        return team.teamName;
+      }
+    }
+    return null;
+  }
+
   // Future<void> saveTeams() async {
   //   final Directory directory = await getApplicationDocumentsDirectory();
   //   final String dirPath = '${directory.path}/$_userId';

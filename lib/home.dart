@@ -9,7 +9,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test2/Settings.dart'; // 올바른 Settings 파일 import
 import 'package:test2/image_upload_page.dart';
 import 'package:test2/model/picture.dart';
-import 'package:test2/photo_folder_screen.dart';
+import 'package:test2/album_screen/photo_folder_screen.dart';
 import 'package:test2/team_page.dart';
 
 import 'model/team.dart';
