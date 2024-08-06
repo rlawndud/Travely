@@ -209,7 +209,7 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
 
     _webSocketService = WebSocketService();
     _webSocketService.init();
-    _listenToFriendLocations();
+    _startListeningToFriendLocationsIfNeeded(); // 팀원 위치 수신 시작
 
     super.initState();
   }
@@ -229,45 +229,70 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
     }
   }
 
+  void _startListeningToFriendLocationsIfNeeded() {
+    TeamManager teamManager = TeamManager();
+    if (teamManager.currentTeam.isNotEmpty) {
+      _listenToFriendLocations();
+    } else {
+      // 만약 팀이 설정되지 않았다면, 팀이 설정된 이후에 _listenToFriendLocations를 호출하도록 하는 코드 작성
+    }
+  }
+
+  // webSocket에 내 위치 보내기
   Future<void> _sendLocationToServer(Position position) async {
-    TeamManager _teamManager = TeamManager();
+    // TeamManager teamManager = TeamManager();
 
     final data = {
       'id': widget.userId, // 사용자 ID로 교체
       'latitude': position.latitude,
-      'longitude': position.longitude,
-      'teamNo' : _teamManager.getTeamNoByTeamName(_teamManager.currentTeam),
+      'longitude': position.longitude
     };
     await _webSocketService.transmit(data, 'UpdateLocation');
   }
 
+  // 팀원 위치 정보를 수신하여 지도에 표시
   Future<void> _listenToFriendLocations() async {
     _webSocketService.responseStream.listen((message) {
       if (message['command'] == 'FriendLocationUpdate') {
-        final friendId = message['id'];
-        final latitude = message['latitude'];
-        final longitude = message['longitude'];
+          final friendId = message['id'];
+          final latitude = message['latitude'];
+          final longitude = message['longitude'];
 
-        print(friendId);
-        print(latitude);
-        print(longitude);
+          print(friendId);
+          print(latitude);
+          print(longitude);
 
-        final MarkerId markerId = MarkerId('$friendId');
-        final Marker marker = Marker(
-          markerId: markerId,
-          position: LatLng(latitude, longitude),
-          infoWindow: InfoWindow(
-            title: '$friendId',
-          ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        );
+          final MarkerId markerId = MarkerId('$friendId');
 
-        setState(() {
-          _markers.removeWhere((marker) => marker.markerId == markerId);
-          _markers.add(marker);
-        });
+          final Marker marker = Marker(
+            markerId: markerId,
+            position: LatLng(latitude, longitude),
+            infoWindow: InfoWindow(
+              title: '$friendId',
+            ),
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          );
+
+          setState(() {
+            _markers.removeWhere((marker) => marker.markerId == markerId);
+            _markers.add(marker);
+          });
       }
     });
+
+    // 주기적으로 팀원 위치 요청
+    Timer.periodic(const Duration(seconds: 10), (Timer timer) async {
+      await _requestFriendLocations();
+    });
+  }
+
+  // 주기적으로 팀원 위치 요청
+  Future<void> _requestFriendLocations() async {
+    TeamManager teamManager = TeamManager();
+    final data = {
+      'teamNo': teamManager.getTeamNoByTeamName(teamManager.currentTeam),
+    };
+    await _webSocketService.transmit(data, 'RequestFriendLocation');
   }
 
   // 위치 권한을 확인하고 요청하는 함수
@@ -294,13 +319,13 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
       );
 
       // 현재 위치를 표시하는 마커 업데이트
-      final MarkerId markerId = MarkerId('current_location');
+      const MarkerId markerId = MarkerId('current_location');
       final Marker marker = Marker(
         markerId: markerId,
         position: position,
         infoWindow: InfoWindow(
-          title: 'You are here',
-          snippet: 'Latitude: ${_currentPosition!.latitude}, Longitude: ${_currentPosition!.longitude}',
+          title: '내 위치',
+          snippet: '위도: ${_currentPosition!.latitude}, 경도: ${_currentPosition!.longitude}',
         ),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
       );
@@ -312,10 +337,11 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
     }
   }
 
-  //위치 정보를 메모리 내에 추가
+  // 위치 정보를 메모리 내에 추가
   void _logPosition(Position position) {
     final timeStamp = DateTime.now().toIso8601String();
-    final log = '[$timeStamp] Latitude: ${position.latitude}, Longitude: ${position.longitude}';
+    final log = '[$timeStamp]\n'
+        '위도: ${position.latitude}, 경도: ${position.longitude}';
 
     setState(() {
       _logLines.add(log);
