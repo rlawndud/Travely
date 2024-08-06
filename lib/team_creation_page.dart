@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class TeamCreationPage extends StatefulWidget {
+  const TeamCreationPage({super.key});
+
   @override
   _TeamCreationPageState createState() => _TeamCreationPageState();
 }
@@ -17,7 +19,7 @@ class _TeamCreationPageState extends State<TeamCreationPage> {
 
     if (teamName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('팀 이름을 입력해주세요.')),
+        const SnackBar(content: Text('팀 이름을 입력해주세요.')),
       );
       return;
     }
@@ -26,7 +28,7 @@ class _TeamCreationPageState extends State<TeamCreationPage> {
 
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('로그인이 필요합니다.')),
+        const SnackBar(content: Text('로그인이 필요합니다.')),
       );
       return;
     }
@@ -39,7 +41,7 @@ class _TeamCreationPageState extends State<TeamCreationPage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('팀이 생성되었습니다.')),
+        const SnackBar(content: Text('팀이 생성되었습니다.')),
       );
 
       Navigator.pop(context);

@@ -6,11 +6,11 @@ class PhotoGridScreen extends StatelessWidget {
   final String subCategory;
 
   const PhotoGridScreen({
-    Key? key,
+    super.key,
     required this.teamName,
     required this.category,
     required this.subCategory,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

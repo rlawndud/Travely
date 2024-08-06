@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class TeamAlbumScreen extends StatelessWidget {
   final String teamName;
 
-  const TeamAlbumScreen({Key? key, required this.teamName}) : super(key: key);
+  const TeamAlbumScreen({super.key, required this.teamName});
 
   @override
   Widget build(BuildContext context) {

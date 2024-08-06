@@ -1,5 +1,8 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:test2/value/color.dart';
 
 import '../network/web_socket.dart';
@@ -7,7 +10,7 @@ import '../network/web_socket.dart';
 class Team {
   int teamNo;
   String teamName;
-  String leaderId; //이게머야
+  String leaderId;
 
   Team(this.teamNo, this.teamName, this.leaderId);
 
@@ -29,35 +32,181 @@ class Team {
   }
 }
 
-class TeamDB {
+class TeamEntity{
+  int teamNo;
+  String teamName;
+  List<Map<String,dynamic>> members;
+
+  TeamEntity(this.teamNo,this.teamName,this.members);
+
+  factory TeamEntity.fromJson(Map<String, dynamic> json){
+    List<dynamic> members = json['teammems'];
+    List<Map<String,dynamic>> resultMembers = [];
+    for(var member in members){
+      String id = member[0];
+      String name = member[1];
+      Map<String, dynamic> mem = {
+        'id':id,
+        'name':name,
+      };
+      resultMembers.add(mem);
+    }
+    return TeamEntity(
+      json['teamNo'] as int,
+      json['teamName'] as String,
+      resultMembers,
+    );
+  }
+
+  Map<String, dynamic> toJson(){
+    return{
+      'teamNo': teamNo,
+      'teamName': teamName,
+      'member': members,
+    };
+  }
+}
+
+class TeamManager with ChangeNotifier {
   final WebSocketService _webSocketService = WebSocketService();
-  static List<Team> teams = [];
+  static final TeamManager _instance = TeamManager._internal();
+  Map<String, List<TeamEntity>> _userTeams = {};
+  static String _curTeam = '';
+  static String _currentUserId='';
+  bool _isInitialized = false;
 
-  // Team newt = new Team(null,'aa','rlawndud');
-  // Team newt2 = new Team(null,'bb','rlawndud');
-  //
-  // teams.add(newt);
-  //
-  void loadTeam(String userId) async {
-    Map<String, dynamic> data = {'userId': userId};
-    var jsonResponse = await _webSocketService.transmit(data, 'Loadteam');
+  TeamManager._internal();
 
-    if (jsonResponse.containsKey('teams')) {
-      List<dynamic> teamsData = jsonResponse['teams'];
-      teams = teamsData.map((teamData) => Team.fromJson(teamData)).toList();
+  // 싱글톤 객체 반환
+  factory TeamManager(){
+    return _instance;
+  }
+
+  Future<void> initialize(String userId) async {
+    if (!_isInitialized || _currentUserId != userId) {
+      _currentUserId = userId;
+      await loadTeam();
+      await loadCurTeam();
+      _isInitialized = true;
     }
   }
 
-  Future<Map<String, dynamic>> inviteTeamMember(
-      int teamNo, String teamName, String addMember) async {
+  List<TeamEntity> getTeamList() => _userTeams[_currentUserId] ?? [];
+  List<int> getTeamNoList(){
+    List<int> teamNoList = [];
+    for(TeamEntity team in getTeamList()){
+      teamNoList.add(team.teamNo);
+    }
+    return teamNoList;
+  }
+  String get currentTeam => _curTeam;
+
+  set currentTeam(String teamName) {
+    _curTeam = teamName;
+    saveCurTeam(_currentUserId, teamName);
+    notifyListeners();
+  }
+
+  int? getTeamNoByTeamName(String teamName){
+    for(var team in _userTeams[_currentUserId]!){
+      if(team.teamName == teamName){
+        return team.teamNo;
+      }
+    }
+    return null;
+  }
+
+  // Future<void> saveTeams() async {
+  //   final Directory directory = await getApplicationDocumentsDirectory();
+  //   final String dirPath = '${directory.path}/$_userId';
+  //   final Directory dir = Directory(dirPath);
+  //
+  //   if (!await dir.exists()) {
+  //     await dir.create(recursive: true);
+  //   }
+  //
+  //   final File file = File('$dirPath/teams.json');
+  //   final data = {
+  //     'teams': _teams.map((team) => team.toJson()).toList(),
+  //   };
+  //   await file.writeAsString(json.encode(data));
+  // }
+
+  Future<void> saveCurTeam(String userId, String currentTeam) async{
+    final Directory directory = await getApplicationDocumentsDirectory();
+    final String dirPath = '${directory.path}/$userId';
+    final Directory dir = Directory(dirPath);
+
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+
+    final File fileCur = File('$dirPath/currentTeam.json');
+    final curTeamdata = {
+      'currentTeam': currentTeam,
+    };
+    _curTeam = currentTeam;
+    await fileCur.writeAsString(json.encode(curTeamdata));
+  }
+
+  Future<void> loadCurTeam() async {
+    final Directory directory = await getApplicationDocumentsDirectory();
+    final File file = File('${directory.path}/$_currentUserId/currentTeam.json');
+    if (await file.exists()) {
+      try {
+        final String contents = await file.readAsString();
+        final Map<String, dynamic> data = json.decode(contents);
+        _curTeam = data['currentTeam'] as String;
+      } catch (e) {
+        print('Error loading current team: $e');
+        _curTeam = ''; // 파일 읽기 실패 시 빈 문자열로 설정
+      }
+    } else {
+      _curTeam = ''; // 파일이 없을 경우 빈 문자열로 설정
+    }
+  }
+  // 팀 정보를 로드하는 메서드
+  // Future<void> loadTeamsFromFile() async {
+  //   final Directory directory = await getApplicationDocumentsDirectory();
+  //   final File file = File('${directory.path}/$_userId/teams.json');
+  //   if (await file.exists()) {
+  //     final String contents = await file.readAsString();
+  //     final Map<String, dynamic> data = json.decode(contents);
+  //     _teams = List<TeamEntity>.from(
+  //       (data['teams'] as List<dynamic>).map((item) => TeamEntity.fromJson(item)),
+  //     );
+  //   }
+  // }
+
+  Future<void> loadTeam() async {
+    Map<String, dynamic> data = {'id': _currentUserId};
+    var jsonResponse = await _webSocketService.transmit(data, 'GetMyTeamInfo');
+    _userTeams[_currentUserId] = [];
+    if (jsonResponse.containsKey('teams')) {
+      List<dynamic> teamsData = jsonResponse['teams'];
+      for (var team in teamsData) {
+        TeamEntity te = TeamEntity.fromJson(team);
+        _userTeams[_currentUserId]!.add(te);
+      }
+      // try {
+      //   await saveTeams();
+      // } catch (e) {
+      //   print('Error saving teams: $e');
+      // }
+    }
+  }
+
+  // 팀가입 요청
+  Future<Map<String, dynamic>> inviteTeamMember(String teamName, String addMember) async {
     Map<String, dynamic> data = {
-      'teamno': teamNo,
+      'teamNo': getTeamNoByTeamName(teamName),
       'teamName': teamName,
       'addid': addMember,
     };
-    return await _webSocketService.transmit(data, 'InviteTeam');
+    return await _webSocketService.transmit(data, 'AddTeamMember');
   }
 
+  // 팀가입 요청 응답
   Future<Map<String, dynamic>> acceptTeamMember(
       int teamNo, String teamName, String memberId, bool isExcept) async {
     Map<String, dynamic> data = {
@@ -68,10 +217,17 @@ class TeamDB {
     };
     return await _webSocketService.transmit(data, 'AcceptTeamRequest');
   }
+
+  Future<void> clearCurrentUserData() async {
+    _userTeams.remove(_currentUserId);
+    _curTeam = '';
+    _isInitialized = false;
+    notifyListeners();
+  }
 }
 
 void showInviteDialog(BuildContext context, int teamNo, String teamName, String memberId) {
-  TeamDB tDB = new TeamDB();
+  TeamManager tDB = new TeamManager();
   showDialog(
       barrierDismissible: false,
       context: context,

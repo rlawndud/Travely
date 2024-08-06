@@ -4,7 +4,7 @@ class SubCategoryScreen extends StatelessWidget {
   final String teamName;
   final String category;
 
-  const SubCategoryScreen({Key? key, required this.teamName, required this.category}) : super(key: key);
+  const SubCategoryScreen({super.key, required this.teamName, required this.category});
 
   @override
   Widget build(BuildContext context) {

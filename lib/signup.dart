@@ -1,10 +1,8 @@
 import 'dart:io';
-import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:test2/model/memberImg.dart';
 import 'package:test2/network/web_socket.dart';
 import 'package:test2/value/color.dart';
@@ -101,10 +99,10 @@ class _SignupState extends State<Signup> {
         fillColor: Colors.white,
         suffixIcon: hintText == 'ID' && controller.text.isNotEmpty
             ? _isIdAvailable != null
-                ? _isIdAvailable == true
-                    ? Icon(Icons.check_circle, color: Colors.green)
-                    : Icon(Icons.error, color: Colors.red)
-                : null
+            ? _isIdAvailable == true
+            ? Icon(Icons.check_circle, color: Colors.green)
+            : Icon(Icons.error, color: Colors.red)
+            : null
             : null,
       ),
       controller: controller,
@@ -142,7 +140,7 @@ class _SignupState extends State<Signup> {
       images_string += XFileToBytes(img!) + '\$';
     });
     MemberImg memImg =
-        new MemberImg(_idController.text, _nameController.text, images_string);
+    new MemberImg(_idController.text, _nameController.text, images_string);
     try {
       _webSocketService.transmit(mem.toJson(), 'AddMember');
       _webSocketService.transmit(memImg.toJson(), 'AddMemImg');
@@ -159,7 +157,6 @@ class _SignupState extends State<Signup> {
           msg: '회원가입 중 오류가 발생했습니다',
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.white70,
-          fontSize: 12,
           textColor: Colors.black,
           toastLength: Toast.LENGTH_LONG);
     }
@@ -297,7 +294,7 @@ class _SignupState extends State<Signup> {
                           itemCount: images.length,
                           //보여줄 item 개수. images 리스트 변수에 담겨있는 사진 수 만큼.
                           gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
+                          SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 3, //1 개의 행에 보여줄 사진 개수
                             childAspectRatio: 1 / 1, //사진 의 가로 세로의 비율
                             mainAxisSpacing: 10, //수평 Padding
@@ -315,8 +312,8 @@ class _SignupState extends State<Signup> {
                                           fit: BoxFit.cover,
                                           //사진 크기를 Container 크기에 맞게 조절
                                           image: FileImage(File(images[index]!
-                                                  .path // images 리스트 변수 안에 있는 사진들을 순서대로 표시함
-                                              )))),
+                                              .path // images 리스트 변수 안에 있는 사진들을 순서대로 표시함
+                                          )))),
                                 ),
                                 Container(
                                     width: 20.0,

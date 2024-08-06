@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class InviteUserPage extends StatefulWidget {
   final String teamId;
 
-  InviteUserPage({required this.teamId});
+  const InviteUserPage({super.key, required this.teamId});
 
   @override
   _InviteUserPageState createState() => _InviteUserPageState();

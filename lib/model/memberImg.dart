@@ -35,8 +35,5 @@ String XFileToBytes(XFile image) {
 
 Uint8List BytesToImage(String imgStr) {
   final bytes = base64Decode(imgStr);
-  // return MemoryImage(bytes);
   return bytes;
 }
-
-

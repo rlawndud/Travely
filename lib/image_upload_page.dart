@@ -1,18 +1,19 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
 class ImageUploadPage extends StatelessWidget {
-  const ImageUploadPage({Key? key}) : super(key: key);
+  const ImageUploadPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: const Size(360, 690),
       builder: (context, child) {
-        return Scaffold(
+        return const Scaffold(
           body: ImageUpload(),
         );
       },
@@ -21,6 +22,8 @@ class ImageUploadPage extends StatelessWidget {
 }
 
 class ImageUpload extends StatefulWidget {
+  const ImageUpload({super.key});
+
   @override
   State<ImageUpload> createState() => _ImageUploadState();
 }
@@ -30,6 +33,21 @@ class _ImageUploadState extends State<ImageUpload> {
   XFile? image;
   List<XFile?> multiImage = [];
   List<XFile?> images = [];
+
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      image = await picker.pickImage(source: ImageSource.camera);
+      if (image != null) {
+        setState(() {
+          images.add(image);
+        });
+        uploadImage(image);
+      }
+    });
+  }
 
   Future<void> uploadImage(XFile? image) async {
     if (image == null) return;

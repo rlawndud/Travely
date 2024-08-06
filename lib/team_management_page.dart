@@ -1,21 +1,34 @@
 import 'package:flutter/material.dart';
 import 'model/team.dart';
 
-class TeamManagementPage extends StatelessWidget {
-  final List<Team> teams;
-  final Map<String, List<String>> teamMembers;
-  final String currentTeam;
+class TeamManagementPage extends StatefulWidget {
+  final List<TeamEntity> teams;
+  final String initialCurrentTeam;
+  final String userId;
   final ValueChanged<String> onTeamSwitch;
   final ValueChanged<String> onTeamDelete;
 
   const TeamManagementPage({
     required this.teams,
-    required this.teamMembers,
-    required this.currentTeam,
+    required this.initialCurrentTeam,
+    required this.userId,
     required this.onTeamSwitch,
     required this.onTeamDelete,
     Key? key,
   }) : super(key: key);
+
+  @override
+  _TeamManagementPageState createState() => _TeamManagementPageState();
+}
+
+class _TeamManagementPageState extends State<TeamManagementPage> {
+  late String _currentTeam;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentTeam = widget.initialCurrentTeam;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,12 +38,12 @@ class TeamManagementPage extends StatelessWidget {
         backgroundColor: Colors.pinkAccent,
       ),
       body: ListView.builder(
-        itemCount: teams.length,
+        itemCount: widget.teams.length,
         itemBuilder: (context, index) {
-          final teamName = teams[index].teamName;
+          final teamName = widget.teams[index].teamName;
           return ListTile(
             title: Text(teamName),
-            leading: teamName == currentTeam
+            leading: teamName == _currentTeam
                 ? Icon(Icons.check, color: Colors.pinkAccent)
                 : null,
             onTap: () {
@@ -42,26 +55,49 @@ class TeamManagementPage extends StatelessWidget {
     );
   }
 
+  List<Map<String, dynamic>>? findTeamMemberByName(String teamName) {
+    // 리스트를 순회하면서 팀 이름이 일치하는 팀을 찾습니다.
+    for (var team in widget.teams) {
+      if (team.teamName == teamName) {
+        return team.members;
+      }
+      return null;
+    }
+  }
+
+  List<String>? findTeamMemberNamesByName(String teamName) {
+    for (var team in widget.teams) {
+      if (team.teamName == teamName) {
+        return team.members.map((member) => member['name'] as String).toList();
+      }
+    }
+    return null;
+  }
+
   void _showTeamDetailsDialog(BuildContext context, String teamName) {
     showDialog(
       context: context,
       builder: (context) {
-        final members = teamMembers[teamName] ?? [];
+        final memberNames = findTeamMemberNamesByName(teamName) ?? [];
         return AlertDialog(
           title: Text('$teamName 팀 상세 정보'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text('팀 멤버 목록:'),
-              ...members.map((member) => Text(member)).toList(),
+              ...memberNames.map((memberName) => Text(memberName)).toList(),
             ],
           ),
           actions: [
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop(true); // Notify that a change happened
-                if (teamName != currentTeam) {
-                  onTeamSwitch(teamName);
+                if (teamName != _currentTeam) {
+                  setState(() {
+                    _currentTeam = teamName;
+                  });
+                  widget.onTeamSwitch(teamName);
+                  await TeamManager().saveCurTeam(widget.userId, teamName);
                 }
               },
               child: Text('변경'),
@@ -69,6 +105,9 @@ class TeamManagementPage extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close dialog first
+                setState(() {
+                  _currentTeam = teamName;
+                });
                 _showDeleteConfirmationDialog(context, teamName);
               },
               child: Text('삭제'),
@@ -90,7 +129,7 @@ class TeamManagementPage extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close dialog first
-                onTeamDelete(teamName);
+                widget.onTeamDelete(teamName);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('$teamName 팀이 삭제되었습니다')),
                 );

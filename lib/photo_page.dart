@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class PhotoPage extends StatelessWidget {
   final String folderName;
 
-  PhotoPage({required this.folderName});
+  const PhotoPage({super.key, required this.folderName});
 
   @override
   Widget build(BuildContext context) {

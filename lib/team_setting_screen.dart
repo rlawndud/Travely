@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class TeamSettingScreen extends StatefulWidget {
   final String teamName;
   final List<String> teamMembers;
-  const TeamSettingScreen({Key? key, required this.teamName, required this.teamMembers}) : super(key: key);
+  const TeamSettingScreen({super.key, required this.teamName, required this.teamMembers});
 
   @override
   _TeamSettingScreenState createState() => _TeamSettingScreenState();
@@ -27,7 +27,7 @@ class _TeamSettingScreenState extends State<TeamSettingScreen> {
         // Logic to update the team name in the data source would go here
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('팀 이름이 변경되었습니다')),
+        const SnackBar(content: Text('팀 이름이 변경되었습니다')),
       );
     }
   }
@@ -76,7 +76,7 @@ class _TeamSettingScreenState extends State<TeamSettingScreen> {
   Widget _buildTeamNameField() {
     return TextField(
       controller: _teamNameController,
-      decoration: InputDecoration(
+      decoration: const InputDecoration(
         labelText: '팀 이름',
         border: OutlineInputBorder(),
       ),
@@ -110,7 +110,7 @@ class _TeamSettingScreenState extends State<TeamSettingScreen> {
         Expanded(
           child: TextField(
             controller: _newMemberController,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: '새 팀원 추가',
               border: OutlineInputBorder(),
             ),
