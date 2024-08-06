@@ -95,6 +95,12 @@ class WebSocketService {
       case 'UpdateImage':
         handleUpdateImage(jsonData);
         break;
+       case 'UpdateImageSignal':
+         PicManager().syncWithServer();
+         break;
+      // case 'UpdateTeamSignal':
+      //   TeamManager().loadTeam();
+      //   break;
       default:
         debugPrint('$jsonData');
         break;

@@ -2,13 +2,11 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:test2/model/memberImg.dart';
 import 'package:test2/model/picture.dart';
 import 'package:test2/model/team.dart';
 import 'package:test2/network/web_socket.dart';
-import 'package:test2/team_management_page.dart';
 import 'package:test2/value/color.dart';
 
 class album extends StatefulWidget {
@@ -32,10 +30,10 @@ class _albumState extends State<album> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     currentTeamName = TeamManager().currentTeam;
     currentTeam = teamManager.getTeamNoByTeamName(currentTeamName);
+    _picManager.initialize(widget.id);
   }
 
   Future<void> _loadImage() async {
@@ -58,7 +56,6 @@ class _albumState extends State<album> {
   }
 
   void _printImage() {
-
     if (images.isNotEmpty) {
       print('images의 개수:${images.length}');
       setState(() {
@@ -80,23 +77,22 @@ class _albumState extends State<album> {
         var images_string = XFileToBytes(photo);
         debugPrint('이미지를 바이트로 읽음');
         Map<String, dynamic> data = {
-          'id':widget.id,
-          'teamno':currentTeam,
+          'id': widget.id,
+          'teamno': currentTeam,
           'image': images_string,
         };
         print(data);
         var response = await _webSocketService.transmit(data, 'AddImage');
-        PictureEntity pre_pic =  PictureEntity.fromJson(response);
-        await _picManager.addPicture(pre_pic);
-        prediction = pre_pic.printPredict();
-        setState(() {
-          pic.add(BytesToImage(pre_pic.img_data));
-          print('pic의 개수:${pic.length}');
-        });
+        // PictureEntity pre_pic = PictureEntity.fromJson(response);
+        // await _picManager.addPicture(pre_pic);
+        // prediction = pre_pic.printPredict();
+        // setState(() {
+        //   pic.add(BytesToImage(pre_pic.img_data));
+        //   print('pic의 개수:${pic.length}');
+        // });
         debugPrint('서버 응답 : $response');
 
         if (response != null && response['success'] == true) {
-          // 서버로부터 이미지를 받았다는 가정하에 처리
           setState(() {
             images.add(PictureEntity.fromJson(response));
             pic.add(BytesToImage(response['img_data']));

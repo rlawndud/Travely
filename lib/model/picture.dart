@@ -7,39 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:test2/model/team.dart';
 import 'package:test2/network/web_socket.dart';
 
-class Picture{
-  int? img_num;
-  String user_id;
-  String img_data;
-
-  Picture(this.img_num, this.user_id, this.img_data);
-
-  factory Picture.fromJson(Map<String, dynamic> json) {
-    //String > XFile으로 변환하는 코드 추가하기
-
-    return Picture(
-      json['img_num'] as int?,
-      json['id'] as String,
-      json['img_data'] as String,
-    );
-  }
-
-  // Member 객체를 JSON으로 변환하는 메서드
-  Map<String, dynamic> toJson() {
-    //XFile > String으로 변환하는 코드 추가하기
-    return {
-      'img_num':img_num,
-      'id': user_id,
-      'img_data': img_data,
-    };
-  }
-  @override
-  String toString() {
-    return 'img_num: $img_num, user_id: $user_id, img_data: ${img_data}';
-  }
-}
-
-class PictureEntity{
+class PictureEntity {
   int img_num;
   String user_id;
   String img_data;
@@ -47,10 +15,9 @@ class PictureEntity{
   String pre_face;
   String pre_background;
 
-
   PictureEntity(this.img_num, this.user_id, this.img_data, this.team_num, this.pre_face, this.pre_background);
 
-  factory PictureEntity.fromJson(Map<String, dynamic> json){
+  factory PictureEntity.fromJson(Map<String, dynamic> json) {
     return PictureEntity(
       json['img_num'] as int,
       json['id'] as String,
@@ -73,12 +40,12 @@ class PictureEntity{
   }
 
   String printPredict() {
-    return ('사진 속 인물 : $pre_face\n 사진 배경 : $pre_background');
+    return '사진 속 인물: $pre_face\n사진 배경: $pre_background';
   }
 
   @override
   String toString() {
-    return ('img_num: $img_num, teamno: $img_num');
+    return 'img_num: $img_num, teamno: $team_num';
   }
 }
 
@@ -99,8 +66,8 @@ class PicManager with ChangeNotifier {
   Future<void> initialize(String userId) async {
     if (!_isInitialized || _currentUserId != userId) {
       _currentUserId = userId;
-      await loadPictures(); //로컬 이미지데이터 로드
-      await syncWithServer(); //서버 이미지데이터 로드
+      await loadPictures();
+      await syncWithServer();
       _isInitialized = true;
     }
   }
@@ -111,9 +78,10 @@ class PicManager with ChangeNotifier {
   Future<void> addPicture(PictureEntity picture) async {
     _userPictures[_currentUserId] ??= [];
     _userPictures[_currentUserId]!.add(picture);
-    _imageStreamController.add(picture); // 스트림으로 이미지 전송
-    await Future.delayed(Duration(milliseconds: 10)); // UI 업데이트를 위한 짧은 딜레이
+    _imageStreamController.add(picture);
+    await Future.delayed(Duration(milliseconds: 10));
     await savePictures();
+    await saveImageToFile(picture);
     notifyListeners();
   }
 
@@ -141,20 +109,17 @@ class PicManager with ChangeNotifier {
       final Map<String, dynamic> data = json.decode(contents);
       _userPictures[_currentUserId] = [];
 
-      // 비동기적으로 이미지 로드
       for (var item in data['pictures']) {
         PictureEntity pic = PictureEntity.fromJson(item);
         _userPictures[_currentUserId]!.add(pic);
-        _imageStreamController.add(pic); // 스트림으로 이미지 전송
-        await Future.delayed(Duration(milliseconds: 10)); // UI 업데이트를 위한 짧은 딜레이
+        _imageStreamController.add(pic);
+        await Future.delayed(Duration(milliseconds: 10));
       }
     } else {
       _userPictures[_currentUserId] = [];
     }
-    print(_userPictures);
   }
 
-  // 서버와 이미지데이터 동기화
   Future<void> syncWithServer() async {
     int? lastImageNum = _userPictures[_currentUserId]?.isEmpty ?? true
         ? null
@@ -164,10 +129,10 @@ class PicManager with ChangeNotifier {
       'team': TeamManager().getTeamNoList(),
       'last_img_num': lastImageNum,
     };
-    
+
     var response = await _webSocketService.transmit(data, 'GetAllImage');
-    
-    if(response.containsKey('result')){
+
+    if (response.containsKey('result')) {
       print('현재 업데이트할 이미지가 없음');
     }
   }
@@ -187,10 +152,45 @@ class PicManager with ChangeNotifier {
     }
   }
 
+  Future<void> saveImageToFile(PictureEntity picture) async {
+    final Directory appDir = await getApplicationDocumentsDirectory();
+    final String teamName = TeamManager().currentTeam;
+    final List<String> categories = ['전체사진', '지역', '배경', '계절'];
+
+    for (String category in categories) {
+      final String path = '${appDir.path}/$teamName/$category';
+      final String fileName = '${picture.img_num}.jpg';
+      final File file = File('$path/$fileName');
+
+      await file.writeAsBytes(base64Decode(picture.img_data));
+
+      // 추가: 하위 폴더에도 저장
+      if (category != '전체사진') {
+        String subCategory = _getSubCategory(category, picture);
+        final String subPath = '$path/$subCategory';
+        final File subFile = File('$subPath/$fileName');
+        await subFile.writeAsBytes(base64Decode(picture.img_data));
+      }
+    }
+  }
+
+  String _getSubCategory(String category, PictureEntity picture) {
+    switch (category) {
+      case '지역':
+        return picture.pre_face;
+      case '배경':
+        return picture.pre_background;
+      case '계절':
+      // 계절 로직 추가 필요
+        return '봄'; // 임시
+      default:
+        return '';
+    }
+  }
+
   Future<void> clearCurrentUserData() async {
     _userPictures.remove(_currentUserId);
     _isInitialized = false;
     notifyListeners();
   }
-
 }

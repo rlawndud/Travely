@@ -189,6 +189,7 @@ class TeamManager with ChangeNotifier {
         TeamEntity te = TeamEntity.fromJson(team);
         _userTeams[_currentUserId]!.add(te);
       }
+      //notifyListeners();
       // try {
       //   await saveTeams();
       // } catch (e) {
