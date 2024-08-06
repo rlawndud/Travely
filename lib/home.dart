@@ -83,14 +83,14 @@ class _HomeState extends State<Home> {
             child: ListView(
               children: <Widget>[
                 UserAccountsDrawerHeader(
-                  currentAccountPicture: CircleAvatar(
+                  currentAccountPicture: const CircleAvatar(
                     backgroundImage: AssetImage('assets/cat.jpg'),
                   ),
                   accountName: Text('R 2 B'),
                   accountEmail: Text('hjkl@naver.com'),
                   decoration: BoxDecoration(
                     color: Colors.pinkAccent[100],
-                    borderRadius: BorderRadius.only(
+                    borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(15.0),
                       bottomRight: Radius.circular(15.0),
                     ),
@@ -200,6 +200,7 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
   );
 
   final List<String> _logLines = []; // 로그 항목 리스트
+  late Timer _locationUpdateTimer; // Timer 추가
 
   late WebSocketService _webSocketService;
 
@@ -209,6 +210,7 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
 
     _webSocketService = WebSocketService();
     _webSocketService.init();
+    _startLocationUpdateTimer(); // 내위치 주기적으로 보내기
     _startListeningToFriendLocationsIfNeeded(); // 팀원 위치 수신 시작
 
     super.initState();
@@ -223,7 +225,7 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
         setState(() {
           _currentPosition = position;
           _updateMapLocation(); // 지도 위치 업데이트
-          _sendLocationToServer(position);
+          _sendLocationToServer();
         });
       });
     }
@@ -234,18 +236,26 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
     if (teamManager.currentTeam.isNotEmpty) {
       _listenToFriendLocations();
     } else {
-      // 만약 팀이 설정되지 않았다면, 팀이 설정된 이후에 _listenToFriendLocations를 호출하도록 하는 코드 작성
+      _initLocationTracking();
     }
   }
 
-  // webSocket에 내 위치 보내기
-  Future<void> _sendLocationToServer(Position position) async {
-    // TeamManager teamManager = TeamManager();
+  // 위치 정보를 주기적으로 보내는 타이머 시작
+  void _startLocationUpdateTimer() {
+    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 10), (Timer timer) async {
+      await _sendLocationToServer();
+    });
+  }
 
+  // webSocket에 내 위치 보내기
+  Future<void> _sendLocationToServer() async {
+    TeamManager teamManager = TeamManager();
+    
     final data = {
-      'id': widget.userId, // 사용자 ID로 교체
-      'latitude': position.latitude,
-      'longitude': position.longitude
+      'id': widget.userId, // 사용자 ID
+      'latitude': _currentPosition!.latitude,
+      'longitude': _currentPosition!.longitude,
+      'teamNo' : teamManager.getTeamNoByTeamName(teamManager.currentTeam)
     };
     await _webSocketService.transmit(data, 'UpdateLocation');
   }
@@ -253,7 +263,7 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
   // 팀원 위치 정보를 수신하여 지도에 표시
   Future<void> _listenToFriendLocations() async {
     _webSocketService.responseStream.listen((message) {
-      if (message['command'] == 'FriendLocationUpdate') {
+      if (message['command'] == 'TeamLocationUpdate') {
           final friendId = message['id'];
           final latitude = message['latitude'];
           final longitude = message['longitude'];
@@ -279,20 +289,6 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
           });
       }
     });
-
-    // 주기적으로 팀원 위치 요청
-    Timer.periodic(const Duration(seconds: 10), (Timer timer) async {
-      await _requestFriendLocations();
-    });
-  }
-
-  // 주기적으로 팀원 위치 요청
-  Future<void> _requestFriendLocations() async {
-    TeamManager teamManager = TeamManager();
-    final data = {
-      'teamNo': teamManager.getTeamNoByTeamName(teamManager.currentTeam),
-    };
-    await _webSocketService.transmit(data, 'RequestFriendLocation');
   }
 
   // 위치 권한을 확인하고 요청하는 함수
@@ -360,7 +356,7 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
       mapController.animateCamera(CameraUpdate.newLatLng(position));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Current position is not available.')),
+        const SnackBar(content: Text('Current position is not available.')),
       );
     }
   }
