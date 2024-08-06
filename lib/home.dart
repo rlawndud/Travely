@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:test2/appbar/friend/Friend.dart';
 import 'package:test2/appbar/mypage/My_Page.dart';
@@ -10,12 +8,12 @@ import 'package:test2/model/member.dart';
 import 'package:test2/model/imgtest.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test2/image_upload_page.dart';
+import 'package:test2/model/team.dart';
 import 'package:test2/network/web_socket.dart';
 import 'package:test2/photo_folder_screen.dart';
 import 'package:test2/team_page.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:path_provider/path_provider.dart';
 
 class Home extends StatefulWidget {
   final Member user;
@@ -41,7 +39,7 @@ class _HomeState extends State<Home> {
   }
 
   int _selectedIndex = 0;
-  String? _teamName = '팀 미설정';
+  // String? _teamName = '팀 미설정';
   late List<Widget> _pages;
 
   void _onItemTapped(int index) {
@@ -89,7 +87,7 @@ class _HomeState extends State<Home> {
                     backgroundImage: AssetImage('assets/cat.jpg'),
                   ),
                   accountName: Text('R 2 B'),
-                  accountEmail: Text('abc12345@naver.com'),
+                  accountEmail: Text('hjkl@naver.com'),
                   decoration: BoxDecoration(
                     color: Colors.pinkAccent[100],
                     borderRadius: BorderRadius.only(
@@ -146,7 +144,7 @@ class _HomeState extends State<Home> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => album()), // 여기 수정
+                      MaterialPageRoute(builder: (context) => album(id: _user.id)), // 여기 수정
                     );
                   },
                   trailing: Icon(Icons.navigate_next),
@@ -177,7 +175,6 @@ class _HomeState extends State<Home> {
   }
 }
 
-
 class GoogleMapSample extends StatefulWidget {
   final String userId;
   const GoogleMapSample({super.key, required this.userId});
@@ -196,17 +193,25 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
 
   Position? _currentPosition;
   late StreamSubscription<Position> _positionStream;
-  final LocationSettings _locationSettings = LocationSettings(
+
+  final LocationSettings _locationSettings = const LocationSettings(
     accuracy: LocationAccuracy.best,
     distanceFilter: 10,
   );
-  String _logContent = ""; // 파일에 저장할 로그 내용
-  List<String> _logLines = []; // 로그 항목 리스트
+
+  final List<String> _logLines = []; // 로그 항목 리스트
+
+  late WebSocketService _webSocketService;
 
   @override
   void initState() {
+    _initLocationTracking();
+
+    _webSocketService = WebSocketService();
+    _webSocketService.init();
+    _listenToFriendLocations();
+
     super.initState();
-    _initLocationTracking(); // 위치 추적 초기화
   }
 
   Future<void> _initLocationTracking() async {
@@ -218,10 +223,51 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
         setState(() {
           _currentPosition = position;
           _updateMapLocation(); // 지도 위치 업데이트
-          _savePositionToFile(position); // 위치를 파일에 저장
+          _sendLocationToServer(position);
         });
       });
     }
+  }
+
+  Future<void> _sendLocationToServer(Position position) async {
+    TeamManager _teamManager = TeamManager();
+
+    final data = {
+      'id': widget.userId, // 사용자 ID로 교체
+      'latitude': position.latitude,
+      'longitude': position.longitude,
+      'teamNo' : _teamManager.getTeamNoByTeamName(_teamManager.currentTeam),
+    };
+    await _webSocketService.transmit(data, 'UpdateLocation');
+  }
+
+  Future<void> _listenToFriendLocations() async {
+    _webSocketService.responseStream.listen((message) {
+      if (message['command'] == 'FriendLocationUpdate') {
+        final friendId = message['id'];
+        final latitude = message['latitude'];
+        final longitude = message['longitude'];
+
+        print(friendId);
+        print(latitude);
+        print(longitude);
+
+        final MarkerId markerId = MarkerId('$friendId');
+        final Marker marker = Marker(
+          markerId: markerId,
+          position: LatLng(latitude, longitude),
+          infoWindow: InfoWindow(
+            title: '$friendId',
+          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        );
+
+        setState(() {
+          _markers.removeWhere((marker) => marker.markerId == markerId);
+          _markers.add(marker);
+        });
+      }
+    });
   }
 
   // 위치 권한을 확인하고 요청하는 함수
@@ -241,17 +287,6 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
         _currentPosition!.latitude,
         _currentPosition!.longitude,
       );
-
-      //웹소켓으로 위도 경도 보내기
-      WebSocketService webSocketService = WebSocketService();
-      if (_currentPosition != null) {
-        Map<String,dynamic> data = {
-          'id': widget.userId,
-          'latitude': _currentPosition!.latitude,
-          'longitude': _currentPosition!.longitude
-        };
-        webSocketService.transmit(data, 'UpdateLocation');
-      }
 
       // 지도 위치 업데이트
       mapController.animateCamera(
@@ -277,51 +312,15 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
     }
   }
 
-  // 위치 정보를 파일에 저장하는 함수
-  Future<void> _savePositionToFile(Position position) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final path = '${directory.path}/location_log.txt';
-    final file = File(path);
+  //위치 정보를 메모리 내에 추가
+  void _logPosition(Position position) {
     final timeStamp = DateTime.now().toIso8601String();
-    final log = '[$timeStamp] Latitude: ${position.latitude}, Longitude: ${position.longitude}\n';
+    final log = '[$timeStamp] Latitude: ${position.latitude}, Longitude: ${position.longitude}';
 
-    await file.writeAsString(log, mode: FileMode.append);
-  }
-
-  // 파일에서 로그 내용을 읽어와서 화면에 표시하는 함수
-  Future<void> _loadLogContent() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final path = '${directory.path}/location_log.txt';
-    final file = File(path);
-
-    if (await file.exists()) {
-      final content = await file.readAsString();
-      setState(() {
-        _logContent = content;
-        _logLines = _logContent.split('\n').where((line) => line.isNotEmpty).toList();
-        _isLogVisible = true; // 로그 내용 표시
-      });
-    } else {
-      setState(() {
-        _logContent = "No log file found.";
-        _logLines = [_logContent];
-        _isLogVisible = true; // 로그 내용 표시
-      });
-    }
-  }
-
-  // 현재 위치를 파일에 저장하고 사용자에게 알림을 표시하는 함수
-  Future<void> _saveCurrentPosition() async {
-    if (_currentPosition != null) {
-      await _savePositionToFile(_currentPosition!);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Position saved to file!')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Current position is not available.')),
-      );
-    }
+    setState(() {
+      _logLines.add(log);
+      _isLogVisible = true; // 로그 내용 표시
+    });
   }
 
   // 현재 위치로 지도를 이동하는 함수
@@ -343,6 +342,7 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
   @override
   void dispose() {
     _positionStream.cancel(); // 위치 스트림 구독 취소
+    _webSocketService.dispose();
     super.dispose();
   }
 
@@ -448,11 +448,11 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
         children: [
           GoogleMap(
             onMapCreated: _onMapCreated,
-            initialCameraPosition: CameraPosition(
+            initialCameraPosition: const CameraPosition(
               target: LatLng(36.2048, 127.7669),
-              zoom: 7.0,
+              zoom: 13.5,
             ),
-            zoomControlsEnabled: false,
+            zoomControlsEnabled: true,
             markers: _markers,
             onTap: (position) {
               if (_isAddingMarker) {
@@ -477,37 +477,35 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
                   onPressed: _zoomOut,
                   mini: true,
                   heroTag: null,
-                  child: Icon(Icons.remove), // 지도를 축소하는 버튼
+                  child: const Icon(Icons.remove), // 지도를 축소하는 버튼
                 ),
                 SizedBox(height: 20),
                 FloatingActionButton(
                   onPressed: _toggleAddMarkerMode,
                   backgroundColor: _isAddingMarker ? Colors.green : Colors.blue,
-                  child: Icon(Icons.add_location_alt), // 마커 추가 버튼
+                  child: const Icon(Icons.add_location_alt), // 마커 추가 버튼
                 ),
                 SizedBox(height: 10),
                 FloatingActionButton(
                   onPressed: _toggleDeleteMarkerMode,
                   backgroundColor: _isDeletingMarker ? Colors.red : Colors.blue,
-                  child: Icon(Icons.delete), // 마커 삭제 버튼
+                  child: const Icon(Icons.delete), // 마커 삭제 버튼
                 ),
                 SizedBox(height: 10),
                 FloatingActionButton(
-                  onPressed: _saveCurrentPosition,
-                  backgroundColor: Colors.purple,
-                  child: Icon(Icons.save), // 현재 위치 저장 버튼
-                ),
-                SizedBox(height: 10),
-                FloatingActionButton(
-                  onPressed: _loadLogContent,
+                  onPressed: () {
+                    if (_currentPosition != null) {
+                      _logPosition(_currentPosition!);
+                    }
+                  },
                   backgroundColor: Colors.orange,
-                  child: Icon(Icons.refresh), // 로그 로드 버튼
+                  child: const Icon(Icons.refresh), // 로그 추가 버튼
                 ),
                 SizedBox(height: 10),
                 FloatingActionButton(
                   onPressed: _moveToCurrentLocation,
                   backgroundColor: Colors.blueAccent,
-                  child: Icon(Icons.my_location), // 현재 위치로 이동 버튼
+                  child: const Icon(Icons.my_location), // 현재 위치로 이동 버튼
                 ),
               ],
             ),
