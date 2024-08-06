@@ -539,3 +539,4 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
     );
   }
 }
+
