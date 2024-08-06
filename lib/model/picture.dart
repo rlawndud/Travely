@@ -12,18 +12,31 @@ class PictureEntity {
   String user_id;
   String img_data;
   int team_num;
-  String pre_face;
+  List<String> pre_face;
   String pre_background;
 
   PictureEntity(this.img_num, this.user_id, this.img_data, this.team_num, this.pre_face, this.pre_background);
 
   factory PictureEntity.fromJson(Map<String, dynamic> json) {
+    var preFaceData = json['pre_face'];
+    List<String> preFaceList;
+
+    if (preFaceData is String) {
+      if(preFaceData.contains('#')){
+        preFaceList = preFaceData.split('#').where((name) => name.isNotEmpty).toList();
+      }else{
+        preFaceList = preFaceData.isEmpty ? [] : [preFaceData];
+      }
+    } else {
+      preFaceList = [];
+    }
+
     return PictureEntity(
       json['img_num'] as int,
       json['id'] as String,
       json['img_data'] as String,
       json['teamno'] as int,
-      json['pre_face'] as String,
+      preFaceList,
       json['pre_background'] as String,
     );
   }
@@ -34,7 +47,7 @@ class PictureEntity {
       'id': user_id,
       'img_data': img_data,
       'teamno': team_num,
-      'pre_face': pre_face,
+      'pre_face': jsonEncode(pre_face),
       'pre_background': pre_background,
     };
   }
@@ -74,6 +87,7 @@ class PicManager with ChangeNotifier {
 
   List<PictureEntity> getPictureList() => _userPictures[_currentUserId] ?? [];
   Stream<PictureEntity> get imageStream => _imageStreamController.stream;
+  String getCurrentId() => _currentUserId;
 
   Future<void> addPicture(PictureEntity picture) async {
     _userPictures[_currentUserId] ??= [];
@@ -81,7 +95,6 @@ class PicManager with ChangeNotifier {
     _imageStreamController.add(picture);
     await Future.delayed(Duration(milliseconds: 10));
     await savePictures();
-    await saveImageToFile(picture);
     notifyListeners();
   }
 
@@ -149,44 +162,6 @@ class PicManager with ChangeNotifier {
     if (response.containsKey('new_image')) {
       PictureEntity newPic = PictureEntity.fromJson(response['new_image']);
       await addPicture(newPic);
-    }
-  }
-
-  Future<void> saveImageToFile(PictureEntity picture) async {
-    final Directory appDir = await getApplicationDocumentsDirectory();
-    final String teamName = TeamManager().currentTeam;
-
-    final List<String> categories = ['전체사진', '지역', '배경', '계절'];
-
-    for (String category in categories) {
-      final String path = '${appDir.path}/$_currentUserId/$teamName/$category';
-
-      final String fileName = '${picture.img_num}.jpg';
-      final File file = File('$path/$fileName');
-
-      await file.writeAsBytes(base64Decode(picture.img_data));
-
-      // 추가: 하위 폴더에도 저장
-      if (category != '전체사진') {
-        String subCategory = _getSubCategory(category, picture);
-        final String subPath = '$path/$subCategory';
-        final File subFile = File('$subPath/$fileName');
-        await subFile.writeAsBytes(base64Decode(picture.img_data));
-      }
-    }
-  }
-
-  String _getSubCategory(String category, PictureEntity picture) {
-    switch (category) {
-      case '지역':
-        return picture.pre_face;
-      case '배경':
-        return picture.pre_background;
-      case '계절':
-      // 계절 로직 추가 필요
-        return '봄'; // 임시
-      default:
-        return '';
     }
   }
 

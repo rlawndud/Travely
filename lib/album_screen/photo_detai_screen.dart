@@ -1,16 +1,18 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:test2/model/memberImg.dart';
+import 'package:test2/model/picture.dart';
 
 class ImageDetailScreen extends StatelessWidget {
-  final File imageFile;
+  final PictureEntity picture;
   final String teamName;
   final String category;
   final String subCategory;
 
   const ImageDetailScreen({
     Key? key,
-    required this.imageFile,
+    required this.picture,
     required this.teamName,
     required this.category,
     required this.subCategory,
@@ -27,37 +29,26 @@ class ImageDetailScreen extends StatelessWidget {
         children: [
           Expanded(
             child: Center(
-              child: Image.file(
-                imageFile,
+              child: Image.memory(
+                BytesToImage(picture.img_data),
                 fit: BoxFit.contain,
               ),
             ),
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: FutureBuilder<String>(
-              future: _getImageAnalysis(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.done) {
-                  return Text(
-                    snapshot.data ?? 'No analysis available',
-                    style: TextStyle(fontSize: 16),
-                  );
-                } else {
-                  return CircularProgressIndicator();
-                }
-              },
-            ),
+            child: Text(
+                _getImageAnalysis(),
+              style: TextStyle(fontSize: 16),
+            )
           ),
         ],
       ),
     );
   }
 
-  Future<String> _getImageAnalysis() async {
-    // 이 부분에서 실제로 이미지 분석 데이터를 가져오는 로직을 구현해야 합니다.
-    // 현재는 더미 데이터를 반환합니다.
-    await Future.delayed(Duration(seconds: 1)); // 분석 시간을 시뮬레이션
-    return '사진 속 인물: 홍길동\n사진 배경: 해변';
+  String _getImageAnalysis() {
+
+    return picture.printPredict();
   }
 }

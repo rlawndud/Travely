@@ -17,6 +17,7 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
   final TeamManager _teamManager = TeamManager();
   final PicManager _picManager = PicManager();
   late StreamSubscription<PictureEntity> _picSubscription;
+  List<String> teamMembers = [];
 
   @override
   void initState() {
@@ -41,13 +42,14 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
 
   Future<void> _createTeamFolderStructure(String teamName) async {
     final Directory appDir = await getApplicationDocumentsDirectory();
-    final String teamPath = '${appDir.path}/$teamName';
+    final String teamPath = '${appDir.path}/${_picManager.getCurrentId()}/$teamName';
 
     await Directory(teamPath).create(recursive: true);
     await Directory('$teamPath/전체사진').create(recursive: true);
     await Directory('$teamPath/지역').create(recursive: true);
     await Directory('$teamPath/배경').create(recursive: true);
     await Directory('$teamPath/계절').create(recursive: true);
+    await Directory('$teamPath/멤버').create(recursive: true);
 
     List<String> cities = ['서울', '대전', '부산', '인천', '대구', '울산', '광주', '제주도', '기타 지역'];
     for (var city in cities) {
@@ -63,6 +65,21 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
     for (var season in seasons) {
       await Directory('$teamPath/계절/$season').create(recursive: true);
     }
+    teamMembers = _findTeamMemberByName(teamName);
+    for (var name in teamMembers){
+      await Directory('$teamPath/멤버/$name').create(recursive: true);
+    }
+
+  }
+
+  List<String> _findTeamMemberByName(String teamName) {
+    // 리스트를 순회하면서 팀 이름이 일치하는 팀을 찾습니다.
+    for (var team in _teamManager.getTeamList()) {
+      if (team.teamName == teamName) {
+        return team.members.map((member) => member['name'] as String).toList();
+      }
+    }
+    return [];
   }
 
   void _subscribeToNewImages() {
@@ -108,7 +125,7 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => TeamAlbumScreen(teamName: teamName),
+            builder: (context) => TeamAlbumScreen(teamName: teamName, teamMembers: teamMembers,),
           ),
         );
       },
@@ -128,8 +145,9 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
 
 class TeamAlbumScreen extends StatelessWidget {
   final String teamName;
+  final List<String> teamMembers;
 
-  const TeamAlbumScreen({Key? key, required this.teamName}) : super(key: key);
+  TeamAlbumScreen({Key? key, required this.teamName, required this.teamMembers}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -144,6 +162,7 @@ class TeamAlbumScreen extends StatelessWidget {
           _buildAlbumTile(context, '지역'),
           _buildAlbumTile(context, '배경'),
           _buildAlbumTile(context, '계절'),
+          _buildAlbumTile(context, '멤버'),
         ],
       ),
     );
@@ -159,6 +178,7 @@ class TeamAlbumScreen extends StatelessWidget {
             builder: (context) => SubCategoryScreen(
               teamName: teamName,
               category: category,
+              teamMembers: teamMembers,
             ),
           ),
         );
