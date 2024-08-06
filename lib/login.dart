@@ -19,42 +19,49 @@ class Login extends StatelessWidget {
 
     String id = _idController.text.toString();
     String pw = _pwController.text.toString();
+
     //SharedPreferences에 로그인 정보 저장
     AutoLogin autoLogin = new AutoLogin();
 
-    //서버에 로그인 정보 전달 및 회원정보 획득
-    UserLoginState loginInfo =
-    new UserLoginState(_idController.text, _pwController.text);
-    WebSocketService _webSocketService = WebSocketService();
-    try{
-      //처리 정상
-      var response = await _webSocketService.transmit(loginInfo.toJson(), 'Login');
-      debugPrint(response.toString());
-      if (response['result'] == 'False') {
-        Fluttertoast.showToast(
-          msg: '등록되지 않은 아이디이거나\n잘못된 비밀번호를 입력하였습니다.',
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.white70,
-          textColor: Colors.black,
-          toastLength: Toast.LENGTH_LONG,
-        );
-      } else {
-        Member mem = Member.fromJson(response);
-        //Member mem = new Member('id', 'password', 'name', 'phone');
-        autoLogin.setLoginInfo(_isAutoLogin, new UserLoginState(id, pw));
-        await TeamManager().initialize(mem.id);
-        Navigator.pushReplacementNamed(context, '/home',
-            arguments: {'user': mem});
-      }
-    } catch (e) {
-      Fluttertoast.showToast(
-          msg: '로그인 중 오류가 발생했습니다',
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.white70,
-          textColor: Colors.black,
-          toastLength: Toast.LENGTH_LONG);
-      e.printError();
-    }
+    //// 서버에 로그인 정보 전달 및 회원정보 획득
+    // UserLoginState loginInfo = new UserLoginState(_idController.text, _pwController.text);
+    // WebSocketService _webSocketService = WebSocketService();
+    // try{
+    //   //처리 정상
+    //   var response = await _webSocketService.transmit(loginInfo.toJson(), 'Login');
+    //   debugPrint(response.toString());
+    //   if (response['result'] == 'False') {
+    //     Fluttertoast.showToast(
+    //       msg: '등록되지 않은 아이디이거나\n잘못된 비밀번호를 입력하였습니다.',
+    //       gravity: ToastGravity.BOTTOM,
+    //       backgroundColor: Colors.white70,
+    //       textColor: Colors.black,
+    //       toastLength: Toast.LENGTH_LONG,
+    //     );
+    //   } else {
+    //     Member mem = Member.fromJson(response);
+    //     //Member mem = new Member('id', 'password', 'name', 'phone');
+    //     autoLogin.setLoginInfo(_isAutoLogin, new UserLoginState(id, pw));
+    //     await TeamManager().initialize(mem.id);
+    //     Navigator.pushReplacementNamed(context, '/home',
+    //         arguments: {'user': mem});
+    //   }
+    // } catch (e) {
+    //   Fluttertoast.showToast(
+    //       msg: '로그인 중 오류가 발생했습니다',
+    //       gravity: ToastGravity.BOTTOM,
+    //       backgroundColor: Colors.white70,
+    //       textColor: Colors.black,
+    //       toastLength: Toast.LENGTH_LONG);
+    //   e.printError();
+    // }
+
+    // 로그인 없이 바로 들어가기 => 로그인 살리고 싶으면 아래 주석 처리 후 위 코드 주석 해제
+    Member mem = new Member('id', 'password', 'name', 'phone');
+    autoLogin.setLoginInfo(_isAutoLogin, new UserLoginState(id, pw));
+    await TeamManager().initialize(mem.id);
+    Navigator.pushReplacementNamed(context, '/home',
+        arguments: {'user': mem});
   }
 
   void _signup(BuildContext context) {

@@ -70,7 +70,7 @@ class TeamEntity{
 class TeamManager with ChangeNotifier {
   final WebSocketService _webSocketService = WebSocketService();
   static final TeamManager _instance = TeamManager._internal();
-  Map<String, List<TeamEntity>> _userTeams = {};
+  final Map<String, List<TeamEntity>> _userTeams = {};
   static String _curTeam = '';
   static String _currentUserId='';
   bool _isInitialized = false;
@@ -165,6 +165,7 @@ class TeamManager with ChangeNotifier {
       _curTeam = ''; // 파일이 없을 경우 빈 문자열로 설정
     }
   }
+
   // 팀 정보를 로드하는 메서드
   // Future<void> loadTeamsFromFile() async {
   //   final Directory directory = await getApplicationDocumentsDirectory();
