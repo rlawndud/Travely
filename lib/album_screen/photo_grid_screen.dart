@@ -62,7 +62,7 @@ class _PhotoGridScreenState extends State<PhotoGridScreen> {
         backgroundColor: Colors.pinkAccent,
       ),
       body: _filteredPictures.isEmpty
-          ? Center(child: Text('No images found'))
+          ? Center(child: Text('사진을 찾을 수 없습니다'))
           : GridView.builder(
         padding: const EdgeInsets.all(8.0),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
