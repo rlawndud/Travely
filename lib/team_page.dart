@@ -40,6 +40,7 @@ class _TeamPageState extends State<TeamPage> {
     _teamManager = TeamManager();
     _loadTeams();
   }
+
   void _showSnackBar(String message) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -59,7 +60,7 @@ class _TeamPageState extends State<TeamPage> {
       } else {
         await _teamManager.loadTeam();
         setState(() {
-          _currentTeam = teamName; // 생성한 팀을 현재 팀으로 설정
+          _currentTeam = teamName;
           _teamManager.currentTeam = teamName;
           _teams = _teamManager.getTeamList();
         });
@@ -89,13 +90,11 @@ class _TeamPageState extends State<TeamPage> {
   void _inviteToTeam() {
     String inviteId = _inviteIdController.text;
     if (inviteId.isNotEmpty && _currentTeam.isNotEmpty) {
-      // 상대방에게 팝업 알림 띄우기
       _teamManager.inviteTeamMember(_currentTeam, inviteId);
     } else {
       _showSnackBar('초대 ID가 비어있거나 선택된 팀이 없습니다.');
     }
   }
-
 
   void _navigateToTeamManagement() {
     Navigator.push(
@@ -123,6 +122,24 @@ class _TeamPageState extends State<TeamPage> {
     });
   }
 
+  void _startTravel() {
+    if (_currentTeam.isNotEmpty) {
+      int? currentTeamNo = _teamManager.getTeamNoByTeamName(_currentTeam);
+      if (currentTeamNo != null) {
+        Map<String, dynamic> team = {
+          'teamNo': currentTeamNo,
+        };
+        _webSocketService.transmit(team, 'TravelStart');
+        print(team);
+        _showSnackBar('여행을 시작합니다!');
+      } else {
+        _showSnackBar('팀 번호를 찾을 수 없습니다.');
+      }
+    } else {
+      _showSnackBar('먼저 팀을 선택해주세요.');
+    }
+  }
+
   Widget _buildCreateTeamSection() {
     return Card(
       color: Colors.white,
@@ -135,9 +152,7 @@ class _TeamPageState extends State<TeamPage> {
           children: [
             Text(
               '팀 생성',
-              style: TextStyle(fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
             ),
             const SizedBox(height: 5),
             TextField(
@@ -149,8 +164,7 @@ class _TeamPageState extends State<TeamPage> {
                   borderSide: BorderSide(color: Colors.pinkAccent),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               ),
             ),
             const SizedBox(height: 5),
@@ -158,12 +172,10 @@ class _TeamPageState extends State<TeamPage> {
               onPressed: _createTeam,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.pinkAccent,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 padding: const EdgeInsets.all(12),
               ),
-              child: const Text(
-                  '팀 생성', style: TextStyle(color: Colors.white)),
+              child: const Text('팀 생성', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -183,9 +195,7 @@ class _TeamPageState extends State<TeamPage> {
           children: [
             Text(
               '팀 초대',
-              style: TextStyle(fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
             ),
             const SizedBox(height: 5),
             TextField(
@@ -197,8 +207,7 @@ class _TeamPageState extends State<TeamPage> {
                   borderSide: BorderSide(color: Colors.pinkAccent),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               ),
             ),
             const SizedBox(height: 5),
@@ -206,8 +215,7 @@ class _TeamPageState extends State<TeamPage> {
               onPressed: _inviteToTeam,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.pinkAccent,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 padding: const EdgeInsets.all(12),
               ),
               child: const Text('초대', style: TextStyle(color: Colors.white)),
@@ -240,19 +248,35 @@ class _TeamPageState extends State<TeamPage> {
             Expanded(
               flex: 1,
               child: Center(
-                child: SizedBox(
-                  width: 200,
-                  child: ElevatedButton(
-                    onPressed: _navigateToTeamManagement,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.pinkAccent,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius
-                          .circular(8)),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 200,
+                      child: ElevatedButton(
+                        onPressed: _navigateToTeamManagement,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.pinkAccent,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: const Text('팀 관리', style: TextStyle(color: Colors.white)),
+                      ),
                     ),
-                    child: const Text('팀 관리', style: TextStyle(color: Colors
-                        .white)),
-                  ),
+                    SizedBox(height: 10),
+                    SizedBox(
+                      width: 200,
+                      child: ElevatedButton(
+                        onPressed: _startTravel,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.pinkAccent,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: const Text('여행 시작', style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
