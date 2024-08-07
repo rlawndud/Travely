@@ -129,7 +129,7 @@ class Login extends StatelessWidget {
                                 activeColor: mainColor,
                                 checkColor: Colors.white,
                                 side: BorderSide(
-                                  color: Color.fromARGB(195, 58, 58, 58),
+                                  color: Colors.black,
                                 ),
                                 value: _isAutoLogin.value,
                                 onChanged: (bool? value) {
@@ -139,8 +139,8 @@ class Login extends StatelessWidget {
                           Text(
                             '자동 로그인',
                             style: TextStyle(
-                              color: Color.fromARGB(195, 58, 58, 58),
-                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ],

@@ -82,11 +82,11 @@ class _HomeState extends State<Home> {
         length: 4, // Tab의 개수에 맞게 수정
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('travely',
+            title: const Text('Travely',
                 style: TextStyle(
-                  fontFamily: 'Open Sans',
+                  fontFamily: 'Agro',
                   fontSize: 22,
-                  fontWeight: FontWeight.normal,
+                  fontWeight: FontWeight.w500,
                   color: Colors.white,
                 )),
             centerTitle: true,
