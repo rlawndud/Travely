@@ -22,7 +22,6 @@ class _albumState extends State<album> {
   List<PictureEntity> images = [];
   List<Uint8List> pic = [];
   TeamManager teamManager = TeamManager();
-  PicManager _picManager = PicManager();
   String currentTeamName = '';
   int? currentTeam;
   String prediction='';
@@ -33,7 +32,6 @@ class _albumState extends State<album> {
     super.initState();
     currentTeamName = TeamManager().currentTeam;
     currentTeam = teamManager.getTeamNoByTeamName(currentTeamName);
-    _picManager.initialize(widget.id);
   }
 
   Future<void> _loadImage() async {

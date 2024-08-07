@@ -5,8 +5,8 @@ import 'package:test2/model/picture.dart';
 import 'package:test2/util/auto_login.dart';
 import 'package:test2/value/color.dart';
 import 'package:test2/model/team.dart';
-import 'model/member.dart';
-import 'network/web_socket.dart';
+import 'package:test2/model/member.dart';
+import 'package:test2/network/web_socket.dart';
 
 class SettingsPage extends StatefulWidget {
   final Member user;

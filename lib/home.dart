@@ -1,16 +1,15 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:test2/appbar/friend/Friend.dart';
 import 'package:test2/appbar/mypage/My_Page.dart';
-import 'package:test2/Settings.dart';
+import 'package:test2/appbar/Settings.dart';
+import 'package:test2/camera_screen.dart';
 import 'package:test2/model/imgtest.dart';
 import 'package:test2/model/member.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:test2/Settings.dart'; // 올바른 Settings 파일 import
-import 'package:test2/image_upload_page.dart';
 import 'package:test2/model/picture.dart';
 import 'package:test2/album_screen/photo_folder_screen.dart';
 import 'package:test2/team_page.dart';
+import 'package:test2/util/permission.dart';
 
 import 'model/team.dart';
 
@@ -31,6 +30,7 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     _user = widget.user;
+    _checkPermissions();
     _teamManager = TeamManager();
     _picManager = PicManager();
     _initializeManager();
@@ -39,7 +39,7 @@ class _HomeState extends State<Home> {
       TeamPage(userId: _user.id),
       const PhotoFolderScreen(), // 앨범 페이지
       GoogleMapSample(), // 홈 페이지
-      const ImageUploadPage(), // 촬영 페이지 //키면 바로 카메라 실행되게
+      CameraScreen(), // 촬영 페이지 //키면 바로 카메라 실행되게
     ];
   }
 
@@ -53,6 +53,10 @@ class _HomeState extends State<Home> {
     setState(() {});  // UI 갱신
   }
 
+  Future<void> _checkPermissions() async {
+    await PermissionManager.checkAndRequestPermissions();
+  }
+
   Future<void> _initializeManager() async {
     await _teamManager.initialize(_user.id);
     await _picManager.initialize(_user.id);
@@ -60,7 +64,6 @@ class _HomeState extends State<Home> {
   }
 
   int _selectedIndex = 0;
-  String? _teamName = '팀 미설정';
   late List<Widget> _pages;
 
   void _onItemTapped(int index) {
@@ -179,7 +182,14 @@ class _HomeState extends State<Home> {
           ),
           bottomNavigationBar: TabBar(
             onTap: (index) {
-              _onItemTapped(index); // 인덱스 그대로 전달
+              print(index);
+              if(index == 3){
+                if(_teamManager.currentTeam.isNotEmpty){
+                  _onItemTapped(index);
+                }
+              }else{
+                _onItemTapped(index); // 인덱스 그대로 전달
+              }
             },
             tabs: const [
               Tab(icon: Icon(Icons.group, color: Colors.black), text: '팀'),

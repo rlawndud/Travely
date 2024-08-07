@@ -103,13 +103,18 @@ class _PhotoGridScreenState extends State<PhotoGridScreen> {
       if (widget.category == '전체사진') {
         return isTeam;
       } else if (widget.category == '지역') {
-        //picture.location이랑 비교할 듯
-        return isTeam && picture.pre_background == widget.subCategory;
+        if (widget.subCategory == '기타 지역') {
+          List<String> mainRegions = ['서울', '대전', '부산', '인천', '대구', '울산', '광주', '제주도'];
+          return isTeam && !mainRegions.any((region) => picture.location.contains(region));
+        }
+        return isTeam && picture.location.contains(widget.subCategory);
       } else if (widget.category == '계절') {
-        // 계절에 대한 필터링 로직 추가 필요
-        // picture.date로 직접 처리해도 되고, 계절 구분해놓은 데이터 처리해도 되고
-        return isTeam;
+        return isTeam && picture.season == widget.subCategory;
       } else if (widget.category == '배경') {
+        if (widget.subCategory == '기타') {
+          List<String> mainBackgrounds = ['산', '바다'];
+          return isTeam && !mainBackgrounds.contains(picture.pre_background);
+        }
         return isTeam && picture.pre_background == widget.subCategory;
       } else if (widget.category == '멤버'){
         return isTeam && picture.pre_face.contains(widget.subCategory);

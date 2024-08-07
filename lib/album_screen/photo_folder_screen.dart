@@ -16,19 +16,16 @@ class PhotoFolderScreen extends StatefulWidget {
 class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
   final TeamManager _teamManager = TeamManager();
   final PicManager _picManager = PicManager();
-  late StreamSubscription<PictureEntity> _picSubscription;
   List<String> teamMembers = [];
 
   @override
   void initState() {
     super.initState();
     _loadTeamFolders();
-    _subscribeToNewImages();
   }
 
   @override
   void dispose() {
-    _picSubscription.cancel();
     super.dispose();
   }
 
@@ -82,7 +79,7 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
     return [];
   }
 
-  void _subscribeToNewImages() {
+  /*void _subscribeToNewImages() {
     _picSubscription = _picManager.imageStream.listen((newImage) {
       setState(() {});
       ScaffoldMessenger.of(context).showSnackBar(
@@ -92,7 +89,7 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
         ),
       );
     });
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
