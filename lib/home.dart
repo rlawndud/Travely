@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:test2/appbar/friend/Friend.dart';
 import 'package:test2/appbar/mypage/My_Page.dart';
 import 'package:test2/appbar/Settings.dart';
 import 'package:test2/camera_screen.dart';
+import 'package:test2/googlemap_image.dart';
 import 'package:test2/model/imgtest.dart';
 import 'package:test2/model/member.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -10,7 +13,11 @@ import 'package:test2/model/picture.dart';
 import 'package:test2/album_screen/photo_folder_screen.dart';
 import 'package:test2/team_page.dart';
 import 'package:test2/util/permission.dart';
+import 'dart:ui' as ui;
+import 'dart:typed_data';
 
+import 'model/image_marker_cluster.dart';
+import 'model/memberImg.dart';
 import 'model/team.dart';
 
 class Home extends StatefulWidget {
@@ -38,7 +45,7 @@ class _HomeState extends State<Home> {
     _pages = <Widget>[
       TeamPage(userId: _user.id),
       const PhotoFolderScreen(), // 앨범 페이지
-      GoogleMapSample(), // 홈 페이지
+      GoogleMapCluster(), // 홈 페이지
       CameraScreen(), // 촬영 페이지 //키면 바로 카메라 실행되게
     ];
   }
@@ -215,138 +222,153 @@ class GoogleMapSample extends StatefulWidget {
 
 class _GoogleMapSampleState extends State<GoogleMapSample> {
   late GoogleMapController _controller;
-  final Set<Marker> _markers = {};
-  final Map<MarkerId, int> _markerClickCounts = {};
-  bool _isAddingMarker = false;
-  bool _isDeletingMarker = false;
+  Set<Marker> _markers = {};
+  List<PictureEntity> pics = PicManager().getPictureList();
+  double _clusterRadius = 100; // 클러스터 반경 (픽셀 단위)
 
-  void _onMapCreated(GoogleMapController controller) {
-    _controller = controller;
+  @override
+  void initState() {
+    super.initState();
+    _createMarkers();
   }
 
-  void _toggleAddMarkerMode() {
-    setState(() {
-      _isAddingMarker = !_isAddingMarker;
-      if (_isAddingMarker) _isDeletingMarker = false;
-    });
-  }
-
-  void _toggleDeleteMarkerMode() {
-    setState(() {
-      _isDeletingMarker = !_isDeletingMarker;
-      if (_isDeletingMarker) _isAddingMarker = false;
-    });
-  }
-
-  void _addMarker(LatLng position) {
-    setState(() {
-      final markerId = MarkerId(position.toString());
-      if (!_markerClickCounts.containsKey(markerId)) {
-        _markerClickCounts[markerId] = 0;
+  void _createMarkers() async {
+    List<List<PictureEntity>> clusters = _clusterPictures(pics);
+    for (var cluster in clusters) {
+      if (cluster.length == 1) {
+        final marker = await _createMarkerFromPic(cluster[0]);
+        setState(() {
+          _markers.add(marker);
+        });
+      } else {
+        final marker = await _createClusterMarker(cluster);
+        setState(() {
+          _markers.add(marker);
+        });
       }
-      final marker = Marker(
-        markerId: markerId,
-        position: position,
-        infoWindow: InfoWindow(
-          title: 'Custom Location',
-          snippet: '${position.latitude}, ${position.longitude}',
-        ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          _markerClickCounts[markerId]! > 5 ? BitmapDescriptor.hueRed : BitmapDescriptor.hueBlue,
-        ),
-        onTap: () {
-          if (_isDeletingMarker) {
-            _removeMarker(markerId);
-          } else {
-            _incrementMarkerClickCount(markerId);
-          }
-        },
+    }
+  }
+
+  List<List<PictureEntity>> _clusterPictures(List<PictureEntity> pictures) {
+    List<List<PictureEntity>> clusters = [];
+    for (var pic in pictures) {
+      bool added = false;
+      for (var cluster in clusters) {
+        if (_isNearby(pic, cluster[0])) {
+          cluster.add(pic);
+          added = true;
+          break;
+        }
+      }
+      if (!added) {
+        clusters.add([pic]);
+      }
+    }
+    return clusters;
+  }
+
+  bool _isNearby(PictureEntity pic1, PictureEntity pic2) {
+    // 실제 구현에서는 위도와 경도를 픽셀 좌표로 변환하여 거리를 계산해야 합니다.
+    // 여기서는 단순화를 위해 위도와 경도의 차이를 사용합니다.
+    return (pic1.latitude - pic2.latitude).abs() < 0.01 &&
+        (pic1.longitude - pic2.longitude).abs() < 0.01;
+  }
+
+  Future<Marker> _createMarkerFromPic(PictureEntity pic) async {
+    final icon = await _getMarkerBitmap(75, pictureData: pic.img_data);
+    return Marker(
+      markerId: MarkerId(pic.img_num.toString()),
+      position: LatLng(pic.latitude, pic.longitude),
+      icon: icon,
+      onTap: () {
+        print('Tapped on image ${pic.img_num}');
+      },
+    );
+  }
+
+  Future<Marker> _createClusterMarker(List<PictureEntity> cluster) async {
+    final center = _getClusterCenter(cluster);
+    final icon = await _getMarkerBitmap(100, text: cluster.length.toString());
+    return Marker(
+      markerId: MarkerId('cluster_${center.latitude}_${center.longitude}'),
+      position: center,
+      icon: icon,
+      onTap: () {
+        print('Tapped on cluster with ${cluster.length} images');
+      },
+    );
+  }
+
+  LatLng _getClusterCenter(List<PictureEntity> cluster) {
+    double lat = 0, lng = 0;
+    for (var pic in cluster) {
+      lat += pic.latitude;
+      lng += pic.longitude;
+    }
+    return LatLng(lat / cluster.length, lng / cluster.length);
+  }
+
+  Future<BitmapDescriptor> _getMarkerBitmap(int size, {String? pictureData, String? text}) async {
+    final ui.PictureRecorder pictureRecorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(pictureRecorder);
+    final Paint paint1 = Paint()..color = Colors.orange;
+    final Paint paint2 = Paint()..color = Colors.white;
+
+    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.0, paint1);
+    canvas.drawCircle(Offset(size / 2, size / 2), size / 2.2, paint2);
+
+    if (pictureData != null) {
+      final ui.Image image = await _base64ToImage(pictureData);
+      canvas.drawImageRect(
+        image,
+        Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+        Rect.fromLTWH(size / 2.8, size / 2.8, size / 1.4, size / 1.4),
+        Paint(),
       );
-      _markers.add(marker);
+    } else {
+      canvas.drawCircle(Offset(size / 2, size / 2), size / 2.8, paint1);
+    }
+
+    if (text != null) {
+      TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
+      painter.text = TextSpan(
+        text: text,
+        style: TextStyle(fontSize: size / 3, color: Colors.white, fontWeight: FontWeight.normal),
+      );
+      painter.layout();
+      painter.paint(
+        canvas,
+        Offset(size / 2 - painter.width / 2, size / 2 - painter.height / 2),
+      );
+    }
+
+    final img = await pictureRecorder.endRecording().toImage(size, size);
+    final data = await img.toByteData(format: ui.ImageByteFormat.png);
+
+    return BitmapDescriptor.fromBytes(data!.buffer.asUint8List());
+  }
+
+  Future<ui.Image> _base64ToImage(String base64String) async {
+    final Uint8List bytes = BytesToImage(base64String);
+    final Completer<ui.Image> completer = Completer();
+    ui.decodeImageFromList(bytes, (ui.Image img) {
+      completer.complete(img);
     });
-  }
-
-  void _removeMarker(MarkerId markerId) {
-    setState(() {
-      _markers.removeWhere((marker) => marker.markerId == markerId);
-      _markerClickCounts.remove(markerId);
-    });
-  }
-
-  void _incrementMarkerClickCount(MarkerId markerId) {
-    setState(() {
-      _markerClickCounts[markerId] = _markerClickCounts[markerId]! + 1;
-      final updatedMarker = _markers.firstWhere((marker) => marker.markerId == markerId);
-      _markers.remove(updatedMarker);
-      _markers.add(updatedMarker.copyWith(
-        iconParam: BitmapDescriptor.defaultMarkerWithHue(
-          _markerClickCounts[markerId]! > 5 ? BitmapDescriptor.hueRed : BitmapDescriptor.hueBlue,
-        ),
-      ));
-    });
-  }
-
-  void _zoomIn() {
-    _controller.animateCamera(CameraUpdate.zoomIn());
-  }
-
-  void _zoomOut() {
-    _controller.animateCamera(CameraUpdate.zoomOut());
+    return completer.future;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          GoogleMap(
-            onMapCreated: _onMapCreated,
-            initialCameraPosition: CameraPosition(
-              target: LatLng(36.2048, 127.7669),
-              zoom: 7.0,
-            ),
-            zoomControlsEnabled: false,
-            markers: _markers,
-            onTap: (position) {
-              if (_isAddingMarker) {
-                _addMarker(position);
-              }
-            },
-          ),
-          Positioned(
-            top: 50,
-            right: 10,
-            child: Column(
-              children: [
-                FloatingActionButton(
-                  onPressed: _zoomIn,
-                  mini: true,
-                  heroTag: null,
-                  child: Icon(Icons.add),
-                ),
-                SizedBox(height: 10),
-                FloatingActionButton(
-                  onPressed: _zoomOut,
-                  mini: true,
-                  heroTag: null,
-                  child: Icon(Icons.remove),
-                ),
-                SizedBox(height: 20),
-                FloatingActionButton(
-                  onPressed: _toggleAddMarkerMode,
-                  backgroundColor: _isAddingMarker ? Colors.green : Colors.blue,
-                  child: Icon(Icons.add_location_alt),
-                ),
-                SizedBox(height: 10),
-                FloatingActionButton(
-                  onPressed: _toggleDeleteMarkerMode,
-                  backgroundColor: _isDeletingMarker ? Colors.red : Colors.blue,
-                  child: Icon(Icons.delete),
-                ),
-              ],
-            ),
-          ),
-        ],
+      body: GoogleMap(
+        onMapCreated: (GoogleMapController controller) {
+          _controller = controller;
+        },
+        initialCameraPosition: CameraPosition(
+          target: LatLng(36.2048, 127.7669),
+          zoom: 7.0,
+        ),
+        markers: _markers,
       ),
     );
   }
