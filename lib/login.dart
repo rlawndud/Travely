@@ -23,8 +23,9 @@ class Login extends StatelessWidget {
     //SharedPreferences에 로그인 정보 저장
     AutoLogin autoLogin = new AutoLogin();
 
-    // 서버에 로그인 정보 전달 및 회원정보 획득
-    UserLoginState loginInfo = new UserLoginState(_idController.text, _pwController.text);
+    //서버에 로그인 정보 전달 및 회원정보 획득
+    UserLoginState loginInfo =
+    new UserLoginState(_idController.text, _pwController.text);
     WebSocketService _webSocketService = WebSocketService();
     try{
       //처리 정상
@@ -40,6 +41,7 @@ class Login extends StatelessWidget {
         );
       } else {
         Member mem = Member.fromJson(response);
+        //Member mem = new Member('id', 'password', 'name', 'phone');
         autoLogin.setLoginInfo(_isAutoLogin, new UserLoginState(id, pw));
         await TeamManager().initialize(mem.id);
         Navigator.pushReplacementNamed(context, '/home',
@@ -55,7 +57,7 @@ class Login extends StatelessWidget {
       e.printError();
     }
 
-    // // 로그인 없이 바로 들어가기 => 로그인 살리고 싶으면 아래 주석 처리 후 위 코드 주석 해제
+    // // 로그인 안하고 들어가기 => 로그인 정보 전달 코드부분을 주석처리 하고 사용 할것
     // Member mem = new Member('id', 'password', 'name', 'phone');
     // autoLogin.setLoginInfo(_isAutoLogin, new UserLoginState(id, pw));
     // await TeamManager().initialize(mem.id);

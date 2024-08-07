@@ -6,7 +6,7 @@ class FriendRequestsPage extends StatelessWidget {
   final Function(FriendRequest) acceptFriendRequest;
   final Function(FriendRequest) declineFriendRequest;
 
-  FriendRequestsPage({
+  const FriendRequestsPage({super.key,
     required this.friendRequests,
     required this.acceptFriendRequest,
     required this.declineFriendRequest,

@@ -27,7 +27,7 @@ class _TeamSettingScreenState extends State<TeamSettingScreen> {
         // Logic to update the team name in the data source would go here
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('팀 이름이 변경되었습니다')),
+        SnackBar(content: Text('팀 이름이 변경되었습니다')),
       );
     }
   }
@@ -76,7 +76,7 @@ class _TeamSettingScreenState extends State<TeamSettingScreen> {
   Widget _buildTeamNameField() {
     return TextField(
       controller: _teamNameController,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         labelText: '팀 이름',
         border: OutlineInputBorder(),
       ),
@@ -103,14 +103,14 @@ class _TeamSettingScreenState extends State<TeamSettingScreen> {
   }
 
   Widget _buildAddMemberField() {
-    final TextEditingController _newMemberController = TextEditingController();
+    final TextEditingController newMemberController = TextEditingController();
 
     return Row(
       children: [
         Expanded(
           child: TextField(
-            controller: _newMemberController,
-            decoration: const InputDecoration(
+            controller: newMemberController,
+            decoration: InputDecoration(
               labelText: '새 팀원 추가',
               border: OutlineInputBorder(),
             ),
@@ -119,8 +119,8 @@ class _TeamSettingScreenState extends State<TeamSettingScreen> {
         IconButton(
           icon: Icon(Icons.add_circle),
           onPressed: () {
-            _addMember(_newMemberController.text);
-            _newMemberController.clear();
+            _addMember(newMemberController.text);
+            newMemberController.clear();
           },
         ),
       ],

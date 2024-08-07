@@ -46,7 +46,6 @@ class _SignupState extends State<Signup> {
     Map<String, dynamic> data = {'id': _idController.text};
 
     var jsonResponse = await _webSocketService.transmit(data, 'IdDuplicate');
-    print(jsonResponse);
 
     if (jsonResponse['result'] == 'True') {
       setState(() {

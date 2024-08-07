@@ -25,7 +25,6 @@ class Member {
       'phone': phone,
     };
   }
-
   @override
   String toString() {
     return "id: $id, pw: $password, name: $name, phone: $phone ";

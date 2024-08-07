@@ -17,11 +17,11 @@ class album extends StatefulWidget {
 }
 
 class _albumState extends State<album> {
-  WebSocketService _webSocketService = WebSocketService();
+  final WebSocketService _webSocketService = WebSocketService();
   List<PictureEntity> images = [];
   List<Uint8List> pic = [];
   TeamManager teamManager = TeamManager();
-  PicManager _picManager = PicManager();
+  final PicManager _picManager = PicManager();
   String currentTeamName = '';
   int? currentTeam;
   String prediction='';
@@ -29,10 +29,10 @@ class _albumState extends State<album> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     currentTeamName = TeamManager().currentTeam;
     currentTeam = teamManager.getTeamNoByTeamName(currentTeamName);
+    _picManager.initialize(widget.id);
   }
 
   Future<void> _loadImage() async {
@@ -55,7 +55,6 @@ class _albumState extends State<album> {
   }
 
   void _printImage() {
-
     if (images.isNotEmpty) {
       print('images의 개수:${images.length}');
       setState(() {
@@ -77,23 +76,15 @@ class _albumState extends State<album> {
         var images_string = XFileToBytes(photo);
         debugPrint('이미지를 바이트로 읽음');
         Map<String, dynamic> data = {
-          'id':widget.id,
-          'teamno':currentTeam,
+          'id': widget.id,
+          'teamno': currentTeam,
           'image': images_string,
         };
         print(data);
         var response = await _webSocketService.transmit(data, 'AddImage');
-        PictureEntity pre_pic =  PictureEntity.fromJson(response);
-        await _picManager.addPicture(pre_pic);
-        prediction = pre_pic.printPredict();
-        setState(() {
-          pic.add(BytesToImage(pre_pic.img_data));
-          print('pic의 개수:${pic.length}');
-        });
         debugPrint('서버 응답 : $response');
 
-        if (response != null && response['success'] == true) {
-          // 서버로부터 이미지를 받았다는 가정하에 처리
+        if (response['success'] == true) {
           setState(() {
             images.add(PictureEntity.fromJson(response));
             pic.add(BytesToImage(response['img_data']));

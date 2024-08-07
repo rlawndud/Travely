@@ -68,7 +68,7 @@ class WebSocketService {
   }
 
   Future<Map<String, dynamic>> transmit(
-      dynamic data, String commandType) async {
+    dynamic data, String commandType) async {
     dynamic command_type = {'command': commandType};
     dynamic signal = {'signal': '@'};
     List<Map<String, dynamic>> message = [command_type, data, signal];
@@ -93,6 +93,9 @@ class WebSocketService {
         break;
       case 'UpdateImage':
         handleUpdateImage(jsonData);
+        break;
+      case 'UpdateImageSignal':
+        PicManager().syncWithServer();
         break;
       default:
         debugPrint('$jsonData');

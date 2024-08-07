@@ -14,12 +14,13 @@ class TeamManagementPage extends StatefulWidget {
     required this.userId,
     required this.onTeamSwitch,
     required this.onTeamDelete,
-    Key? key,
-  }) : super(key: key);
+    super.key
+  });
 
   @override
   _TeamManagementPageState createState() => _TeamManagementPageState();
 }
+
 
 class _TeamManagementPageState extends State<TeamManagementPage> {
   late String _currentTeam;
@@ -61,8 +62,8 @@ class _TeamManagementPageState extends State<TeamManagementPage> {
       if (team.teamName == teamName) {
         return team.members;
       }
-      return null;
     }
+    return null;
   }
 
   List<String>? findTeamMemberNamesByName(String teamName) {

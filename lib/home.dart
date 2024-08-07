@@ -10,10 +10,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test2/image_upload_page.dart';
 import 'package:test2/model/team.dart';
 import 'package:test2/network/web_socket.dart';
-import 'package:test2/photo_folder_screen.dart';
+import 'package:test2/album_screen/photo_folder_screen.dart';
 import 'package:test2/team_page.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import 'model/picture.dart';
 
 class Home extends StatefulWidget {
   final Member user;
@@ -25,21 +27,42 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   late Member _user;
+  late TeamManager _teamManager;
+  late PicManager _picManager;
 
   @override
   void initState() {
     super.initState();
     _user = widget.user;
+    _teamManager = TeamManager();
+    _picManager = PicManager();
+    _initializeManager();
+    _teamManager.addListener(_updateUI);
     _pages = <Widget>[
-      TeamPage(userId: _user.id,),
+      TeamPage(userId: _user.id),
       const PhotoFolderScreen(), // 앨범 페이지
       GoogleMapSample(userId: _user.id), // 홈 페이지
-      const ImageUploadPage(), // 촬영 페이지
+      const ImageUploadPage(), // 촬영 페이지 //키면 바로 카메라 실행되게
     ];
   }
 
+  @override
+  void dispose() {
+    _teamManager.removeListener(_updateUI);
+    super.dispose();
+  }
+
+  void _updateUI() {
+    setState(() {});  // UI 갱신
+  }
+
+  Future<void> _initializeManager() async {
+    await _teamManager.initialize(_user.id);
+    await _picManager.initialize(_user.id);
+    setState(() {});
+  }
+
   int _selectedIndex = 0;
-  // String? _teamName = '팀 미설정';
   late List<Widget> _pages;
 
   void _onItemTapped(int index) {
@@ -83,14 +106,15 @@ class _HomeState extends State<Home> {
             child: ListView(
               children: <Widget>[
                 UserAccountsDrawerHeader(
-                  currentAccountPicture: const CircleAvatar(
+                  currentAccountPicture: CircleAvatar(
                     backgroundImage: AssetImage('assets/cat.jpg'),
                   ),
-                  accountName: Text('R 2 B'),
-                  accountEmail: Text('hjkl@naver.com'),
+                  accountName: _teamManager.currentTeam.isNotEmpty?Text('${_teamManager.currentTeam}',style: TextStyle(fontWeight: FontWeight.bold),)
+                      :Text('현재 설정된 팀이 없음'),
+                  accountEmail: Text('${_user.id}'),
                   decoration: BoxDecoration(
                     color: Colors.pinkAccent[100],
-                    borderRadius: const BorderRadius.only(
+                    borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(15.0),
                       bottomRight: Radius.circular(15.0),
                     ),
@@ -144,7 +168,7 @@ class _HomeState extends State<Home> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => album(id: _user.id)), // 여기 수정
+                      MaterialPageRoute(builder: (context) => album(id: _user.id,)), // 여기 수정
                     );
                   },
                   trailing: Icon(Icons.navigate_next),
@@ -164,9 +188,6 @@ class _HomeState extends State<Home> {
               Tab(icon: Icon(Icons.photo_album, color: Colors.black), text: '앨범'),
               Tab(icon: Icon(Icons.home, color: Colors.black), text: '홈'),
               Tab(icon: Icon(Icons.camera_alt, color: Colors.black), text: '촬영'),
-              //Tab(icon: Icon(Icons.edit_note, color: Colors.black),
-              //text: 'SnapNote',
-              //),
             ],
           ),
         ),
