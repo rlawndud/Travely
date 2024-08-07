@@ -81,9 +81,9 @@ class _HomeState extends State<Home> {
           appBar: AppBar(
             title: const Text('Travely',
                 style: TextStyle(
-                  fontFamily: 'Open Sans',
+                  fontFamily: 'Agro',
                   fontSize: 22,
-                  fontWeight: FontWeight.normal,
+                  fontWeight: FontWeight.w500,
                   color: Colors.white,
                 )),
             centerTitle: true,
