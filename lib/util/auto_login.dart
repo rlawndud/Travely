@@ -8,7 +8,7 @@ class AutoLogin{
   static final AutoLogin _instance = AutoLogin._internal();
   final Future<SharedPreferences> _manager = SharedPreferences.getInstance();
 
-  AutoLogin._internal(){}
+  AutoLogin._internal();
 
   factory AutoLogin(){
     return _instance;

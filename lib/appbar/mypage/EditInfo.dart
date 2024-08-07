@@ -3,6 +3,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class EditInfoPage extends StatefulWidget {
+  const EditInfoPage({super.key});
+
   @override
   _EditInfoPageState createState() => _EditInfoPageState();
 }

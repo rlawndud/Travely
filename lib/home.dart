@@ -15,8 +15,6 @@ import 'package:test2/team_page.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import 'model/picture.dart';
-
 class Home extends StatefulWidget {
   final Member user;
   const Home({super.key, required this.user});
@@ -27,42 +25,21 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   late Member _user;
-  late TeamManager _teamManager;
-  late PicManager _picManager;
 
   @override
   void initState() {
     super.initState();
     _user = widget.user;
-    _teamManager = TeamManager();
-    _picManager = PicManager();
-    _initializeManager();
-    _teamManager.addListener(_updateUI);
     _pages = <Widget>[
-      TeamPage(userId: _user.id),
+      TeamPage(userId: _user.id,),
       const PhotoFolderScreen(), // 앨범 페이지
       GoogleMapSample(userId: _user.id), // 홈 페이지
-      const ImageUploadPage(), // 촬영 페이지 //키면 바로 카메라 실행되게
+      const ImageUploadPage(), // 촬영 페이지
     ];
   }
 
-  @override
-  void dispose() {
-    _teamManager.removeListener(_updateUI);
-    super.dispose();
-  }
-
-  void _updateUI() {
-    setState(() {});  // UI 갱신
-  }
-
-  Future<void> _initializeManager() async {
-    await _teamManager.initialize(_user.id);
-    await _picManager.initialize(_user.id);
-    setState(() {});
-  }
-
   int _selectedIndex = 0;
+  // String? _teamName = '팀 미설정';
   late List<Widget> _pages;
 
   void _onItemTapped(int index) {
@@ -109,9 +86,8 @@ class _HomeState extends State<Home> {
                   currentAccountPicture: CircleAvatar(
                     backgroundImage: AssetImage('assets/cat.jpg'),
                   ),
-                  accountName: _teamManager.currentTeam.isNotEmpty?Text('${_teamManager.currentTeam}',style: TextStyle(fontWeight: FontWeight.bold),)
-                      :Text('현재 설정된 팀이 없음'),
-                  accountEmail: Text('${_user.id}'),
+                  accountName: Text('R 2 B'),
+                  accountEmail: Text('hjkl@naver.com'),
                   decoration: BoxDecoration(
                     color: Colors.pinkAccent[100],
                     borderRadius: BorderRadius.only(
@@ -168,7 +144,7 @@ class _HomeState extends State<Home> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => album(id: _user.id,)), // 여기 수정
+                      MaterialPageRoute(builder: (context) => album(id: _user.id)), // 여기 수정
                     );
                   },
                   trailing: Icon(Icons.navigate_next),
@@ -188,6 +164,9 @@ class _HomeState extends State<Home> {
               Tab(icon: Icon(Icons.photo_album, color: Colors.black), text: '앨범'),
               Tab(icon: Icon(Icons.home, color: Colors.black), text: '홈'),
               Tab(icon: Icon(Icons.camera_alt, color: Colors.black), text: '촬영'),
+              //Tab(icon: Icon(Icons.edit_note, color: Colors.black),
+              //text: 'SnapNote',
+              //),
             ],
           ),
         ),
@@ -221,7 +200,6 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
   );
 
   final List<String> _logLines = []; // 로그 항목 리스트
-  late Timer _locationUpdateTimer; // Timer 추가
 
   late WebSocketService _webSocketService;
 
@@ -231,8 +209,7 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
 
     _webSocketService = WebSocketService();
     _webSocketService.init();
-    _startLocationUpdateTimer(); // 내위치 주기적으로 보내기
-    _startListeningToFriendLocationsIfNeeded(); // 팀원 위치 수신 시작
+    _listenToFriendLocations();
 
     super.initState();
   }
@@ -246,59 +223,36 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
         setState(() {
           _currentPosition = position;
           _updateMapLocation(); // 지도 위치 업데이트
-          _sendLocationToServer();
+          _sendLocationToServer(position);
         });
       });
     }
   }
 
-  void _startListeningToFriendLocationsIfNeeded() {
-    TeamManager teamManager = TeamManager();
-    if (teamManager.currentTeam.isNotEmpty) {
-      _listenToFriendLocations();
-    } else {
-      _initLocationTracking();
-    }
-  }
-
-  // 위치 정보를 주기적으로 보내는 타이머 시작
-  void _startLocationUpdateTimer() {
-    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 10), (Timer timer) async {
-      await _sendLocationToServer();
-    });
-  }
-
-  // webSocket에 내 위치 보내기
-  Future<void> _sendLocationToServer() async {
-    TeamManager teamManager = TeamManager();
+  Future<void> _sendLocationToServer(Position position) async {
+    TeamManager _teamManager = TeamManager();
 
     final data = {
-      'id': widget.userId, // 사용자 ID
-      'latitude': _currentPosition!.latitude,
-      'longitude': _currentPosition!.longitude,
-      'teamNo' : teamManager.getTeamNoByTeamName(teamManager.currentTeam)
+      'id': widget.userId, // 사용자 ID로 교체
+      'latitude': position.latitude,
+      'longitude': position.longitude,
+      'teamNo' : _teamManager.getTeamNoByTeamName(_teamManager.currentTeam),
     };
-    print(teamManager.getTeamNoByTeamName(teamManager.currentTeam));
-    print(teamManager.currentTeam);
     await _webSocketService.transmit(data, 'UpdateLocation');
   }
 
-  // 팀원 위치 정보를 수신하여 지도에 표시
   Future<void> _listenToFriendLocations() async {
     _webSocketService.responseStream.listen((message) {
-      if (message['command'] == 'TeamLocationUpdate') {
+      if (message['command'] == 'FriendLocationUpdate') {
         final friendId = message['id'];
         final latitude = message['latitude'];
         final longitude = message['longitude'];
-        final teamNo = message['teamNo'];
 
         print(friendId);
         print(latitude);
         print(longitude);
-        print(teamNo);
 
         final MarkerId markerId = MarkerId('$friendId');
-
         final Marker marker = Marker(
           markerId: markerId,
           position: LatLng(latitude, longitude),
@@ -310,7 +264,7 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
 
         setState(() {
           _markers.removeWhere((marker) => marker.markerId == markerId);
-          // _markers.add(marker);
+          _markers.add(marker);
         });
       }
     });
@@ -340,13 +294,13 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
       );
 
       // 현재 위치를 표시하는 마커 업데이트
-      const MarkerId markerId = MarkerId('current_location');
+      final MarkerId markerId = MarkerId('current_location');
       final Marker marker = Marker(
         markerId: markerId,
         position: position,
         infoWindow: InfoWindow(
-          title: '내 위치',
-          snippet: '위도: ${_currentPosition!.latitude}, 경도: ${_currentPosition!.longitude}',
+          title: 'You are here',
+          snippet: 'Latitude: ${_currentPosition!.latitude}, Longitude: ${_currentPosition!.longitude}',
         ),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
       );
@@ -358,11 +312,10 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
     }
   }
 
-  // 위치 정보를 메모리 내에 추가
+  //위치 정보를 메모리 내에 추가
   void _logPosition(Position position) {
     final timeStamp = DateTime.now().toIso8601String();
-    final log = '[$timeStamp]\n'
-        '위도: ${position.latitude}, 경도: ${position.longitude}';
+    final log = '[$timeStamp] Latitude: ${position.latitude}, Longitude: ${position.longitude}';
 
     setState(() {
       _logLines.add(log);
@@ -381,7 +334,7 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
       mapController.animateCamera(CameraUpdate.newLatLng(position));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('현재 위치를 사용할 수 없습니다.')),
+        SnackBar(content: Text('Current position is not available.')),
       );
     }
   }
@@ -507,7 +460,6 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
               }
               _hideLogContent(); // 지도를 클릭할 때 로그 내용 숨기기
             },
-            myLocationEnabled: true,
           ),
           Positioned(
             top: 50,

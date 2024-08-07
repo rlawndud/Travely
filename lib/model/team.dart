@@ -70,7 +70,7 @@ class TeamEntity{
 class TeamManager with ChangeNotifier {
   final WebSocketService _webSocketService = WebSocketService();
   static final TeamManager _instance = TeamManager._internal();
-  Map<String, List<TeamEntity>> _userTeams = {};
+  final Map<String, List<TeamEntity>> _userTeams = {};
   static String _curTeam = '';
   static String _currentUserId='';
   bool _isInitialized = false;
@@ -116,21 +116,14 @@ class TeamManager with ChangeNotifier {
     return null;
   }
 
-  // Future<void> saveTeams() async {
-  //   final Directory directory = await getApplicationDocumentsDirectory();
-  //   final String dirPath = '${directory.path}/$_userId';
-  //   final Directory dir = Directory(dirPath);
-  //
-  //   if (!await dir.exists()) {
-  //     await dir.create(recursive: true);
-  //   }
-  //
-  //   final File file = File('$dirPath/teams.json');
-  //   final data = {
-  //     'teams': _teams.map((team) => team.toJson()).toList(),
-  //   };
-  //   await file.writeAsString(json.encode(data));
-  // }
+  String? getTeamNameByTeamNo(int teamNo){
+    for(var team in _userTeams[_currentUserId]!){
+      if(team.teamNo==teamNo){
+        return team.teamName;
+      }
+    }
+    return null;
+  }
 
   Future<void> saveCurTeam(String userId, String currentTeam) async{
     final Directory directory = await getApplicationDocumentsDirectory();
@@ -165,18 +158,6 @@ class TeamManager with ChangeNotifier {
       _curTeam = ''; // 파일이 없을 경우 빈 문자열로 설정
     }
   }
-  // 팀 정보를 로드하는 메서드
-  // Future<void> loadTeamsFromFile() async {
-  //   final Directory directory = await getApplicationDocumentsDirectory();
-  //   final File file = File('${directory.path}/$_userId/teams.json');
-  //   if (await file.exists()) {
-  //     final String contents = await file.readAsString();
-  //     final Map<String, dynamic> data = json.decode(contents);
-  //     _teams = List<TeamEntity>.from(
-  //       (data['teams'] as List<dynamic>).map((item) => TeamEntity.fromJson(item)),
-  //     );
-  //   }
-  // }
 
   Future<void> loadTeam() async {
     Map<String, dynamic> data = {'id': _currentUserId};
@@ -188,11 +169,6 @@ class TeamManager with ChangeNotifier {
         TeamEntity te = TeamEntity.fromJson(team);
         _userTeams[_currentUserId]!.add(te);
       }
-      // try {
-      //   await saveTeams();
-      // } catch (e) {
-      //   print('Error saving teams: $e');
-      // }
     }
   }
 

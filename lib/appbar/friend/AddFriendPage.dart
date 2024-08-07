@@ -29,12 +29,12 @@ class AddFriendPage extends StatelessWidget {
               controller: friendNameController,
               decoration: InputDecoration(
                 labelText: 'Friend Name',
-                labelStyle: TextStyle(color: Colors.blueAccent), // 추가
-                border: OutlineInputBorder(), // 추가
+                labelStyle: TextStyle(color: Colors.blueAccent),
+                border: OutlineInputBorder(),
               ),
-              style: TextStyle(color: Colors.black), // 추가
+              style: TextStyle(color: Colors.black),
             ),
-            SizedBox(height: 16), // 추가
+            SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
                 final String friendName = friendNameController.text;

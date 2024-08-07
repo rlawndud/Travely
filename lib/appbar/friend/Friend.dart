@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:test2/appbar/friend/AddFriendPage.dart'; // 오타 수정
+import 'package:test2/appbar/friend/AddFriendPage.dart';
 import 'FriendRequestsPage.dart';
 import 'FriendRequestModel.dart';
 import 'FriendListPage.dart';
-import 'FriendEditPage.dart'; // 새로 추가된 파일
+import 'FriendEditPage.dart';
 
 class Friend extends StatefulWidget {
   const Friend({super.key}); // const 생성자

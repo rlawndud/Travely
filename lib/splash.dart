@@ -37,7 +37,7 @@ class _SplashState extends State<Splash> {
     super.didChangeDependencies();
   }
   _navigateToLogin() async {
-    await Future.delayed(Duration(milliseconds: 3000), () {});
+    await Future.delayed(const Duration(milliseconds: 3000), () {});
     //만약 로그인 정보가 있으면 로그인 정보를 서버로 전달 후 바로 홈 화면으로 이동
     await _checkLogin();
   }
@@ -64,7 +64,7 @@ class _SplashState extends State<Splash> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage('assets/loading_image.png'),
             fit: BoxFit.cover,

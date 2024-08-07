@@ -19,6 +19,7 @@ class Login extends StatelessWidget {
 
     String id = _idController.text.toString();
     String pw = _pwController.text.toString();
+
     //SharedPreferences에 로그인 정보 저장
     AutoLogin autoLogin = new AutoLogin();
 
@@ -55,6 +56,13 @@ class Login extends StatelessWidget {
           toastLength: Toast.LENGTH_LONG);
       e.printError();
     }
+
+    // // 로그인 안하고 들어가기 => 로그인 정보 전달 코드부분을 주석처리 하고 사용 할것
+    // Member mem = new Member('id', 'password', 'name', 'phone');
+    // autoLogin.setLoginInfo(_isAutoLogin, new UserLoginState(id, pw));
+    // await TeamManager().initialize(mem.id);
+    // Navigator.pushReplacementNamed(context, '/home',
+    //     arguments: {'user': mem});
   }
 
   void _signup(BuildContext context) {
