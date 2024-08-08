@@ -6,6 +6,7 @@ import 'package:test2/appbar/mypage/My_Page.dart';
 import 'package:test2/appbar/Settings.dart';
 import 'package:test2/camera_screen.dart';
 import 'package:test2/googlemap_image.dart';
+import 'package:test2/googlemap_location.dart';
 import 'package:test2/model/imgtest.dart';
 import 'package:test2/model/member.dart';
 import 'package:test2/model/picture.dart';
@@ -26,6 +27,7 @@ class _HomeState extends State<Home> {
   late Member _user;
   late TeamManager _teamManager;
   late PicManager _picManager;
+  String _selectedMapType = '앨범';
 
   @override
   void initState() {
@@ -39,7 +41,7 @@ class _HomeState extends State<Home> {
     _pages = <Widget>[
       TeamPage(userId: _user.id),
       const PhotoFolderScreen(), // 앨범 페이지
-      GoogleMapCluster(), // 홈 페이지
+      _buildMapWidget(), // 홈 페이지
       CameraScreen(), // 촬영 페이지 //키면 바로 카메라 실행되게
     ];
   }
@@ -200,4 +202,43 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+
+  Widget _buildMapWidget() {
+    return Stack(
+      children: [
+        _selectedMapType == '앨범' ? GoogleMapCluster() : GoogleMapLocation(userId: _user.id),
+        Positioned(
+          top: 10,
+          left: 10,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: DropdownButton<String>(
+              value: _selectedMapType,
+              items: ['앨범', 'GPS']
+                  .map((String value) => DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              ))
+                  .toList(),
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  print(newValue);
+                  setState(() {
+                    _selectedMapType = newValue;
+                    _pages[2] = _buildMapWidget();
+                  });
+                }
+              },
+              underline: Container(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
 }

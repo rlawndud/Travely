@@ -19,11 +19,13 @@ class WebSocketService {
   WebSocketService._internal();
 
   late WebSocketChannel channel;
-  Uri websocketUrl = Uri.parse('ws://192.168.0.45:8080');
+  Uri websocketUrl = Uri.parse('ws://220.90.180.89:8080');
   bool _isInitialized = false;
   late StreamSubscription _subscription;
   final _responseController = StreamController<Map<String, dynamic>>.broadcast();
   String buffer = "";
+
+  Stream<Map<String, dynamic>> get responseStream => _responseController.stream;
 
   void init() {
     if (_isInitialized) return;

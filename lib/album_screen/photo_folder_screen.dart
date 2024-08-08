@@ -16,6 +16,7 @@ class PhotoFolderScreen extends StatefulWidget {
 class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
   final TeamManager _teamManager = TeamManager();
   final PicManager _picManager = PicManager();
+  List<dynamic> team_teamMembers = [];
   List<String> teamMembers = [];
 
   @override
@@ -63,6 +64,7 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
       await Directory('$teamPath/계절/$season').create(recursive: true);
     }
     teamMembers = _findTeamMemberByName(teamName);
+    team_teamMembers.add(teamMembers);
     for (var name in teamMembers){
       await Directory('$teamPath/멤버/$name').create(recursive: true);
     }
@@ -110,19 +112,19 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
         ),
         itemCount: teams.length,
         itemBuilder: (context, index) {
-          return _buildTeamItem(teams[index].teamName);
+          return _buildTeamItem(teams[index].teamName, index);
         },
       ),
     );
   }
 
-  Widget _buildTeamItem(String teamName) {
+  Widget _buildTeamItem(String teamName, int index) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => TeamAlbumScreen(teamName: teamName, teamMembers: teamMembers,),
+            builder: (context) => TeamAlbumScreen(teamName: teamName, teamMembers: team_teamMembers[index],),
           ),
         );
       },
@@ -148,6 +150,7 @@ class TeamAlbumScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('TeamAlbumScreen : $teamName, ${teamMembers.toString()}');
     return Scaffold(
       appBar: AppBar(
         title: Text('$teamName 팀 앨범'),
@@ -166,6 +169,7 @@ class TeamAlbumScreen extends StatelessWidget {
   }
 
   Widget _buildAlbumTile(BuildContext context, String category) {
+    print('_buildAlbumTile : $teamMembers');
     return ListTile(
       title: Text(category),
       onTap: () {

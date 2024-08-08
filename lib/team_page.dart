@@ -119,16 +119,27 @@ class _TeamPageState extends State<TeamPage> {
     });
   }
 
-  void _startTravel() {
+  void _startTravel() async {
     if (_currentTeam.isNotEmpty) {
       int? currentTeamNo = _teamManager.getTeamNoByTeamName(_currentTeam);
       if (currentTeamNo != null) {
         Map<String, dynamic> team = {
           'teamNo': currentTeamNo,
         };
-        _webSocketService.transmit(team, 'TravelStart');
+        var response = await _webSocketService.transmit(team, 'TravelStart');
         print(team);
-        _showSnackBar('여행을 시작합니다');
+        if(response['result']=='True'){
+          _showSnackBar('여행 준비가 완료되었습니다');
+        }else if(response.containsKey('error')){
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('여행 준비 중 문제가 생겼습니다'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          });
+        }
       } else {
         _showSnackBar('팀 번호를 찾을 수 없습니다');
       }
@@ -268,24 +279,36 @@ class _TeamPageState extends State<TeamPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: null,
-      body: Container(
-        color: Colors.white,
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                children: [
-                  _buildCreateTeamSection(),
-                  const SizedBox(height: 10),
-                  _buildInviteSection(),
-                  const SizedBox(height: 200),
-                  _buildManagementSection(),
-                ],
+      body: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Container(
+            color: Colors.white,
+            child: SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: [
+                            _buildCreateTeamSection(),
+                            const SizedBox(height: 10),
+                            _buildInviteSection(),
+                          ],
+                        ),
+                      ),
+                      Expanded(child: Container()),
+                      _buildManagementSection(),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

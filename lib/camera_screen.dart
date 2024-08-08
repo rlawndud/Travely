@@ -47,10 +47,13 @@ class _CameraScreenState extends State<CameraScreen> {
       ResolutionPreset.ultraHigh,
       enableAudio: false,
     );
-    await _controller!.initialize();
-    await _controller!.setFlashMode(_currentFlashMode);
-    if (!mounted) return;
-    setState(() {});
+    try {
+      await _controller!.initialize();
+      await _controller!.setFlashMode(_currentFlashMode);
+      if (mounted) setState(() {});
+    } catch (e) {
+      debugPrint('카메라 초기화 오류: $e');
+    }
   }
 
   @override
@@ -101,7 +104,7 @@ class _CameraScreenState extends State<CameraScreen> {
           setState(() {
             _lastCapturedImage = image;
           });
-        }else if(response['error']=='DB 오류 발생'){
+        }else if(response.containsKey('error')){
           return '모델 생성 필요';
         }
       }catch(e){
@@ -115,8 +118,11 @@ class _CameraScreenState extends State<CameraScreen> {
     if (_cameras!.length > 1) {
       setState(() {
         _selectedCameraIdx = (_selectedCameraIdx + 1) % _cameras!.length;
+        _controller = null;  // 현재 컨트롤러를 null로 설정
       });
-      _initializeCamera();
+      _initializeCamera().then((_) {
+        if (mounted) setState(() {});  // 초기화 완료 후 화면 업데이트
+      });
     }
   }
 
