@@ -278,13 +278,22 @@ class _SignupState extends State<Signup> {
                             ),
                           ),
                           Text(
-                            '해당 사진은 어플의 얼굴분석에 사용되며,\n 상업적으로 이용되지 않습니다',
+                            '다양한 방향으로 얼굴을 촬영해주세요',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.normal),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            '해당 사진은 어플의 얼굴분석에 사용되며,\n상업적으로 이용되지 않습니다',
                             style: TextStyle(
                                 color: Colors.black54,
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
                           ),
+
                         ],
                       ),
                       //찍은 사진들 화면에 출력

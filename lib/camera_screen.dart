@@ -237,7 +237,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
                         switch(result) {
                           case '촬영 성공':
-                            message = '사진이 성공적으로 촬영되었습니다.';
+                            message = '';
                             backgroundColor = Colors.green;
                             break;
                           case '팀 미설정':
@@ -256,14 +256,15 @@ class _CameraScreenState extends State<CameraScreen> {
                             message = '사진 촬영 중 오류가 발생했습니다.';
                             backgroundColor = Colors.red;
                         }
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(message),
-                            backgroundColor: backgroundColor,
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
+                        if(message.isNotEmpty){
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(message),
+                              backgroundColor: backgroundColor,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        }
                       } catch (e) {
                         debugPrint('사진촬영오류: $e');
                         ScaffoldMessenger.of(context).showSnackBar(
