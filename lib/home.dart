@@ -42,7 +42,7 @@ class _HomeState extends State<Home> {
     _pages = <Widget>[
       TeamPage(userId: _user.id),
       const PhotoFolderScreen(), // 앨범 페이지
-      GoogleMapSample(userId: _user.id), // 홈 페이지
+      GoogleMapLocation(userId: _user.id), // 홈 페이지
       const ImageUploadPage(), // 촬영 페이지 //키면 바로 카메라 실행되게
     ];
   }
@@ -197,16 +197,16 @@ class _HomeState extends State<Home> {
   }
 }
 
-class GoogleMapSample extends StatefulWidget {
+class GoogleMapLocation extends StatefulWidget {
   final String userId;
 
-  const GoogleMapSample({super.key, required this.userId});
+  const GoogleMapLocation({super.key, required this.userId});
 
   @override
-  _GoogleMapSampleState createState() => _GoogleMapSampleState();
+  _GoogleMapLocationState createState() => _GoogleMapLocationState();
 }
 
-class _GoogleMapSampleState extends State<GoogleMapSample> {
+class _GoogleMapLocationState extends State<GoogleMapLocation> {
   final Completer<GoogleMapController> _controller = Completer();
   final Set<Marker> _markers = {};
   final Map<MarkerId, int> _markerClickCounts = {};
@@ -361,24 +361,6 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
     super.dispose();
   }
 
-  void _onMapCreated(GoogleMapController controller) {
-    _controller.complete(controller);
-  }
-
-  void _toggleAddMarkerMode() {
-    setState(() {
-      _isAddingMarker = !_isAddingMarker;
-      if (_isAddingMarker) _isDeletingMarker = false;
-    });
-  }
-
-  void _toggleDeleteMarkerMode() {
-    setState(() {
-      _isDeletingMarker = !_isDeletingMarker;
-      if (_isDeletingMarker) _isAddingMarker = false;
-    });
-  }
-
   void _addMarker(LatLng position) {
     setState(() {
       final markerId = MarkerId(position.toString());
@@ -441,12 +423,15 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
       body: Stack(
         children: [
           GoogleMap(
-            onMapCreated: _onMapCreated,
+            onMapCreated: (GoogleMapController controller) {
+              _controller.complete(controller);
+            },
             initialCameraPosition: const CameraPosition(
               target: LatLng(36.2048, 127.7669),
               zoom: 13.5,
             ),
             zoomControlsEnabled: true,
+            myLocationEnabled: true,
             markers: _markers,
             onTap: (position) {
               if (_isAddingMarker) {
@@ -454,7 +439,6 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
               }
               _hideLogContent();
             },
-            myLocationEnabled: true
           ),
           Positioned(
             top: 50,
@@ -462,27 +446,15 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
             child: Column(
               children: [
                 FloatingActionButton(
-                  onPressed: _toggleAddMarkerMode,
-                  backgroundColor: _isAddingMarker ? Colors.green : Colors.blue,
-                  child: const Icon(Icons.add_location_alt),
-                ),
-                SizedBox(height: 10),
-                FloatingActionButton(
-                  onPressed: _toggleDeleteMarkerMode,
-                  backgroundColor: _isDeletingMarker ? Colors.red : Colors.blue,
-                  child: const Icon(Icons.delete),
-                ),
-                SizedBox(height: 10),
-                FloatingActionButton(
                   onPressed: () {
                     if (_currentPosition != null) {
                       _logPosition(_currentPosition!);
                     }
                   },
                   backgroundColor: Colors.orange,
-                  child: const Icon(Icons.refresh),
+                  child: const Icon(Icons.wrap_text_outlined),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 6),
               ],
             ),
           ),
