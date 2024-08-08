@@ -236,7 +236,7 @@ class _TeamPageState extends State<TeamPage> {
         child: Column(
           children: [
             Expanded(
-              flex: 4,
+              flex: 3,
               child: ListView(
                 children: [
                   _buildCreateTeamSection(),
