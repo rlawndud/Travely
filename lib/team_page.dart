@@ -269,6 +269,13 @@ class _TeamPageState extends State<TeamPage> {
                 child: const Text('여행 시작', style: TextStyle(color: Colors.white)),
               ),
             ),
+            const SizedBox(
+              width: 200,
+              child: Text('얼굴 분석을 위한 모델을 생성해야\n사진촬영이 가능합니다',
+                style: TextStyle(
+                    color: Colors.black54,),
+                textAlign: TextAlign.center,),
+            ),
           ],
         ),
       ),
