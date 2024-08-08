@@ -1,8 +1,4 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:test2/album_screen/photo_detail_screen.dart';
 import 'package:test2/model/memberImg.dart';
 import 'package:test2/model/picture.dart';

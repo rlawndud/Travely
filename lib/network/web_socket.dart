@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:test2/model/picture.dart';
 import 'package:test2/value/global_variable.dart';
 import 'package:test2/model/team.dart';
-import 'package:test2/team_page.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 

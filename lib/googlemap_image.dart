@@ -15,7 +15,6 @@ class GoogleMapCluster extends StatefulWidget {
 }
 
 class _GoogleMapClusterState extends State<GoogleMapCluster> {
-  late GoogleMapController _controller;
   late ClusterManager<ImageMarkerCluster> _clusterManager;
   final Set<Marker> _markers = {};
   final CameraPosition _initialCameraPosition = CameraPosition(
@@ -52,10 +51,10 @@ class _GoogleMapClusterState extends State<GoogleMapCluster> {
       markerId: MarkerId(cluster.getId()),
       position: cluster.location,
       onTap: () {
-        print('---- $cluster');
-        cluster.items.forEach((p) => print(p.name));
+        debugPrint('---- $cluster');
+        cluster.items.forEach((p) => debugPrint(p.name));
       },
-      icon: await _getMarkerBitmap( 90,
+      icon: await _getMarkerBitmap(85,
           text: cluster.isMultiple ? cluster.count.toString() : null,
           image: cluster.items.isNotEmpty ? cluster.items.first.imgUint : null),
     );
@@ -70,7 +69,6 @@ class _GoogleMapClusterState extends State<GoogleMapCluster> {
 
     // 테두리 두께 설정
     final double orangeBorderThickness = size * 0.03; // 3% of the size
-    final double whiteBorderThickness = size * 0.02; // 2% of the size
 
     // 외부 네모 마커 그리기 (오렌지색 테두리)
     final double borderRadius = size / 12;
@@ -160,7 +158,7 @@ class _GoogleMapClusterState extends State<GoogleMapCluster> {
     final int? currentTeamNo = teamManager.getTeamNoByTeamName(currentTeam);
 
     if (currentTeamNo == null) {
-      print('팀을 설정하세요');
+      debugPrint('팀을 설정하세요');
       return;
     }
 
@@ -186,7 +184,6 @@ class _GoogleMapClusterState extends State<GoogleMapCluster> {
         children: [
           GoogleMap(
             onMapCreated: (GoogleMapController controller) {
-              _controller = controller;
               _clusterManager.setMapId(controller.mapId);
             },
             initialCameraPosition: _initialCameraPosition,
@@ -198,5 +195,4 @@ class _GoogleMapClusterState extends State<GoogleMapCluster> {
       ),
     );
   }
-
 }

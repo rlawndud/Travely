@@ -1,3 +1,4 @@
+import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:test2/appbar/mypage/EditInfo.dart';
 
@@ -28,6 +29,7 @@ class MyPage extends StatelessWidget {
             leading: Icon(Icons.security),
             title: Text('어플 권한 설정'),
             trailing: Icon(Icons.navigate_next),
+            onTap: AppSettings.openAppSettings,
           ),
         ],
       ),
