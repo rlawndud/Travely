@@ -454,9 +454,7 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
               }
               _hideLogContent();
             },
-            myLocationEnabled: true,
-            scrollGesturesEnabled: true,
-            rotateGesturesEnabled: true,
+            myLocationEnabled: true
           ),
           Positioned(
             top: 50,
