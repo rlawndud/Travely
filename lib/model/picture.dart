@@ -16,8 +16,8 @@ class PictureEntity {
   List<String> pre_face;
   String pre_background;
   String pre_caption;
-  num latitude;
-  num longitude;
+  double latitude;
+  double longitude;
   String location;
   String date;
   String season;
@@ -48,8 +48,8 @@ class PictureEntity {
       preFaceList,
       json['pre_background'] as String,
       json['pre_caption'] as String,
-      json['latitude'] as num,
-      json['longitude'] as num,
+      json['latitude'] as double,
+      json['longitude'] as double,
       json['location'] as String,
       json['date'] as String,
       json['season'] as String,
