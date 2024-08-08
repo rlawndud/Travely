@@ -179,6 +179,7 @@ class _HomeState extends State<Home> {
             ),
           ),
           body: TabBarView(
+            physics: NeverScrollableScrollPhysics(),
             children: _pages, // 전체 리스트를 참조
           ),
           bottomNavigationBar: TabBar(
