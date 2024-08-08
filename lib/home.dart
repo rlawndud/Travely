@@ -14,6 +14,7 @@ import 'package:test2/album_screen/photo_folder_screen.dart';
 import 'package:test2/team_page.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:test2/value/label_markers.dart' as b;
 
 import 'model/picture.dart';
 
@@ -198,6 +199,7 @@ class _HomeState extends State<Home> {
 
 class GoogleMapSample extends StatefulWidget {
   final String userId;
+
   const GoogleMapSample({super.key, required this.userId});
 
   @override
@@ -210,31 +212,28 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
   final Map<MarkerId, int> _markerClickCounts = {};
   bool _isAddingMarker = false;
   bool _isDeletingMarker = false;
-  bool _isLogVisible = false; // 로그 내용 표시 여부를 제어하는 변수 추가
+  bool _isLogVisible = false;
 
   Position? _currentPosition;
   late StreamSubscription<Position> _positionStream;
+  late Timer _locationUpdateTimer;
+  late WebSocketService _webSocketService;
 
   final LocationSettings _locationSettings = const LocationSettings(
     accuracy: LocationAccuracy.best,
     distanceFilter: 10,
   );
 
-  final List<String> _logLines = []; // 로그 항목 리스트
-  late Timer _locationUpdateTimer; // Timer 추가
-
-  late WebSocketService _webSocketService;
+  final List<String> _logLines = [];
 
   @override
   void initState() {
+    super.initState();
     _initLocationTracking();
-
     _webSocketService = WebSocketService();
     _webSocketService.init();
-    _startLocationUpdateTimer(); // 내위치 주기적으로 보내기
-    _startListeningToFriendLocationsIfNeeded(); // 팀원 위치 수신 시작
-
-    super.initState();
+    _startLocationUpdateTimer();
+    _startListeningToFriendLocationsIfNeeded();
   }
 
   Future<void> _initLocationTracking() async {
@@ -245,7 +244,7 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
       ).listen((Position position) {
         setState(() {
           _currentPosition = position;
-          _updateMapLocation(); // 지도 위치 업데이트
+          _updateMapLocation();
           _sendLocationToServer();
         });
       });
@@ -261,62 +260,51 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
     }
   }
 
-  // 위치 정보를 주기적으로 보내는 타이머 시작
   void _startLocationUpdateTimer() {
-    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 10), (Timer timer) async {
+    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 3), (Timer timer) async {
       await _sendLocationToServer();
     });
   }
 
-  // webSocket에 내 위치 보내기
   Future<void> _sendLocationToServer() async {
     TeamManager teamManager = TeamManager();
-    
+
     final data = {
-      'id': widget.userId, // 사용자 ID
+      'id': widget.userId,
       'latitude': _currentPosition!.latitude,
       'longitude': _currentPosition!.longitude,
-      'teamNo' : teamManager.getTeamNoByTeamName(teamManager.currentTeam)
+      'teamNo': teamManager.getTeamNoByTeamName(teamManager.currentTeam),
+      'teamName': teamManager.currentTeam
     };
-    print(teamManager.getTeamNoByTeamName(teamManager.currentTeam));
-    print(teamManager.currentTeam);
     await _webSocketService.transmit(data, 'UpdateLocation');
   }
 
-  // 팀원 위치 정보를 수신하여 지도에 표시
   Future<void> _listenToFriendLocations() async {
     _webSocketService.responseStream.listen((message) {
       if (message['command'] == 'TeamLocationUpdate') {
-          final friendId = message['id'];
-          final latitude = message['latitude'];
-          final longitude = message['longitude'];
-          final teamNo = message['teamNo'];
+        final friendId = message['id'];
+        final latitude = message['latitude'];
+        final longitude = message['longitude'];
+        final teamNo = message['teamNo'];
+        final teamName = message['teamName'];
 
-          print(friendId);
-          print(latitude);
-          print(longitude);
-          print(teamNo);
+        final MarkerId markerId = MarkerId('$friendId');
 
-          final MarkerId markerId = MarkerId('$friendId');
+        final b.LabelMarker marker = b.LabelMarker(
+          label: '팀방: $teamName\n팀원: $friendId',
+          markerId: markerId,
+          position: LatLng(latitude, longitude),
+          backgroundColor: Colors.green
+        );
 
-          final Marker marker = Marker(
-            markerId: markerId,
-            position: LatLng(latitude, longitude),
-            infoWindow: InfoWindow(
-              title: '$friendId',
-            ),
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-          );
-
-          setState(() {
-            _markers.removeWhere((marker) => marker.markerId == markerId);
-            _markers.add(marker);
-          });
+        setState(() {
+          _markers.removeWhere((marker) => marker.markerId == markerId);
+          _markers.addLabelMarker(marker);
+        });
       }
     });
   }
 
-  // 위치 권한을 확인하고 요청하는 함수
   Future<bool> _checkLocationPermission() async {
     var status = await Permission.location.status;
     if (!status.isGranted) {
@@ -325,7 +313,6 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
     return status.isGranted;
   }
 
-  // 현재 위치를 기반으로 지도와 마커를 업데이트하는 함수
   Future<void> _updateMapLocation() async {
     if (_currentPosition != null) {
       final GoogleMapController mapController = await _controller.future;
@@ -334,12 +321,8 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
         _currentPosition!.longitude,
       );
 
-      // 지도 위치 업데이트
-      mapController.animateCamera(
-        CameraUpdate.newLatLng(position),
-      );
+      mapController.animateCamera(CameraUpdate.newLatLng(position));
 
-      // 현재 위치를 표시하는 마커 업데이트
       const MarkerId markerId = MarkerId('current_location');
       final Marker marker = Marker(
         markerId: markerId,
@@ -353,12 +336,11 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
 
       setState(() {
         _markers.removeWhere((m) => m.markerId == markerId);
-        _markers.add(marker);
+        // _markers.add(marker);
       });
     }
   }
 
-  // 위치 정보를 메모리 내에 추가
   void _logPosition(Position position) {
     final timeStamp = DateTime.now().toIso8601String();
     final log = '[$timeStamp]\n'
@@ -366,11 +348,10 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
 
     setState(() {
       _logLines.add(log);
-      _isLogVisible = true; // 로그 내용 표시
+      _isLogVisible = true;
     });
   }
 
-  // 현재 위치로 지도를 이동하는 함수
   Future<void> _moveToCurrentLocation() async {
     if (_currentPosition != null) {
       final GoogleMapController mapController = await _controller.future;
@@ -381,24 +362,22 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
       mapController.animateCamera(CameraUpdate.newLatLng(position));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Current position is not available.')),
+        const SnackBar(content: Text('현재 위치를 사용할 수 없습니다.')),
       );
     }
   }
 
   @override
   void dispose() {
-    _positionStream.cancel(); // 위치 스트림 구독 취소
+    _positionStream.cancel();
     _webSocketService.dispose();
     super.dispose();
   }
 
-  // GoogleMap이 생성될 때 호출되는 함수
   void _onMapCreated(GoogleMapController controller) {
     _controller.complete(controller);
   }
 
-  // 마커 추가 모드를 토글하는 함수
   void _toggleAddMarkerMode() {
     setState(() {
       _isAddingMarker = !_isAddingMarker;
@@ -406,7 +385,6 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
     });
   }
 
-  // 마커 삭제 모드를 토글하는 함수
   void _toggleDeleteMarkerMode() {
     setState(() {
       _isDeletingMarker = !_isDeletingMarker;
@@ -414,7 +392,6 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
     });
   }
 
-  // 지도에 마커를 추가하는 함수
   void _addMarker(LatLng position) {
     setState(() {
       final markerId = MarkerId(position.toString());
@@ -433,9 +410,9 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
         ),
         onTap: () {
           if (_isDeletingMarker) {
-            _removeMarker(markerId); // 마커 삭제
+            _removeMarker(markerId);
           } else {
-            _incrementMarkerClickCount(markerId); // 마커 클릭 수 증가
+            _incrementMarkerClickCount(markerId);
           }
         },
       );
@@ -443,7 +420,6 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
     });
   }
 
-  // 마커를 삭제하는 함수
   void _removeMarker(MarkerId markerId) {
     setState(() {
       _markers.removeWhere((marker) => marker.markerId == markerId);
@@ -451,7 +427,6 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
     });
   }
 
-  // 마커의 클릭 수를 증가시키는 함수
   void _incrementMarkerClickCount(MarkerId markerId) {
     setState(() {
       _markerClickCounts[markerId] = _markerClickCounts[markerId]! + 1;
@@ -465,25 +440,22 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
     });
   }
 
-  // 지도를 확대하는 함수
   void _zoomIn() {
     _controller.future.then((controller) {
       controller.animateCamera(CameraUpdate.zoomIn());
     });
   }
 
-  // 지도를 축소하는 함수
   void _zoomOut() {
     _controller.future.then((controller) {
       controller.animateCamera(CameraUpdate.zoomOut());
     });
   }
 
-  // 지도를 클릭할 때 로그 내용이 표시되어 있을 경우 로그 내용만 숨기는 함수
   void _hideLogContent() {
     setState(() {
       if (_isLogVisible) {
-        _isLogVisible = false; // 로그 내용을 숨김
+        _isLogVisible = false;
       }
     });
   }
@@ -505,8 +477,9 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
               if (_isAddingMarker) {
                 _addMarker(position);
               }
-              _hideLogContent(); // 지도를 클릭할 때 로그 내용 숨기기
+              _hideLogContent();
             },
+            myLocationEnabled: true,
           ),
           Positioned(
             top: 50,
@@ -517,26 +490,26 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
                   onPressed: _zoomIn,
                   mini: true,
                   heroTag: null,
-                  child: Icon(Icons.add), // 지도를 확대하는 버튼
+                  child: Icon(Icons.add),
                 ),
                 SizedBox(height: 10),
                 FloatingActionButton(
                   onPressed: _zoomOut,
                   mini: true,
                   heroTag: null,
-                  child: const Icon(Icons.remove), // 지도를 축소하는 버튼
+                  child: const Icon(Icons.remove),
                 ),
                 SizedBox(height: 20),
                 FloatingActionButton(
                   onPressed: _toggleAddMarkerMode,
                   backgroundColor: _isAddingMarker ? Colors.green : Colors.blue,
-                  child: const Icon(Icons.add_location_alt), // 마커 추가 버튼
+                  child: const Icon(Icons.add_location_alt),
                 ),
                 SizedBox(height: 10),
                 FloatingActionButton(
                   onPressed: _toggleDeleteMarkerMode,
                   backgroundColor: _isDeletingMarker ? Colors.red : Colors.blue,
-                  child: const Icon(Icons.delete), // 마커 삭제 버튼
+                  child: const Icon(Icons.delete),
                 ),
                 SizedBox(height: 10),
                 FloatingActionButton(
@@ -546,18 +519,17 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
                     }
                   },
                   backgroundColor: Colors.orange,
-                  child: const Icon(Icons.refresh), // 로그 추가 버튼
+                  child: const Icon(Icons.refresh),
                 ),
                 SizedBox(height: 10),
                 FloatingActionButton(
                   onPressed: _moveToCurrentLocation,
                   backgroundColor: Colors.blueAccent,
-                  child: const Icon(Icons.my_location), // 현재 위치로 이동 버튼
+                  child: const Icon(Icons.my_location),
                 ),
               ],
             ),
           ),
-          // 로그 내용이 표시되어야 할 때만 표시
           if (_isLogVisible)
             Positioned(
               bottom: 10,
@@ -566,11 +538,10 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
               child: Container(
                 padding: EdgeInsets.all(10),
                 color: Colors.white,
-                height: 200, // 로그 화면의 높이를 제한하여 2개의 항목만 보이게 함
+                height: 200,
                 child: ListView.builder(
                   itemCount: _logLines.length,
                   itemBuilder: (context, index) {
-                    // 모든 로그 항목 표시
                     return ListTile(
                       title: Text(
                         _logLines[index],
