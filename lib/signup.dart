@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -46,10 +47,11 @@ class _SignupState extends State<Signup> {
     Map<String, dynamic> data = {'id': _idController.text};
 
     var jsonResponse = await _webSocketService.transmit(data, 'IdDuplicate');
+    print(jsonResponse);
 
     if (jsonResponse['result'] == 'True') {
       setState(() {
-        _errorMsg = "이미 존재하는 아이디입니다.";
+        _errorMsg = "이미 존재하는 아이디입니다";
         _isIdAvailable = false;
       });
     } else if (jsonResponse['result'] == 'False') {
@@ -116,7 +118,7 @@ class _SignupState extends State<Signup> {
 
   void _showExplainToast() {
     Fluttertoast.showToast(
-        msg: '다섯 장의 얼굴 사진을 찍어주세요.',
+        msg: '다섯 장의 얼굴 사진을 찍어주세요',
         gravity: ToastGravity.BOTTOM,
         backgroundColor: Colors.white70,
         fontSize: 12,
@@ -144,7 +146,7 @@ class _SignupState extends State<Signup> {
       _webSocketService.transmit(mem.toJson(), 'AddMember');
       _webSocketService.transmit(memImg.toJson(), 'AddMemImg');
       Fluttertoast.showToast(
-          msg: '회원가입 성공!',
+          msg: '회원가입 완료',
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.white70,
           fontSize: 12,
@@ -275,7 +277,7 @@ class _SignupState extends State<Signup> {
                             ),
                           ),
                           Text(
-                            '해당 사진은 어플의 얼굴분석에 사용되며,\n 상업적으로 이용되지 않습니다.',
+                            '해당 사진은 어플의 얼굴분석에 사용되며,\n 상업적으로 이용되지 않습니다',
                             style: TextStyle(
                                 color: Colors.black54,
                                 fontSize: 9,

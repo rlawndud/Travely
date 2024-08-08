@@ -20,7 +20,7 @@ class MyPage extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const EditInfoPage()),
+                MaterialPageRoute(builder: (context) => EditInfoPage()),
               );
             },
           ),

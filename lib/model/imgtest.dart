@@ -17,11 +17,10 @@ class album extends StatefulWidget {
 }
 
 class _albumState extends State<album> {
-  final WebSocketService _webSocketService = WebSocketService();
+  WebSocketService _webSocketService = WebSocketService();
   List<PictureEntity> images = [];
   List<Uint8List> pic = [];
   TeamManager teamManager = TeamManager();
-  final PicManager _picManager = PicManager();
   String currentTeamName = '';
   int? currentTeam;
   String prediction='';
@@ -32,7 +31,6 @@ class _albumState extends State<album> {
     super.initState();
     currentTeamName = TeamManager().currentTeam;
     currentTeam = teamManager.getTeamNoByTeamName(currentTeamName);
-    _picManager.initialize(widget.id);
   }
 
   Future<void> _loadImage() async {
@@ -40,7 +38,7 @@ class _albumState extends State<album> {
       Map<String,dynamic> response = await _webSocketService.transmit({'id': widget.id}, 'GetAllImage');
       debugPrint('이미지 로드 응답 : $response');
 
-      if (response != null && response['img_data'] != null) {
+      if (response['img_data'] != null) {
         setState(() {
           PictureEntity p_pic = PictureEntity.fromJson(response);
           images.add(p_pic);
@@ -82,9 +80,10 @@ class _albumState extends State<album> {
         };
         print(data);
         var response = await _webSocketService.transmit(data, 'AddImage');
+
         debugPrint('서버 응답 : $response');
 
-        if (response['success'] == true) {
+        if (response != null && response['success'] == true) {
           setState(() {
             images.add(PictureEntity.fromJson(response));
             pic.add(BytesToImage(response['img_data']));

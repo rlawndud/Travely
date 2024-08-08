@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:test2/appbar/friend/AddFriendPage.dart';
+import 'package:test2/appbar/friend/AddFriendPage.dart'; // 오타 수정
 import 'FriendRequestsPage.dart';
 import 'FriendRequestModel.dart';
 import 'FriendListPage.dart';
-import 'FriendEditPage.dart';
+import 'FriendEditPage.dart'; // 새로 추가된 파일
 
 class Friend extends StatefulWidget {
   const Friend({super.key}); // const 생성자
@@ -27,21 +27,21 @@ class _FriendState extends State<Friend> {
       friendRequests.remove(request);
       acceptedFriends.add(request); // 수락된 친구를 리스트에 추가
     });
-    print('Accepted friend request from: ${request.senderName}');
+    print('수락된 친구 요청: ${request.senderName}');
   }
 
   void _declineFriendRequest(FriendRequest request) {
     setState(() {
       friendRequests.remove(request);
     });
-    print('Declined friend request from: ${request.senderName}');
+    print('거부된 친구 요청: ${request.senderName}');
   }
 
   void _removeFriend(FriendRequest friend) {
     setState(() {
       acceptedFriends.remove(friend); // 친구 삭제
     });
-    print('Removed friend: ${friend.senderName}');
+    print('삭제된 친구: ${friend.senderName}');
   }
 
   @override

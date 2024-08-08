@@ -151,7 +151,7 @@ class TeamManager with ChangeNotifier {
         final Map<String, dynamic> data = json.decode(contents);
         _curTeam = data['currentTeam'] as String;
       } catch (e) {
-        print('Error loading current team: $e');
+        print('current team 로딩중 문제발생 : $e');
         _curTeam = ''; // 파일 읽기 실패 시 빈 문자열로 설정
       }
     } else {

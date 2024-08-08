@@ -5,8 +5,8 @@ import 'package:test2/model/picture.dart';
 import 'package:test2/util/auto_login.dart';
 import 'package:test2/value/color.dart';
 import 'package:test2/model/team.dart';
-import 'model/member.dart';
-import 'network/web_socket.dart';
+import 'package:test2/model/member.dart';
+import 'package:test2/network/web_socket.dart';
 
 class SettingsPage extends StatefulWidget {
   final Member user;
@@ -104,7 +104,7 @@ class _SettingsPageState extends State<SettingsPage> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.'),
+              Text('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다'),
               TextField(
                 controller: _pwController,
                 decoration: InputDecoration(
@@ -113,7 +113,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 focusNode: _focusNode,
               ),
               Text(
-                '탈퇴하시려면 비밀번호를 입력해주세요.',
+                '탈퇴하시려면 비밀번호를 입력해주세요',
                 style: TextStyle(color: Colors.black87, fontSize: 11),
               )
             ],

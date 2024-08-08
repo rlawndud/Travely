@@ -14,8 +14,16 @@ class PictureEntity {
   int team_num;
   List<String> pre_face;
   String pre_background;
+  String pre_caption;
+  double latitude;
+  double longitude;
+  String location;
+  String date;
+  String season;
 
-  PictureEntity(this.img_num, this.user_id, this.img_data, this.team_num, this.pre_face, this.pre_background);
+
+  PictureEntity(this.img_num, this.user_id, this.img_data, this.team_num, this.pre_face, this.pre_background, this.pre_caption,
+      this.latitude, this.longitude, this.location, this.date, this.season);
 
   factory PictureEntity.fromJson(Map<String, dynamic> json) {
     var preFaceData = json['pre_face'];
@@ -38,6 +46,12 @@ class PictureEntity {
       json['teamno'] as int,
       preFaceList,
       json['pre_background'] as String,
+      json['pre_caption'] as String,
+      json['latitude'] as double,
+      json['longitude'] as double,
+      json['location'] as String,
+      json['date'] as String,
+      json['season'] as String,
     );
   }
 
@@ -49,11 +63,17 @@ class PictureEntity {
       'teamno': team_num,
       'pre_face': jsonEncode(pre_face),
       'pre_background': pre_background,
+      'pre_caption': pre_caption,
+      'latitude': latitude,
+      'longitude': longitude,
+      'location': location,
+      'date': date,
+      'season':season,
     };
   }
 
   String printPredict() {
-    return '사진 속 인물: $pre_face\n사진 배경: $pre_background';
+    return '촬영날짜: $date\n장소: $location\n사진 속 인물: $pre_face\n사진 배경: $pre_background\n요약문장: $pre_caption';
   }
 
   @override
@@ -93,7 +113,7 @@ class PicManager with ChangeNotifier {
     _userPictures[_currentUserId] ??= [];
     _userPictures[_currentUserId]!.add(picture);
     _imageStreamController.add(picture);
-    await Future.delayed(const Duration(milliseconds: 10));
+    await Future.delayed(Duration(milliseconds: 10));
     await savePictures();
     notifyListeners();
   }
@@ -126,7 +146,7 @@ class PicManager with ChangeNotifier {
         PictureEntity pic = PictureEntity.fromJson(item);
         _userPictures[_currentUserId]!.add(pic);
         _imageStreamController.add(pic);
-        await Future.delayed(const Duration(milliseconds: 10));
+        await Future.delayed(Duration(milliseconds: 10));
       }
     } else {
       _userPictures[_currentUserId] = [];
@@ -147,21 +167,6 @@ class PicManager with ChangeNotifier {
 
     if (response.containsKey('result')) {
       print('현재 업데이트할 이미지가 없음');
-    }
-  }
-
-  Future<void> uploadImage(File imageFile, int teamNo) async {
-    String base64Image = base64Encode(imageFile.readAsBytesSync());
-    Map<String, dynamic> data = {
-      'id': _currentUserId,
-      'teamno': teamNo,
-      'image': base64Image,
-    };
-
-    var response = await _webSocketService.transmit(data, 'AddImage');
-    if (response.containsKey('new_image')) {
-      PictureEntity newPic = PictureEntity.fromJson(response['new_image']);
-      await addPicture(newPic);
     }
   }
 

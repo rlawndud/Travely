@@ -9,12 +9,12 @@ class TeamManagementPage extends StatefulWidget {
   final ValueChanged<String> onTeamDelete;
 
   const TeamManagementPage({
+    super.key,
     required this.teams,
     required this.initialCurrentTeam,
     required this.userId,
     required this.onTeamSwitch,
-    required this.onTeamDelete,
-    super.key
+    required this.onTeamDelete
   });
 
   @override

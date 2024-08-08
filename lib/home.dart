@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:test2/appbar/friend/Friend.dart';
 import 'package:test2/appbar/mypage/My_Page.dart';
-import 'package:test2/Settings.dart';
+import 'package:test2/appbar/Settings.dart';
 import 'package:test2/model/member.dart';
 import 'package:test2/model/imgtest.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -13,7 +13,7 @@ import 'package:test2/network/web_socket.dart';
 import 'package:test2/album_screen/photo_folder_screen.dart';
 import 'package:test2/team_page.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:test2/util/permission.dart';
 import 'package:test2/value/label_markers.dart' as b;
 
 import 'model/picture.dart';
@@ -311,11 +311,8 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
   }
 
   Future<bool> _checkLocationPermission() async {
-    var status = await Permission.location.status;
-    if (!status.isGranted) {
-      status = await Permission.location.request();
-    }
-    return status.isGranted;
+    final permissionStatus = await PermissionManager.checkAndRequestPermissions();
+    return permissionStatus;
   }
 
   Future<void> _updateMapLocation() async {

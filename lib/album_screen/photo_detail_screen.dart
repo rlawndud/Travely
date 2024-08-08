@@ -46,7 +46,6 @@ class ImageDetailScreen extends StatelessWidget {
   }
 
   String _getImageAnalysis() {
-
     return picture.printPredict();
   }
 }

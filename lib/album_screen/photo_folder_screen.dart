@@ -16,19 +16,16 @@ class PhotoFolderScreen extends StatefulWidget {
 class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
   final TeamManager _teamManager = TeamManager();
   final PicManager _picManager = PicManager();
-  late StreamSubscription<PictureEntity> _picSubscription;
   List<String> teamMembers = [];
 
   @override
   void initState() {
     super.initState();
     _loadTeamFolders();
-    _subscribeToNewImages();
   }
 
   @override
   void dispose() {
-    _picSubscription.cancel();
     super.dispose();
   }
 
@@ -80,18 +77,6 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
       }
     }
     return [];
-  }
-
-  void _subscribeToNewImages() {
-    _picSubscription = _picManager.imageStream.listen((newImage) {
-      setState(() {});
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('새로운 사진이 추가되었습니다: ${newImage.img_num}'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    });
   }
 
   @override
