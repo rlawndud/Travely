@@ -294,11 +294,16 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
           label: '팀방: $teamName\n팀원: $friendId',
           markerId: markerId,
           position: LatLng(latitude, longitude),
-          backgroundColor: Colors.green
+          backgroundColor: Colors.lightBlueAccent
         );
 
         setState(() {
-          _markers.removeWhere((marker) => marker.markerId == markerId);
+          // 마커가 존재하는지 확인
+          if (_markers.any((marker) => marker.markerId == markerId)) {
+            // 마커 위치 업데이트
+            _markers.removeWhere((marker) => marker.markerId == markerId);
+          }
+          // 새 마커 추가 또는 업데이트된 마커 추가
           _markers.addLabelMarker(marker);
         });
       }
@@ -350,21 +355,6 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
       _logLines.add(log);
       _isLogVisible = true;
     });
-  }
-
-  Future<void> _moveToCurrentLocation() async {
-    if (_currentPosition != null) {
-      final GoogleMapController mapController = await _controller.future;
-      final LatLng position = LatLng(
-        _currentPosition!.latitude,
-        _currentPosition!.longitude,
-      );
-      mapController.animateCamera(CameraUpdate.newLatLng(position));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('현재 위치를 사용할 수 없습니다.')),
-      );
-    }
   }
 
   @override
@@ -440,18 +430,6 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
     });
   }
 
-  void _zoomIn() {
-    _controller.future.then((controller) {
-      controller.animateCamera(CameraUpdate.zoomIn());
-    });
-  }
-
-  void _zoomOut() {
-    _controller.future.then((controller) {
-      controller.animateCamera(CameraUpdate.zoomOut());
-    });
-  }
-
   void _hideLogContent() {
     setState(() {
       if (_isLogVisible) {
@@ -480,26 +458,15 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
               _hideLogContent();
             },
             myLocationEnabled: true,
+            myLocationButtonEnabled: true,
+            scrollGesturesEnabled: true,
+            rotateGesturesEnabled: true,
           ),
           Positioned(
             top: 50,
             right: 10,
             child: Column(
               children: [
-                FloatingActionButton(
-                  onPressed: _zoomIn,
-                  mini: true,
-                  heroTag: null,
-                  child: Icon(Icons.add),
-                ),
-                SizedBox(height: 10),
-                FloatingActionButton(
-                  onPressed: _zoomOut,
-                  mini: true,
-                  heroTag: null,
-                  child: const Icon(Icons.remove),
-                ),
-                SizedBox(height: 20),
                 FloatingActionButton(
                   onPressed: _toggleAddMarkerMode,
                   backgroundColor: _isAddingMarker ? Colors.green : Colors.blue,
@@ -522,11 +489,6 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
                   child: const Icon(Icons.refresh),
                 ),
                 SizedBox(height: 10),
-                FloatingActionButton(
-                  onPressed: _moveToCurrentLocation,
-                  backgroundColor: Colors.blueAccent,
-                  child: const Icon(Icons.my_location),
-                ),
               ],
             ),
           ),

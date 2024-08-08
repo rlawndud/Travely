@@ -195,7 +195,7 @@ class LabelMarker {
     this.backgroundColor = Colors.blueAccent,
     this.textStyle = const TextStyle(
       fontSize: 40.0,
-      color: Colors.white,
+      color: Colors.black,
       letterSpacing: 1.0,
       fontFamily: 'Roboto Bold',
     ),
