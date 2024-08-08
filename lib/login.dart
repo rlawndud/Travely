@@ -41,7 +41,7 @@ class Login extends StatelessWidget {
       } else {
         Member mem = Member.fromJson(response);
         //Member mem = new Member('id', 'password', 'name', 'phone');
-        autoLogin.setLoginInfo(_isAutoLogin, new UserLoginState(id, pw));
+        autoLogin.setLoginInfo(_isAutoLogin, UserLoginState(id, pw));
         await TeamManager().initialize(mem.id);
         Navigator.pushReplacementNamed(context, '/home',
             arguments: {'user': mem});

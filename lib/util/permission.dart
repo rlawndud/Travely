@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionManager{
@@ -28,7 +29,12 @@ class PermissionManager{
     bool cameraGranted = await requestCameraPermission();
 
     if (!locationGranted || !cameraGranted) {
-      print('일부 권한이 거부되었습니다. 앱 기능이 제한될 수 있습니다.');
+      debugPrint('일부 권한이 거부되었습니다. 앱 기능이 제한될 수 있습니다.');
     }
   }
+
+  void openPermissionSetting() {
+    openAppSettings();
+  }
+
 }

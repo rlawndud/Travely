@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
 import 'model/team.dart';
 import 'network/web_socket.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import 'dart:convert';
 import 'team_management_page.dart';
 
 class TeamPage extends StatefulWidget {
@@ -226,6 +223,47 @@ class _TeamPageState extends State<TeamPage> {
     );
   }
 
+  Widget _buildManagementSection() {
+    return Card(
+      color: Colors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 200,
+              child: ElevatedButton(
+                onPressed: _navigateToTeamManagement,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pinkAccent,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: const Text('팀 관리', style: TextStyle(color: Colors.white)),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: 200,
+              child: ElevatedButton(
+                onPressed: _startTravel,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pinkAccent,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: const Text('여행 시작', style: TextStyle(color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -236,48 +274,14 @@ class _TeamPageState extends State<TeamPage> {
         child: Column(
           children: [
             Expanded(
-              flex: 3,
               child: ListView(
                 children: [
                   _buildCreateTeamSection(),
                   const SizedBox(height: 10),
                   _buildInviteSection(),
+                  const SizedBox(height: 200),
+                  _buildManagementSection(),
                 ],
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 200,
-                      child: ElevatedButton(
-                        onPressed: _navigateToTeamManagement,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.pinkAccent,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: const Text('팀 관리', style: TextStyle(color: Colors.white)),
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    SizedBox(
-                      width: 200,
-                      child: ElevatedButton(
-                        onPressed: _startTravel,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.pinkAccent,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: const Text('여행 시작', style: TextStyle(color: Colors.white)),
-                      ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ],

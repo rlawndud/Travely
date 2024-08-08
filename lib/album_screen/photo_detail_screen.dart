@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:test2/model/memberImg.dart';
 import 'package:test2/model/picture.dart';

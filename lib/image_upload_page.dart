@@ -57,9 +57,9 @@ class _ImageUploadState extends State<ImageUpload> {
     var response = await request.send();
 
     if (response.statusCode == 200) {
-      print('Image uploaded');
+      debugPrint('Image uploaded');
     } else {
-      print('Upload failed');
+      debugPrint('Upload failed');
     }
   }
 
@@ -67,15 +67,15 @@ class _ImageUploadState extends State<ImageUpload> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.all(10),
+        padding: const EdgeInsets.all(10),
         child: Column(
           children: [
-            SizedBox(height: 50),
+            const SizedBox(height: 50),
             Row(
               children: [
                 Container(
-                  margin: EdgeInsets.all(10),
-                  padding: EdgeInsets.all(5),
+                  margin: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(5),
                   decoration: BoxDecoration(
                     color: Colors.lightBlueAccent,
                     borderRadius: BorderRadius.circular(5),
@@ -97,7 +97,7 @@ class _ImageUploadState extends State<ImageUpload> {
                         uploadImage(image);
                       }
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.add_a_photo,
                       size: 30,
                       color: Colors.white,
@@ -105,8 +105,8 @@ class _ImageUploadState extends State<ImageUpload> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.all(10),
-                  padding: EdgeInsets.all(5),
+                  margin: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(5),
                   decoration: BoxDecoration(
                     color: Colors.lightBlueAccent,
                     borderRadius: BorderRadius.circular(5),
@@ -128,7 +128,7 @@ class _ImageUploadState extends State<ImageUpload> {
                         uploadImage(img);
                       }
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.add_photo_alternate_outlined,
                       size: 30,
                       color: Colors.white,
@@ -138,12 +138,12 @@ class _ImageUploadState extends State<ImageUpload> {
               ],
             ),
             Container(
-              margin: EdgeInsets.all(10),
+              margin: const EdgeInsets.all(10),
               child: GridView.builder(
-                padding: EdgeInsets.all(0),
+                padding: const EdgeInsets.all(0),
                 shrinkWrap: true,
                 itemCount: images.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   childAspectRatio: 1 / 1,
                   mainAxisSpacing: 10,
@@ -169,8 +169,8 @@ class _ImageUploadState extends State<ImageUpload> {
                         ),
                         child: IconButton(
                           padding: EdgeInsets.zero,
-                          constraints: BoxConstraints(),
-                          icon: Icon(Icons.close, color: Colors.white, size: 15),
+                          constraints: const BoxConstraints(),
+                          icon: const Icon(Icons.close, color: Colors.white, size: 15),
                           onPressed: () {
                             setState(() {
                               images.remove(images[index]);

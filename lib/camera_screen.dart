@@ -38,6 +38,9 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> _initializeCamera() async {
+    if (_controller != null) {
+      await _controller!.dispose();
+    }
     _cameras = await availableCameras();
     _controller = CameraController(
       _cameras![_selectedCameraIdx],
@@ -53,38 +56,58 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void dispose() {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    _controller?.dispose();
+    _controller?.dispose().then((_){
+      if(mounted){
+        setState(() {
+          _controller = null;
+        });
+      }
+    });
     super.dispose();
   }
 
-  Future<void> uploadImage(XFile image) async {
-    try{
-      var images_string = XFileToBytes(image);
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
+  @override
+  void deactivate() {
+    _controller?.dispose();
+    super.deactivate();
+  }
+
+  Future<String> uploadImage(XFile image) async {
+    String currentTeam = TeamManager().currentTeam;
+    if(currentTeam==''){
+      return '팀 미설정';
+    }else{
+      try{
+        var images_string = XFileToBytes(image);
+        LocationPermission permission = await Geolocator.checkPermission();
         if (permission == LocationPermission.denied) {
-          return Future.error('permissions are denied');
+          permission = await Geolocator.requestPermission();
+          if (permission == LocationPermission.denied) {
+            return '권한 부족';
+          }
         }
+        Position position = await Geolocator.getCurrentPosition();
+        String formatDate = DateFormat('yyyy/MM/dd HH:mm:ss').format(DateTime.now());
+        Map<String, dynamic> data = {
+          'id': PicManager().getCurrentId(),
+          'teamno': TeamManager().getTeamNoByTeamName(currentTeam),
+          'image': images_string,
+          'location': position,
+          'date': formatDate,
+        };
+        debugPrint('location: ${data['location']}, date: ${data['date']}');
+        var response = await _webSocketService.transmit(data, 'AddImage');
+        if(response['result']=='True'){
+          setState(() {
+            _lastCapturedImage = image;
+          });
+        }else if(response['error']=='DB 오류 발생'){
+          return '모델 생성 필요';
+        }
+      }catch(e){
+        e.printError;
       }
-      Position position = await Geolocator.getCurrentPosition();
-      String formatDate = DateFormat('yyyy/MM/dd HH:mm:ss').format(DateTime.now());
-      Map<String, dynamic> data = {
-        'id': PicManager().getCurrentId(),
-        'teamno': TeamManager().getTeamNoByTeamName(TeamManager().currentTeam),
-        'image': images_string,
-        'location': position,
-        'date': formatDate,
-      };
-      print('location: ${data['location']}, date: ${data['date']}');
-      var response = await _webSocketService.transmit(data, 'AddImage');
-      if(response['result']=='True'){
-        setState(() {
-          _lastCapturedImage = image;
-        });
-      }
-    }catch(e){
-      e.printError;
+      return '촬영 성공';
     }
   }
 
@@ -92,8 +115,8 @@ class _CameraScreenState extends State<CameraScreen> {
     if (_cameras!.length > 1) {
       setState(() {
         _selectedCameraIdx = (_selectedCameraIdx + 1) % _cameras!.length;
-        _initializeCamera();
       });
+      _initializeCamera();
     }
   }
 
@@ -134,7 +157,7 @@ class _CameraScreenState extends State<CameraScreen> {
     if (_controller == null || !_controller!.value.isInitialized) {
       return Container(
         color: Colors.black,
-        child: Center(
+        child: const Center(
           child: CircularProgressIndicator(),
         ),
       );
@@ -164,7 +187,7 @@ class _CameraScreenState extends State<CameraScreen> {
             left: 0,
             right: 0,
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -184,7 +207,7 @@ class _CameraScreenState extends State<CameraScreen> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: IconButton(
-                      icon: Icon(Icons.cameraswitch, color: Colors.white),
+                      icon: const Icon(Icons.cameraswitch, color: Colors.white),
                       onPressed: _toggleCameraLens,
                     ),
                   ),
@@ -208,12 +231,41 @@ class _CameraScreenState extends State<CameraScreen> {
                     onPressed: () async {
                       try {
                         final image = await _controller!.takePicture();
-                        await uploadImage(image);
-                      } catch (e) {
-                        print('Error taking picture: $e');
+                        var result = await uploadImage(image);
+                        String message;
+                        Color backgroundColor;
+
+                        switch(result) {
+                          case '촬영 성공':
+                            message = '사진이 성공적으로 촬영되었습니다.';
+                            backgroundColor = Colors.green;
+                            break;
+                          case '팀 미설정':
+                            message = '팀이 설정되지 않았습니다. 팀을 먼저 설정해주세요.';
+                            backgroundColor = Colors.orange;
+                            break;
+                          case '모델 생성 필요':
+                            message = '얼굴 모델이 생성되지 않았습니다. 여행 시작을 먼저 해주세요.';
+                            backgroundColor = Colors.orange;
+                            break;
+                          case '권한 부족':
+                            message = '위치 권한이 필요합니다. 설정에서 권한을 허용해주세요.';
+                            backgroundColor = Colors.red;
+                            break;
+                          default:
+                            message = '사진 촬영 중 오류가 발생했습니다.';
+                            backgroundColor = Colors.red;
+                        }
+
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed to take picture: $e')),
+                          SnackBar(
+                            content: Text(message),
+                            backgroundColor: backgroundColor,
+                            duration: Duration(seconds: 2),
+                          ),
                         );
+                      } catch (e) {
+                        debugPrint('Error taking picture: $e');
                       }
                     },
                   ),
@@ -231,7 +283,7 @@ class _CameraScreenState extends State<CameraScreen> {
 class CustomCameraButton extends StatefulWidget {
   final VoidCallback onPressed;
 
-  CustomCameraButton({required this.onPressed});
+  const CustomCameraButton({super.key, required this.onPressed});
 
   @override
   _CustomCameraButtonState createState() => _CustomCameraButtonState();

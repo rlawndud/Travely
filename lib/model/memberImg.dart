@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-
-import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
 
 class MemberImg {

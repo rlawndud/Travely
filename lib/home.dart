@@ -124,62 +124,62 @@ class _HomeState extends State<Home> {
                   onDetailsPressed: () {},
                 ),
                 ListTile(
-                  leading: Icon(Icons.person),
+                  leading: const Icon(Icons.person),
                   iconColor: Colors.black38,
                   focusColor: Colors.black38,
-                  title: Text('My Page'),
+                  title: const Text('My Page'),
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const MyPage()),
                     );
                   },
-                  trailing: Icon(Icons.navigate_next),
+                  trailing: const Icon(Icons.navigate_next),
                 ),
                 ListTile(
-                  leading: Icon(Icons.group),
+                  leading: const Icon(Icons.group),
                   iconColor: Colors.black38,
                   focusColor: Colors.black38,
-                  title: Text('Friend'),
+                  title: const Text('Friend'),
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const Friend()),
                     );
                   },
-                  trailing: Icon(Icons.navigate_next),
+                  trailing: const Icon(Icons.navigate_next),
                 ),
                 ListTile(
-                  leading: Icon(Icons.settings),
+                  leading: const Icon(Icons.settings),
                   iconColor: Colors.black38,
                   focusColor: Colors.black38,
-                  title: Text('Settings'),
+                  title: const Text('Settings'),
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => SettingsPage(user: _user,)), // 여기 수정
                     );
                   },
-                  trailing: Icon(Icons.navigate_next),
+                  trailing: const Icon(Icons.navigate_next),
                 ),
                 ListTile(
-                  leading: Icon(Icons.question_answer),
+                  leading: const Icon(Icons.question_answer),
                   iconColor: Colors.black38,
                   focusColor: Colors.black38,
-                  title: Text('도움말'),
+                  title: const Text('도움말'),
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => album(id: _user.id,)), // 여기 수정
                     );
                   },
-                  trailing: Icon(Icons.navigate_next),
+                  trailing: const Icon(Icons.navigate_next),
                 ),
               ],
             ),
           ),
           body: TabBarView(
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             children: _pages, // 전체 리스트를 참조
           ),
           bottomNavigationBar: TabBar(

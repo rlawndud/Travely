@@ -1,7 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:test2/login.dart';
 import 'package:test2/model/userLoginState.dart';
 
 class AutoLogin{
@@ -10,7 +8,7 @@ class AutoLogin{
   static final AutoLogin _instance = AutoLogin._internal();
   final Future<SharedPreferences> _manager = SharedPreferences.getInstance();
 
-  AutoLogin._internal(){}
+  AutoLogin._internal();
 
   factory AutoLogin(){
     return _instance;

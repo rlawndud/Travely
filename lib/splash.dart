@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:test2/model/userLoginState.dart';
 import 'package:test2/util/auto_login.dart';
 import 'package:test2/network/web_socket.dart';
-
-import 'home.dart';
 import 'model/member.dart';
 
 class Splash extends StatefulWidget {
