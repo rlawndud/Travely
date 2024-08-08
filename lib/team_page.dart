@@ -131,12 +131,12 @@ class _TeamPageState extends State<TeamPage> {
         };
         _webSocketService.transmit(team, 'TravelStart');
         print(team);
-        _showSnackBar('여행을 시작합니다!');
+        _showSnackBar('여행을 시작합니다');
       } else {
-        _showSnackBar('팀 번호를 찾을 수 없습니다.');
+        _showSnackBar('팀 번호를 찾을 수 없습니다');
       }
     } else {
-      _showSnackBar('먼저 팀을 선택해주세요.');
+      _showSnackBar('먼저 팀을 선택해주세요');
     }
   }
 

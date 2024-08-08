@@ -57,9 +57,9 @@ class _ImageUploadState extends State<ImageUpload> {
     var response = await request.send();
 
     if (response.statusCode == 200) {
-      print('Image uploaded');
+      print('이미지 업로드 완료');
     } else {
-      print('Upload failed');
+      print('이미지 업로드 실패');
     }
   }
 

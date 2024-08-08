@@ -63,7 +63,7 @@ class FriendEditPage extends StatelessWidget {
             onDismissed: (direction) {
               removeFriend(friend);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('${friend.senderName} 님이 삭제되었습니다.')),
+                SnackBar(content: Text('${friend.senderName} 님이 삭제되었습니다')),
               );
             },
             child: ListTile(

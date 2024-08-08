@@ -31,7 +31,7 @@ class _EditInfoPageState extends State<EditInfoPage> {
 
     if (newPassword != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('새 비밀번호가 일치하지 않습니다.')),
+        const SnackBar(content: Text('새 비밀번호가 일치하지 않습니다')),
       );
       return;
     }
@@ -41,7 +41,7 @@ class _EditInfoPageState extends State<EditInfoPage> {
 
     // 정보 수정 성공 메시지
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('정보 수정되었습니다.')),
+      const SnackBar(content: Text('정보 수정되었습니다')),
     );
 
     // 업데이트가 완료되면 이전 화면으로 돌아가기
@@ -157,7 +157,7 @@ class _EditInfoPageState extends State<EditInfoPage> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  print('Phone verification for: ${_phoneController.text}');
+                  print('전화번호 확인: ${_phoneController.text}');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white, // 버튼 배경 색상

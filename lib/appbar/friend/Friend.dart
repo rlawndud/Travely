@@ -27,21 +27,21 @@ class _FriendState extends State<Friend> {
       friendRequests.remove(request);
       acceptedFriends.add(request); // 수락된 친구를 리스트에 추가
     });
-    print('Accepted friend request from: ${request.senderName}');
+    print('${request.senderName}님이 친구요청을 수락하였습니다');
   }
 
   void _declineFriendRequest(FriendRequest request) {
     setState(() {
       friendRequests.remove(request);
     });
-    print('Declined friend request from: ${request.senderName}');
+    print('${request.senderName}님이 친구요청을 거절하였습니다');
   }
 
   void _removeFriend(FriendRequest friend) {
     setState(() {
       acceptedFriends.remove(friend); // 친구 삭제
     });
-    print('Removed friend: ${friend.senderName}');
+    print('${friend.senderName}을 친구목록에서 삭제하였습니다');
   }
 
   @override

@@ -49,7 +49,7 @@ class _SettingsPageState extends State<SettingsPage> {
   void _validatePassword() {
     setState(() {
       _isPwCorrect = (_pwController.text == _user.password);
-      _errorMsg = _isPwCorrect ? '' : '비밀번호가 일치하지 않습니다.';
+      _errorMsg = _isPwCorrect ? '' : '비밀번호가 일치하지 않습니다';
     });
   }
 
@@ -104,7 +104,7 @@ class _SettingsPageState extends State<SettingsPage> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다'),
+              Text('정말로 탈퇴하시겠습니까?'),
               TextField(
                 controller: _pwController,
                 decoration: InputDecoration(

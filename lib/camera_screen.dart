@@ -210,9 +210,9 @@ class _CameraScreenState extends State<CameraScreen> {
                         final image = await _controller!.takePicture();
                         await uploadImage(image);
                       } catch (e) {
-                        print('Error taking picture: $e');
+                        print('사진찍기오류: $e');
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed to take picture: $e')),
+                          SnackBar(content: Text('사진을 찍지 못했습니다: $e')),
                         );
                       }
                     },

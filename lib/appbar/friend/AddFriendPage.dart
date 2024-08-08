@@ -18,7 +18,7 @@ class AddFriendPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Friend'),
+        title: const Text('친구 추가'),
         backgroundColor: Colors.blueAccent,
       ),
       body: Padding(
@@ -28,7 +28,7 @@ class AddFriendPage extends StatelessWidget {
             TextField(
               controller: friendNameController,
               decoration: InputDecoration(
-                labelText: 'Friend Name',
+                labelText: 'ID',
                 labelStyle: TextStyle(color: Colors.blueAccent), // 추가
                 border: OutlineInputBorder(), // 추가
               ),
@@ -43,7 +43,7 @@ class AddFriendPage extends StatelessWidget {
                   Navigator.pop(context);
                 }
               },
-              child: const Text('Add Friend'),
+              child: const Text('친구 추가'),
             ),
           ],
         ),

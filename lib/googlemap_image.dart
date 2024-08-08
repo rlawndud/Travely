@@ -160,7 +160,7 @@ class _GoogleMapClusterState extends State<GoogleMapCluster> {
     final int? currentTeamNo = teamManager.getTeamNoByTeamName(currentTeam);
 
     if (currentTeamNo == null) {
-      print('Current team not found');
+      print('팀을 설정하세요');
       return;
     }
 
