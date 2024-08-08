@@ -268,15 +268,16 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
 
   Future<void> _sendLocationToServer() async {
     TeamManager teamManager = TeamManager();
-
-    final data = {
-      'id': widget.userId,
-      'latitude': _currentPosition!.latitude,
-      'longitude': _currentPosition!.longitude,
-      'teamNo': teamManager.getTeamNoByTeamName(teamManager.currentTeam),
-      'teamName': teamManager.currentTeam
-    };
-    await _webSocketService.transmit(data, 'UpdateLocation');
+    if(_currentPosition!=null){
+      final data = {
+        'id': widget.userId,
+        'latitude': _currentPosition!.latitude,
+        'longitude': _currentPosition!.longitude,
+        'teamNo': teamManager.getTeamNoByTeamName(teamManager.currentTeam),
+        'teamName': teamManager.currentTeam
+      };
+      await _webSocketService.transmit(data, 'UpdateLocation');
+    }
   }
 
   Future<void> _listenToFriendLocations() async {
@@ -286,12 +287,12 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
         final latitude = message['latitude'];
         final longitude = message['longitude'];
         final teamNo = message['teamNo'];
-        final teamName = message['teamName'];
 
         final MarkerId markerId = MarkerId('$friendId');
 
+
         final b.LabelMarker marker = b.LabelMarker(
-          label: '팀방: $teamName\n팀원: $friendId',
+          label: '팀방: ${TeamManager().getTeamNameByTeamNo(teamNo)}\n팀원: $friendId',
           markerId: markerId,
           position: LatLng(latitude, longitude),
           backgroundColor: Colors.lightBlueAccent
