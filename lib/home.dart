@@ -189,14 +189,7 @@ class _HomeState extends State<Home> {
           ),
           bottomNavigationBar: TabBar(
             onTap: (index) {
-              print(index);
-              if(index == 3){
-                if(_teamManager.currentTeam.isNotEmpty){
-                  _onItemTapped(index);
-                }
-              }else{
-                _onItemTapped(index); // 인덱스 그대로 전달
-              }
+              _onItemTapped(index);
             },
             tabs: const [
               Tab(icon: Icon(Icons.group, color: Colors.black), text: '팀'),
