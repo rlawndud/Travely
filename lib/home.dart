@@ -8,6 +8,7 @@ import 'package:test2/camera_screen.dart';
 import 'package:test2/googlemap_image.dart';
 import 'package:test2/googlemap_location.dart';
 import 'package:test2/model/imgtest.dart';
+import 'package:test2/model/locationMarker.dart';
 import 'package:test2/model/member.dart';
 import 'package:test2/model/picture.dart';
 import 'package:test2/album_screen/photo_folder_screen.dart';
@@ -41,8 +42,8 @@ class _HomeState extends State<Home> {
     _pages = <Widget>[
       TeamPage(userId: _user.id),
       const PhotoFolderScreen(), // 앨범 페이지
-      _buildMapWidget(), // 홈 페이지
-      CameraScreen(), // 촬영 페이지 //키면 바로 카메라 실행되게
+      _buildMapWidget(), // 홈 페이지-지도
+      CameraScreen(), // 촬영 페이지
     ];
   }
 
@@ -54,6 +55,7 @@ class _HomeState extends State<Home> {
 
   void _updateUI() {
     setState(() {});  // UI 갱신
+    print('home : ${LocationManager().done}');
   }
 
   Future<void> _checkPermissions() async {

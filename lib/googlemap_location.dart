@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:test2/model/locationMarker.dart';
 import 'package:test2/network/web_socket.dart';
 import 'package:test2/value/label_markers.dart'as b;
 
@@ -46,7 +47,25 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
 
   final List<String> _logLines = [];
   bool _isInitialized = false;
+  late LocationManager _locationManager = LocationManager();
 
+  @override
+  void initState() {
+    super.initState();
+    _locationManager.initialize(widget.userId);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Column(
+        children: [
+          Text('data'),
+        ],
+      ),
+    );
+  }
+/*
   @override
   void initState() {
     super.initState();
@@ -309,5 +328,5 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
         ],
       ),
     );
-  }
+  }*/
 }

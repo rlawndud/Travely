@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:test2/model/locationMarker.dart';
 import 'package:test2/model/picture.dart';
 import 'package:test2/value/global_variable.dart';
 import 'package:test2/model/team.dart';
@@ -69,8 +70,7 @@ class WebSocketService {
     _isInitialized = true;
   }
 
-  Future<Map<String, dynamic>> transmit(
-      dynamic data, String commandType) async {
+  Future<Map<String, dynamic>> transmit(dynamic data, String commandType) async {
     dynamic command_type = {'command': commandType};
     dynamic signal = {'signal': '@'};
     List<Map<String, dynamic>> message = [command_type, data, signal];
@@ -102,6 +102,9 @@ class WebSocketService {
       // case 'UpdateTeamSignal':
       //   TeamManager().loadTeam();
       //   break;
+      case 'TeamLocationUpdate':
+        handleUpdateLocation(jsonData);
+        break;
       default:
         debugPrint('$jsonData');
         break;
@@ -138,5 +141,9 @@ class WebSocketService {
     } else {
       debugPrint('이미지 데이터가 없습니다.');
     }
+  }
+
+  void handleUpdateLocation(Map<String, dynamic> data){
+    LocationManager().updateLocation(LocationMarker.fromJson(data));
   }
 }
