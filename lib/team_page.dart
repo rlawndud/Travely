@@ -28,7 +28,6 @@ class _TeamPageState extends State<TeamPage> {
     setState(() {
       _teams = _teamManager.getTeamList();
       _currentTeam = _teamManager.currentTeam;
-      print(_currentTeam);
     });
   }
 

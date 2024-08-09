@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:test2/model/team.dart';
 import 'package:test2/model/userLoginState.dart';
 import 'package:test2/util/auto_login.dart';
 import 'package:test2/network/web_socket.dart';
@@ -50,6 +51,7 @@ class _SplashState extends State<Splash> {
       debugPrint(response.toString());
       Member mem = Member.fromJson(response);
       // Member mem = new Member('id', 'password', 'name', 'phone');
+      TeamManager().initialize(mem.id);
       //홈화면으로 이동
       Navigator.pushReplacementNamed(context, '/home', arguments: {'user':mem});
     }else{

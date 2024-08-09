@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:test2/model/team.dart';
 import 'package:test2/value/global_variable.dart';
 import 'package:test2/home.dart';
 import 'package:test2/login.dart';

@@ -88,6 +88,7 @@ class TeamManager with ChangeNotifier {
       _currentUserId = userId;
       await loadTeam();
       await loadCurTeam();
+      print(currentTeam);
       _isInitialized = true;
     }
   }
