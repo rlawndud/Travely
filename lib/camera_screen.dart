@@ -12,6 +12,7 @@ import 'package:test2/network/web_socket.dart';
 import 'model/picture.dart';
 import 'model/team.dart';
 
+// SoundPool _soundPool;
 
 class CameraScreen extends StatefulWidget {
   @override
@@ -25,6 +26,7 @@ class _CameraScreenState extends State<CameraScreen> {
   int _selectedCameraIdx = 0;
   FlashMode _currentFlashMode = FlashMode.off;
   static XFile? _lastCapturedImage;
+  // Future<int> _soundId;
 
   @override
   void initState() {
@@ -35,7 +37,13 @@ class _CameraScreenState extends State<CameraScreen> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
+    
   }
+  
+  // Future<int> _loadSound() async{
+  //   var asset = await rootBundle.load("assets/722833__maodin204__camera-shutter.wav");
+  //   // return await _sound
+  // }
 
   Future<void> _initializeCamera() async {
     if (_controller != null) {
@@ -44,7 +52,7 @@ class _CameraScreenState extends State<CameraScreen> {
     _cameras = await availableCameras();
     _controller = CameraController(
       _cameras![_selectedCameraIdx],
-      ResolutionPreset.ultraHigh,
+      ResolutionPreset.veryHigh,
       enableAudio: false,
     );
     try {
