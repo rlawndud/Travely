@@ -25,8 +25,8 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   late Member _user;
-  late TeamManager _teamManager;
-  late PicManager _picManager;
+  final TeamManager _teamManager = TeamManager();
+  final PicManager _picManager = PicManager();
   String _selectedMapType = '앨범';
 
   @override
@@ -34,8 +34,6 @@ class _HomeState extends State<Home> {
     super.initState();
     _user = widget.user;
     _checkPermissions();
-    _teamManager = TeamManager();
-    _picManager = PicManager();
     _initializeManager();
     _teamManager.addListener(_updateUI);
     _pages = <Widget>[
@@ -61,7 +59,6 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _initializeManager() async {
-    await _teamManager.initialize(_user.id);
     await _picManager.initialize(_user.id);
     setState(() {});
   }
