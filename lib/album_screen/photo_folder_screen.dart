@@ -169,7 +169,6 @@ class TeamAlbumScreen extends StatelessWidget {
   }
 
   Widget _buildAlbumTile(BuildContext context, String category) {
-    print('_buildAlbumTile : $teamMembers');
     return ListTile(
       title: Text(category),
       onTap: () {
