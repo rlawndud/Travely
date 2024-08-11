@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:test2/util/globalUI.dart';
+import 'package:test2/value/global_variable.dart';
 import 'model/team.dart';
 import 'network/web_socket.dart';
 import 'team_management_page.dart';
@@ -119,20 +120,22 @@ class _TeamPageState extends State<TeamPage> {
         Map<String, dynamic> team = {
           'teamNo': currentTeamNo,
         };
+
+        GlobalVariable.setTravel(false); // 모델 생성 전까지 버튼 비활성화
+        setState(() {
+        });
+
         var response = await _webSocketService.transmit(team, 'TravelStart');
         //전체 어플에서 확인가능
         if(response['result']=='True'){
-          showSnackBar('여행 준비가 완료되었습니다', null);
+          showSnackBar('여행 준비가 완료되었습니다', Colors.green);
         }else if(response.containsKey('error')){
-          /*WidgetsBinding.instance.addPostFrameCallback((_) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('여행 준비 중 문제가 생겼습니다'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          });*/
           showSnackBar('여행 준비 중 문제가 생겼습니다', Colors.red);
+        }
+        GlobalVariable.setTravel(true);
+        if(mounted){
+          setState(() {
+          });
         }
       } else {
         _showSnackBar('팀 번호를 찾을 수 없습니다');
@@ -254,11 +257,14 @@ class _TeamPageState extends State<TeamPage> {
             SizedBox(
               width: 200,
               child: ElevatedButton(
-                onPressed: _startTravel,
+                onPressed: GlobalVariable.isTavel?_startTravel:null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.pinkAccent,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   padding: const EdgeInsets.symmetric(vertical: 12),
+
+                  disabledBackgroundColor: Colors.pinkAccent.withOpacity(0.30),
+                  disabledForegroundColor: Colors.pinkAccent.withOpacity(0.30),
                 ),
                 child: const Text('여행 시작', style: TextStyle(color: Colors.white)),
               ),
