@@ -33,7 +33,7 @@ class WebSocketService {
 
     channel = IOWebSocketChannel.connect(websocketUrl);
     debugPrint(channel.toString());
-    _subscription = channel.stream.listen((message) {
+    _subscription = channel.stream.listen((message) async {
       try {
         buffer += message;
         if (buffer.contains("@"))
@@ -97,11 +97,12 @@ class WebSocketService {
         handleUpdateImage(jsonData);
         break;
        case 'UpdateImageSignal':
+         print('서버가 호출함');
          PicManager().syncWithServer();
          break;
-      // case 'UpdateTeamSignal':
-      //   TeamManager().loadTeam();
-      //   break;
+      case 'UpdateTeamSignal':
+        handleUpdateTeam();
+        break;
       case 'TeamLocationUpdate':
         handleUpdateLocation(jsonData);
         break;
@@ -141,6 +142,10 @@ class WebSocketService {
     } else {
       debugPrint('이미지 데이터가 없습니다.');
     }
+  }
+
+  void handleUpdateTeam() {
+    TeamManager().updateTeam();
   }
 
   void handleUpdateLocation(Map<String, dynamic> data){

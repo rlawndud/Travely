@@ -53,7 +53,7 @@ class _HomeState extends State<Home> {
 
   void _updateUI() {
     setState(() {});  // UI 갱신
-    print('home : ${LocationManager().done}');
+    print('home-location : ${LocationManager().done}');
   }
 
   Future<void> _checkPermissions() async {
