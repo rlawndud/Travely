@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:test2/util/globalUI.dart';
 import 'model/team.dart';
 import 'network/web_socket.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 import 'team_management_page.dart';
 
 class TeamPage extends StatefulWidget {
@@ -18,15 +17,12 @@ class _TeamPageState extends State<TeamPage> {
   final TextEditingController _teamNameController = TextEditingController();
   final TextEditingController _inviteIdController = TextEditingController();
 
-  List<TeamEntity> _teams = [];
-  final Map<String, List<String>> _teamMembers = {};
   String _currentTeam = '';
   final WebSocketService _webSocketService = WebSocketService();
   late TeamManager _teamManager;
 
   Future<void> _loadTeams() async {
     setState(() {
-      _teams = _teamManager.getTeamList();
       _currentTeam = _teamManager.currentTeam;
     });
   }
@@ -59,28 +55,14 @@ class _TeamPageState extends State<TeamPage> {
         setState(() {
           _currentTeam = teamName;
           _teamManager.currentTeam = teamName;
-          _teams = _teamManager.getTeamList();
         });
-        _createTeamFolder(teamName);
+        _teamManager.createTeamFolder(teamName);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('$teamName 팀을 생성하였습니다')),
         );
       }
     } else {
       _showSnackBar('팀이름이 이미 존재하거나 팀이름이 비어있습니다');
-    }
-  }
-
-  Future<void> _createTeamFolder(String folderName) async {
-    final Directory directory = await getApplicationDocumentsDirectory();
-    final String path = '${directory.path}/$folderName';
-    final Directory folder = Directory(path);
-
-    if (!await folder.exists()) {
-      await folder.create(recursive: true);
-      print('Folder created at: $path');
-    } else {
-      print('Folder already exists at: $path');
     }
   }
 
@@ -98,7 +80,6 @@ class _TeamPageState extends State<TeamPage> {
       context,
       MaterialPageRoute(
         builder: (context) => TeamManagementPage(
-          teams: _teamManager.getTeamList(),
           initialCurrentTeam: _teamManager.currentTeam,
           userId: widget.userId,
           onTeamSwitch: (teamName) {
@@ -107,8 +88,20 @@ class _TeamPageState extends State<TeamPage> {
               _teamManager.currentTeam = teamName;
             });
           },
-          onTeamDelete: (teamName) {
-            // ... 기존 코드 ...
+          onTeamDelete: (teamName) async {
+            var result = await _teamManager.deleteTeam(teamName);
+            if(result=='True') {
+              setState(() {
+                if (_currentTeam == teamName) {
+                  _teamManager.currentTeam = '';
+                }
+              });
+              showSnackBar('$teamName 팀이 삭제되었습니다', null);
+            }
+            else{
+              showSnackBar('팀 삭제에 실패했습니다', null);
+            }
+
           },
         ),
       ),
@@ -127,18 +120,19 @@ class _TeamPageState extends State<TeamPage> {
           'teamNo': currentTeamNo,
         };
         var response = await _webSocketService.transmit(team, 'TravelStart');
-        print(team);
+        //전체 어플에서 확인가능
         if(response['result']=='True'){
-          _showSnackBar('여행 준비가 완료되었습니다');
+          showSnackBar('여행 준비가 완료되었습니다', null);
         }else if(response.containsKey('error')){
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ScaffoldMessenger.of(context).showSnackBar(
+          /*WidgetsBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('여행 준비 중 문제가 생겼습니다'),
                 backgroundColor: Colors.red,
               ),
             );
-          });
+          });*/
+          showSnackBar('여행 준비 중 문제가 생겼습니다', Colors.red);
         }
       } else {
         _showSnackBar('팀 번호를 찾을 수 없습니다');

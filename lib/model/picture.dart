@@ -153,10 +153,18 @@ class PicManager with ChangeNotifier {
     }
   }
 
+  Future<void> deleteTeamPictures(String teamName) async{
+    int? teamNo = TeamManager().getTeamNoByTeamName(teamName);
+    _userPictures[_currentUserId] = _userPictures[_currentUserId]?.where((pic)=>pic.team_num != teamNo).toList()??[];
+    await savePictures();
+    notifyListeners();
+  }
+
   Future<void> syncWithServer() async {
-    int? lastImageNum = _userPictures[_currentUserId]?.isEmpty ?? true
-        ? null
-        : _userPictures[_currentUserId]!.last.img_num;
+    int? lastImageNum = _userPictures[_currentUserId]?.isEmpty ?? true ? null
+        : _userPictures[_currentUserId]!
+        .map((pic)=>pic.img_num)
+        .reduce((max, current) => max > current? max:current);
 
     Map<String, dynamic> data = {
       'team': TeamManager().getTeamNoList(),
@@ -168,6 +176,14 @@ class PicManager with ChangeNotifier {
     if (response.containsKey('result')) {
       print('현재 업데이트할 이미지가 없음');
     }
+  }
+
+  Future<void> getNewTeamPictures(int teamNo) async{
+    Map<String, dynamic> data = {
+      'team': teamNo,
+      'last_img_num': null,
+    };
+    await _webSocketService.transmit(data, 'GetAllImage');
   }
 
   Future<void> clearCurrentUserData() async {
