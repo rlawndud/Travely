@@ -119,7 +119,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
         final LatLng position = LatLng(latitude, longitude);
 
         setState(() {
-          _friendLocation[friendName] = position;
+          _friendLocation[friendId] = position;
           _customarkers();
         });
       }
