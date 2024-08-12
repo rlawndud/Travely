@@ -92,7 +92,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
   }
 
   void _startLocationUpdateTimer() {
-    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 3), (Timer timer) async {
+    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 15), (Timer timer) async {
       await _sendLocationToServer();
     });
   }

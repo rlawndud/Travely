@@ -13,6 +13,7 @@ import 'package:test2/model/locationMarker.dart';
 import 'package:test2/model/member.dart';
 import 'package:test2/model/picture.dart';
 import 'package:test2/album_screen/photo_folder_screen.dart';
+import 'package:test2/network/web_socket.dart';
 import 'package:test2/team_page.dart';
 import 'package:test2/util/permission.dart';
 import 'model/team.dart';
@@ -29,7 +30,7 @@ class _HomeState extends State<Home> {
   late Member _user;
   final TeamManager _teamManager = TeamManager();
   final PicManager _picManager = PicManager();
-  String _selectedMapType = '앨범';
+  String _selectedMapType = '팀원의 위치';
 
   @override
   void initState() {
@@ -207,7 +208,7 @@ class _HomeState extends State<Home> {
   Widget _buildMapWidget() {
     return Stack(
       children: [
-        _selectedMapType == '앨범' ? GoogleMapCluster() : GoogleMapLocation(userId: _user.id, userName: _user.name,),
+        _selectedMapType == '팀원의 위치' ? GoogleMapLocation(userId: _user.id, userName: _user.name,) : GoogleMapCluster(),
         Positioned(
           top: 10,
           left: 10,
@@ -219,7 +220,7 @@ class _HomeState extends State<Home> {
             ),
             child: DropdownButton<String>(
               value: _selectedMapType,
-              items: ['앨범', 'GPS']
+              items: ['팀원의 위치', '앨범']
                   .map((String value) => DropdownMenuItem<String>(
                 value: value,
                 child: Text(value),

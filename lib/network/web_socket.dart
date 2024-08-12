@@ -25,49 +25,68 @@ class WebSocketService {
   late StreamSubscription _subscription;
   final _responseController = StreamController<Map<String, dynamic>>.broadcast();
   String buffer = "";
+  Timer? _reconnectionTimer;
+  final int _reconnectInterval = 5000;
 
   Stream<Map<String, dynamic>> get responseStream => _responseController.stream;
 
   void init() {
     if (_isInitialized) return;
+    _connect();
+    _isInitialized = true;
+  }
 
+  void _connect(){
     channel = IOWebSocketChannel.connect(websocketUrl);
     debugPrint(channel.toString());
-    _subscription = channel.stream.listen((message) async {
-      try {
-        buffer += message;
-        if (buffer.contains("@"))
-        {
-          int endIndex = buffer.indexOf('@');
-          String jsonMessage = buffer.substring(0, endIndex);
-          buffer = "";
-
-          var jsonData = jsonDecode(jsonMessage);
-
-          //형식 확인용
-          debugPrint('message: ${message.toString()}');
-          debugPrint('jsonData: ${jsonData.toString()}');
-
-          if (jsonData is Map<String, dynamic>) {
-            if(jsonData.containsKey('command')){
-              handleMessage(jsonData);
-            }
-            _responseController.add(jsonData);
-          } else {
-            _responseController.add({'error': 'Unexpected response format', 'data': jsonData});
-          }
-        }
-      } catch (e) {
-        debugPrint('Error parsing WebSocket message: $e');
-        _responseController.add({'error': 'Invalid JSON data', 'raw': message});
-      }
-    },
+    _subscription = channel.stream.listen(
+      _handleMessage,
       onError: (error) {
-        debugPrint('WebSocket error: $error');
-        _responseController.add({'error': 'WebSocket error', 'details': error.toString()});
+        debugPrint('웹소켓 에러: $error');
+        _responseController.add({'error': '웹소켓 에러', 'details': error.toString()});
       },
+      onDone: (){
+        debugPrint('웹소켓 연결 종료');
+        _scheduleReconnection();
+      }
     );
-    _isInitialized = true;
+  }
+  void _handleMessage(dynamic message) async {
+    try {
+      buffer += message;
+      if (buffer.contains("@"))
+      {
+        int endIndex = buffer.indexOf('@');
+        String jsonMessage = buffer.substring(0, endIndex);
+        buffer = "";
+
+        var jsonData = jsonDecode(jsonMessage);
+
+        //형식 확인용
+        debugPrint('message: ${message.toString()}');
+        debugPrint('jsonData: ${jsonData.toString()}');
+
+        if (jsonData is Map<String, dynamic>) {
+          if(jsonData.containsKey('command')){
+            handleMessage(jsonData);
+          }
+          _responseController.add(jsonData);
+        } else {
+          _responseController.add({'error': 'Unexpected response format', 'data': jsonData});
+        }
+      }
+    } catch (e) {
+      debugPrint('Error parsing WebSocket message: $e');
+      _responseController.add({'error': 'Invalid JSON data', 'raw': message});
+    }
+  }
+
+  void _scheduleReconnection() {
+    _reconnectionTimer?.cancel();
+    _reconnectionTimer = Timer(Duration(milliseconds: _reconnectInterval), () {
+      debugPrint('재연결 시도 중...');
+      _connect();
+    });
   }
 
   Future<Map<String, dynamic>> transmit(dynamic data, String commandType) async {
