@@ -1,18 +1,17 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:test2/googlemap_location.dart';
+import 'package:test2/model/team.dart';
+import 'package:test2/model/picture.dart';
+import 'package:test2/album_screen/photo_folder_screen.dart';
 import 'package:test2/team_page.dart';
-
-import 'album_screen/photo_folder_screen.dart';
-import 'appbar/Settings.dart';
-import 'appbar/friend/Friend.dart';
-import 'appbar/mypage/My_Page.dart';
-import 'google_map_location.dart';
-import 'image_upload_page.dart';
-import 'model/imgtest.dart';
-import 'model/member.dart';
-import 'model/picture.dart';
-import 'model/team.dart';
+import 'package:test2/image_upload_page.dart';
+import 'package:test2/model/member.dart';
+import 'package:test2/model/imgtest.dart';
+import 'package:test2/appbar/mypage/My_Page.dart';
+import 'package:test2/appbar/friend/Friend.dart';
+import 'package:test2/appbar/Settings.dart';
 
 class Home extends StatefulWidget {
   final Member user;
