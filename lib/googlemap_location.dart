@@ -1,22 +1,25 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test2/network/web_socket.dart';
-import 'package:test2/value/label_markers.dart'as b;
+import 'package:test2/value/MapMarker.dart';
+import 'package:test2/value/Markergeneration.dart';
 
 import 'model/team.dart';
 
 class GoogleMapLocation extends StatefulWidget {
   final String userId;
+  final String userName;
 
-  const GoogleMapLocation._({required this.userId});
+  const GoogleMapLocation._({required this.userId, required this.userName});
 
   static GoogleMapLocation? _instance;
 
-  factory GoogleMapLocation({required String userId}) {
-    _instance ??= GoogleMapLocation._(userId: userId);
+  factory GoogleMapLocation({required String userId, required String userName}) {
+    _instance ??= GoogleMapLocation._(userId: userId, userName: userName);
     return _instance!;
   }
 
@@ -28,6 +31,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
   final Completer<GoogleMapController> _controller = Completer();
   final Set<Marker> _markers = {};
   final Map<MarkerId, int> _markerClickCounts = {};
+  final Map<String, LatLng> _friendLocation = {};
   bool _isAddingMarker = false;
   bool _isDeletingMarker = false;
   bool _isLogVisible = false;
@@ -46,6 +50,18 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
 
   final List<String> _logLines = [];
   bool _isInitialized = false;
+
+  List<Marker> customMarkers = [];
+  List<Marker> mapBitmapsToMarkers(List<Uint8List> bitmaps) {
+    bitmaps.asMap().forEach((i, bmp) {
+      customMarkers.add(Marker(
+        markerId: MarkerId('$i'),
+        position: _friendLocation.values.toList()[i], // 마커 위치 수정
+        icon: BitmapDescriptor.fromBytes(bmp),
+      ));
+    });
+    return customMarkers;
+  }
 
   @override
   void initState() {
@@ -103,6 +119,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
     if(_currentPosition!=null && mounted){
       final data = {
         'id': widget.userId,
+        'name': widget.userName,
         'latitude': _currentPosition!.latitude,
         'longitude': _currentPosition!.longitude,
         'teamNo': teamManager.getTeamNoByTeamName(teamManager.currentTeam),
@@ -116,30 +133,45 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
     _friendLocationSubscription = _webSocketService.responseStream.listen((message) {
       if (message['command'] == 'TeamLocationUpdate') {
         final friendId = message['id'];
+        final friendName = message['name'];
         final latitude = message['latitude'];
         final longitude = message['longitude'];
-        final teamNo = message['teamNo'];
-
-        final MarkerId markerId = MarkerId('$friendId');
-
-        final b.LabelMarker marker = b.LabelMarker(
-            label: '팀방: ${TeamManager().getTeamNameByTeamNo(teamNo)}\n팀원: $friendId',
-            markerId: markerId,
-            position: LatLng(latitude, longitude),
-            backgroundColor: Colors.lightBlueAccent
-        );
+        final LatLng position = LatLng(latitude, longitude);
 
         setState(() {
-          // 마커가 존재하는지 확인
-          if (_markers.any((marker) => marker.markerId == markerId)) {
-            // 마커 위치 업데이트
-            _markers.removeWhere((marker) => marker.markerId == markerId);
-          }
-          // 새 마커 추가 또는 업데이트된 마커 추가
-          _markers.addLabelMarker(marker);
+          _friendLocation[friendId] = position;
+          _customarkers();
         });
       }
     });
+  }
+
+  void _customarkers() {
+    List<Widget> markerWidgetsList = [];
+    for (var entry in _friendLocation.entries) {
+      final friendId = entry.key;
+      final friendName = entry.key;
+      final position = entry.value;
+
+      markerWidgetsList.add(MapMarker(name: friendName));
+    }
+
+    MarkerGenerator(markerWidgetsList, (bitmaps) {
+      setState(() {
+        _markers.clear();
+        bitmaps.asMap().forEach((i, bmp) {
+          final friendName = _friendLocation.keys.toList()[i];
+          final position = _friendLocation[friendName]!;
+          final markerId = MarkerId(friendName);
+
+          _markers.add(Marker(
+            markerId: markerId,
+            position: position,
+            icon: BitmapDescriptor.fromBytes(bmp),
+          ));
+        });
+      });
+    }).generate(context);
   }
 
   Future<void> _updateMapLocation() async {

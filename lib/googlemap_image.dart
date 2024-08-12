@@ -10,6 +10,8 @@ import 'package:test2/model/picture.dart';
 import 'package:test2/model/team.dart';
 
 class GoogleMapCluster extends StatefulWidget {
+  const GoogleMapCluster({super.key});
+
   @override
   _GoogleMapClusterState createState() => _GoogleMapClusterState();
 }

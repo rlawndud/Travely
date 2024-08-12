@@ -206,7 +206,7 @@ class _HomeState extends State<Home> {
   Widget _buildMapWidget() {
     return Stack(
       children: [
-        _selectedMapType == '앨범' ? GoogleMapCluster() : GoogleMapLocation(userId: _user.id),
+        _selectedMapType == '앨범' ? GoogleMapCluster() : GoogleMapLocation(userId: _user.id, userName: _user.name),
         Positioned(
           top: 10,
           left: 10,
@@ -240,5 +240,4 @@ class _HomeState extends State<Home> {
       ],
     );
   }
-
 }

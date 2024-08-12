@@ -12,8 +12,9 @@ import 'package:test2/network/web_socket.dart';
 import 'model/picture.dart';
 import 'model/team.dart';
 
-
 class CameraScreen extends StatefulWidget {
+  const CameraScreen({super.key});
+
   @override
   _CameraScreenState createState() => _CameraScreenState();
 }
@@ -325,7 +326,7 @@ class _CustomCameraButtonState extends State<CustomCameraButton> {
 class ThumbnailWidget extends StatelessWidget {
   final XFile? image;
 
-  const ThumbnailWidget({Key? key, required this.image}) : super(key: key);
+  const ThumbnailWidget({super.key, required this.image});
 
   @override
   Widget build(BuildContext context) {
