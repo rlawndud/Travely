@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      scaffoldMessengerKey: GlobalVariable.globalScaffoldKey,
+      scaffoldMessengerKey: GlobalVariable.globalScaffoldMessengerKey,
       navigatorKey: GlobalVariable.navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
