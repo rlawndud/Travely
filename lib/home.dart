@@ -7,6 +7,7 @@ import 'package:test2/appbar/Settings.dart';
 import 'package:test2/camera_screen.dart';
 import 'package:test2/googlemap_image.dart';
 import 'package:test2/googlemap_location.dart';
+import 'package:test2/map_page.dart';
 import 'package:test2/model/imgtest.dart';
 import 'package:test2/model/locationMarker.dart';
 import 'package:test2/model/member.dart';
@@ -41,6 +42,7 @@ class _HomeState extends State<Home> {
       TeamPage(userId: _user.id),
       const PhotoFolderScreen(), // 앨범 페이지
       _buildMapWidget(), // 홈 페이지-지도
+      // MapPage(userId: _user.id, userName: _user.name),
       CameraScreen(), // 촬영 페이지
     ];
   }
@@ -205,7 +207,7 @@ class _HomeState extends State<Home> {
   Widget _buildMapWidget() {
     return Stack(
       children: [
-        _selectedMapType == '앨범' ? GoogleMapCluster() : GoogleMapLocation(userId: _user.id),
+        _selectedMapType == '앨범' ? GoogleMapCluster() : GoogleMapLocation(userId: _user.id, userName: _user.name,),
         Positioned(
           top: 10,
           left: 10,

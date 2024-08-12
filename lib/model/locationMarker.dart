@@ -28,6 +28,7 @@ class LocationMarker{
   Map<String, dynamic> toJson(){
     return {
       'id': userId,
+      'name': userName,
       'latitude': latitude,
       'longitude': longitude,
       'teamNo': teamNo,
@@ -47,6 +48,7 @@ class LocationManager with ChangeNotifier {
   late StreamSubscription<Position> _positionStream;
   Map<int, List<LocationMarker>> _teamLocations = {};
   static String _currentUserId = '';
+  static String _currentUserName = '';
   Timer? _locationUpdateTimer;
   Position? _currentPosition;
   bool _isInitialized = false;
@@ -63,13 +65,14 @@ class LocationManager with ChangeNotifier {
     return _instance;
   }
 
-  Future<void> initialize(String userId) async {
+  Future<void> initialize(String userId, String userName) async {
     if (!_isInitialized || _currentUserId != userId) {
       _currentUserId = userId;
+      _currentUserName = userName;
       try{
         await _initLocationTracking(); // 내 위치 전달
         _startLocationUpdateTimer();
-        // await _syncLocationFromServer(); // 현재 팀 위치 업데이트(나 포함 전원)
+        //await _syncLocationOnMap(); // 현재 팀 위치 업데이트(나 포함 전원)
         _isInitialized = true;
       }catch(e){
         debugPrint('LocationManager 초기화 에러 : $e');
@@ -78,6 +81,7 @@ class LocationManager with ChangeNotifier {
   }
 
   Stream<LocationMarker> get locationStream => _locationStreamController.stream;
+  Position? get currentPosition => _currentPosition;
 
   Future<void> _initLocationTracking() async {
 
@@ -89,15 +93,16 @@ class LocationManager with ChangeNotifier {
       _positionStream = Geolocator.getPositionStream(
         locationSettings: _locationSettings,
       ).listen((Position position) async {
-        done = position.latitude.toString();
+        // done = position.latitude.toString();
         _currentPosition = position;
       });
     }
+    notifyListeners();
   }
 
 
   void _startLocationUpdateTimer() {
-    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 30), (timer) async {
+    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 15), (timer) async {
       if (_currentPosition != null) {
         await _sendLocationToServer(_currentPosition!);
       }
@@ -111,7 +116,7 @@ class LocationManager with ChangeNotifier {
       if (currentTeamNo != null) {
         final location = LocationMarker(
             _currentUserId,
-            '',
+            _currentUserName,
             position.latitude,
             position.longitude,
             currentTeamNo,
@@ -140,6 +145,10 @@ class LocationManager with ChangeNotifier {
     print(_teamLocations.toString());
     notifyListeners();
   }
+
+  // Future<void> _syncLocationOnMap(){
+  //
+  // }
 
   void stopTracking() {
     _positionStream.cancel();

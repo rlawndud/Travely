@@ -31,7 +31,7 @@ class PictureEntity {
 
     if (preFaceData is String) {
       if(preFaceData.contains('#')){
-        preFaceList = preFaceData.split('#').where((name) => name.isNotEmpty).toList();
+        preFaceList = preFaceData.split('#');
       }else{
         preFaceList = preFaceData.isEmpty ? [] : [preFaceData];
       }

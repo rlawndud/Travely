@@ -1,25 +1,21 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:test2/model/locationMarker.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:test2/network/web_socket.dart';
-import 'package:test2/value/label_markers.dart'as b;
+import 'package:test2/util/permission.dart';
+import 'package:test2/value/MapMarker.dart';
 
 import 'model/team.dart';
+import 'value/Markergeneration.dart';
 
 class GoogleMapLocation extends StatefulWidget {
   final String userId;
+  final String userName;
 
-  const GoogleMapLocation._({required this.userId});
-
-  static GoogleMapLocation? _instance;
-
-  factory GoogleMapLocation({required String userId}) {
-    _instance ??= GoogleMapLocation._(userId: userId);
-    return _instance!;
-  }
+  const GoogleMapLocation({super.key, required this.userId, required this.userName});
 
   @override
   _GoogleMapLocationState createState() => _GoogleMapLocationState();
@@ -29,16 +25,15 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
   final Completer<GoogleMapController> _controller = Completer();
   final Set<Marker> _markers = {};
   final Map<MarkerId, int> _markerClickCounts = {};
-  bool _isAddingMarker = false;
-  bool _isDeletingMarker = false;
+  final Map<String, LatLng> _friendLocation = {};
+  final bool _isAddingMarker = false;
+  final bool _isDeletingMarker = false;
   bool _isLogVisible = false;
-  TeamManager teamManager = TeamManager();
 
   Position? _currentPosition;
   late StreamSubscription<Position> _positionStream;
   late Timer _locationUpdateTimer;
   late WebSocketService _webSocketService;
-  StreamSubscription? _friendLocationSubscription;
 
   final LocationSettings _locationSettings = const LocationSettings(
     accuracy: LocationAccuracy.best,
@@ -46,63 +41,49 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
   );
 
   final List<String> _logLines = [];
-  bool _isInitialized = false;
-  late LocationManager _locationManager = LocationManager();
+
+  List<Marker> customMarkers = [];
+  List<Marker> mapBitmapsToMarkers(List<Uint8List> bitmaps) {
+    bitmaps.asMap().forEach((i, bmp) {
+      customMarkers.add(Marker(
+        markerId: MarkerId('$i'),
+        position: _friendLocation.values.toList()[i], // 마커 위치 수정
+        icon: BitmapDescriptor.fromBytes(bmp),
+      ));
+    });
+    return customMarkers;
+  }
 
   @override
   void initState() {
     super.initState();
-    _locationManager.initialize(widget.userId);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Column(
-        children: [
-          Text('data'),
-        ],
-      ),
-    );
-  }
-/*
-  @override
-  void initState() {
-    super.initState();
-    if (!_isInitialized) {
-      _initializeServices();
-    }
-  }
-
-  void _initializeServices() {
-    _webSocketService = WebSocketService();
     _initLocationTracking();
+    _webSocketService = WebSocketService();
+    _webSocketService.init();
     _startLocationUpdateTimer();
     _startListeningToFriendLocationsIfNeeded();
-    _isInitialized = true;
   }
 
   Future<void> _initLocationTracking() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
+    LocationPermission permissionStatus = await Geolocator.checkPermission();
+    if (permissionStatus == LocationPermission.denied) {
+      permissionStatus = await Geolocator.requestPermission();
     }
-    if (permission != LocationPermission.denied) {
+    if (permissionStatus  != LocationPermission.denied) {
       _positionStream = Geolocator.getPositionStream(
         locationSettings: _locationSettings,
       ).listen((Position position) {
-        if(mounted){
-          setState(() {
-            _currentPosition = position;
-            _updateMapLocation();
-            _sendLocationToServer();
-          });
-        }
+        setState(() {
+          _currentPosition = position;
+          _updateMapLocation();
+          _sendLocationToServer();
+        });
       });
     }
   }
 
   void _startListeningToFriendLocationsIfNeeded() {
+    TeamManager teamManager = TeamManager();
     if (teamManager.currentTeam.isNotEmpty) {
       _listenToFriendLocations();
     } else {
@@ -112,16 +93,16 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
 
   void _startLocationUpdateTimer() {
     _locationUpdateTimer = Timer.periodic(const Duration(seconds: 3), (Timer timer) async {
-      if (mounted) {
-        await _sendLocationToServer();
-      }
+      await _sendLocationToServer();
     });
   }
 
   Future<void> _sendLocationToServer() async {
-    if(_currentPosition!=null && mounted){
+    TeamManager teamManager = TeamManager();
+    if(_currentPosition!=null){
       final data = {
         'id': widget.userId,
+        'name' : widget.userName,
         'latitude': _currentPosition!.latitude,
         'longitude': _currentPosition!.longitude,
         'teamNo': teamManager.getTeamNoByTeamName(teamManager.currentTeam),
@@ -131,35 +112,51 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
     }
   }
 
-  void _listenToFriendLocations() {
-    _friendLocationSubscription = _webSocketService.responseStream.listen((message) {
+  Future<void> _listenToFriendLocations() async {
+    _webSocketService.responseStream.listen((message) {
       if (message['command'] == 'TeamLocationUpdate') {
         final friendId = message['id'];
+        final friendName = message['name'];
         final latitude = message['latitude'];
         final longitude = message['longitude'];
-        final teamNo = message['teamNo'];
-
-        final MarkerId markerId = MarkerId('$friendId');
-
-        final b.LabelMarker marker = b.LabelMarker(
-            label: '팀방: ${TeamManager().getTeamNameByTeamNo(teamNo)}\n팀원: $friendId',
-            markerId: markerId,
-            position: LatLng(latitude, longitude),
-            backgroundColor: Colors.lightBlueAccent
-        );
+        final LatLng position = LatLng(latitude, longitude);
 
         setState(() {
-          // 마커가 존재하는지 확인
-          if (_markers.any((marker) => marker.markerId == markerId)) {
-            // 마커 위치 업데이트
-            _markers.removeWhere((marker) => marker.markerId == markerId);
-          }
-          // 새 마커 추가 또는 업데이트된 마커 추가
-          _markers.addLabelMarker(marker);
+          _friendLocation[friendId] = position;
+          _customarkers();
         });
       }
     });
   }
+
+  void _customarkers() {
+    List<Widget> markerWidgetsList = [];
+    for (var entry in _friendLocation.entries) {
+      final friendId = entry.key;
+      final friendName = entry.key;
+      final position = entry.value;
+
+      markerWidgetsList.add(MapMarker(name: friendName));
+    }
+
+    MarkerGenerator(markerWidgetsList, (bitmaps) {
+      setState(() {
+        _markers.clear();
+        bitmaps.asMap().forEach((i, bmp) {
+          final friendName = _friendLocation.keys.toList()[i];
+          final position = _friendLocation[friendName]!;
+          final markerId = MarkerId(friendName);
+
+          _markers.add(Marker(
+            markerId: markerId,
+            position: position,
+            icon: BitmapDescriptor.fromBytes(bmp),
+          ));
+        });
+      });
+    }).generate(context);
+  }
+
 
   Future<void> _updateMapLocation() async {
     if (_currentPosition != null) {
@@ -191,8 +188,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
 
   void _logPosition(Position position) {
     final timeStamp = DateTime.now().toIso8601String();
-    final log = '[$timeStamp]\n'
-        '위도: ${position.latitude}, 경도: ${position.longitude}';
+    final log = '[$timeStamp]\n위도: ${position.latitude}, 경도: ${position.longitude}';
 
     setState(() {
       _logLines.add(log);
@@ -328,5 +324,5 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
         ],
       ),
     );
-  }*/
+  }
 }
