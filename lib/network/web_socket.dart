@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:test2/model/locationMarker.dart';
 import 'package:test2/model/picture.dart';
 import 'package:test2/value/global_variable.dart';
 import 'package:test2/model/team.dart';
@@ -32,7 +33,7 @@ class WebSocketService {
 
     channel = IOWebSocketChannel.connect(websocketUrl);
     debugPrint(channel.toString());
-    _subscription = channel.stream.listen((message) {
+    _subscription = channel.stream.listen((message) async {
       try {
         buffer += message;
         if (buffer.contains("@"))
@@ -69,8 +70,7 @@ class WebSocketService {
     _isInitialized = true;
   }
 
-  Future<Map<String, dynamic>> transmit(
-      dynamic data, String commandType) async {
+  Future<Map<String, dynamic>> transmit(dynamic data, String commandType) async {
     dynamic command_type = {'command': commandType};
     dynamic signal = {'signal': '@'};
     List<Map<String, dynamic>> message = [command_type, data, signal];
@@ -97,11 +97,15 @@ class WebSocketService {
         handleUpdateImage(jsonData);
         break;
        case 'UpdateImageSignal':
+         print('서버가 호출함');
          PicManager().syncWithServer();
          break;
-      // case 'UpdateTeamSignal':
-      //   TeamManager().loadTeam();
-      //   break;
+      case 'UpdateTeamSignal':
+        handleUpdateTeam();
+        break;
+      case 'TeamLocationUpdate':
+        handleUpdateLocation(jsonData);
+        break;
       default:
         debugPrint('$jsonData');
         break;
@@ -138,5 +142,13 @@ class WebSocketService {
     } else {
       debugPrint('이미지 데이터가 없습니다.');
     }
+  }
+
+  void handleUpdateTeam() {
+    TeamManager().updateTeam();
+  }
+
+  void handleUpdateLocation(Map<String, dynamic> data){
+    LocationManager().updateLocation(LocationMarker.fromJson(data));
   }
 }

@@ -16,12 +16,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: GlobalVariable.globalScaffoldKey,
       navigatorKey: GlobalVariable.navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
+      builder: (context, child){
+        return Scaffold(
+          body: child,
+        );
+      },
       home: const Splash(),
       routes: {
         '/login': (context) => Login(),

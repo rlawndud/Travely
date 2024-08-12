@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:test2/model/picture.dart';
+import 'package:test2/util/globalUI.dart';
 import 'package:test2/value/color.dart';
 
 import '../network/web_socket.dart';
@@ -66,6 +69,11 @@ class TeamEntity{
       'member': members,
     };
   }
+
+  @override
+  String toString() {
+    return 'teamNo: $teamNo, teamName: $teamName, member: $members';
+  }
 }
 
 class TeamManager with ChangeNotifier {
@@ -88,6 +96,7 @@ class TeamManager with ChangeNotifier {
       _currentUserId = userId;
       await loadTeam();
       await loadCurTeam();
+      print('TeamInit : $currentTeam');
       _isInitialized = true;
     }
   }
@@ -98,6 +107,7 @@ class TeamManager with ChangeNotifier {
     for(TeamEntity team in getTeamList()){
       teamNoList.add(team.teamNo);
     }
+    print(teamNoList);
     return teamNoList;
   }
   String get currentTeam => _curTeam;
@@ -125,22 +135,6 @@ class TeamManager with ChangeNotifier {
     }
     return null;
   }
-
-  // Future<void> saveTeams() async {
-  //   final Directory directory = await getApplicationDocumentsDirectory();
-  //   final String dirPath = '${directory.path}/$_userId';
-  //   final Directory dir = Directory(dirPath);
-  //
-  //   if (!await dir.exists()) {
-  //     await dir.create(recursive: true);
-  //   }
-  //
-  //   final File file = File('$dirPath/teams.json');
-  //   final data = {
-  //     'teams': _teams.map((team) => team.toJson()).toList(),
-  //   };
-  //   await file.writeAsString(json.encode(data));
-  // }
 
   Future<void> saveCurTeam(String userId, String currentTeam) async{
     final Directory directory = await getApplicationDocumentsDirectory();
@@ -175,18 +169,6 @@ class TeamManager with ChangeNotifier {
       _curTeam = ''; // 파일이 없을 경우 빈 문자열로 설정
     }
   }
-  // 팀 정보를 로드하는 메서드
-  // Future<void> loadTeamsFromFile() async {
-  //   final Directory directory = await getApplicationDocumentsDirectory();
-  //   final File file = File('${directory.path}/$_userId/teams.json');
-  //   if (await file.exists()) {
-  //     final String contents = await file.readAsString();
-  //     final Map<String, dynamic> data = json.decode(contents);
-  //     _teams = List<TeamEntity>.from(
-  //       (data['teams'] as List<dynamic>).map((item) => TeamEntity.fromJson(item)),
-  //     );
-  //   }
-  // }
 
   Future<void> loadTeam() async {
     Map<String, dynamic> data = {'id': _currentUserId};
@@ -198,12 +180,29 @@ class TeamManager with ChangeNotifier {
         TeamEntity te = TeamEntity.fromJson(team);
         _userTeams[_currentUserId]!.add(te);
       }
-      //notifyListeners();
-      // try {
-      //   await saveTeams();
-      // } catch (e) {
-      //   print('Error saving teams: $e');
-      // }
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateTeam() async {
+    Map<String, dynamic> data = {'id': _currentUserId};
+    await _webSocketService.transmit(data, 'GetMyTeamInfo');
+    _userTeams[_currentUserId] = [];
+
+    var jsonResponse = await _webSocketService.responseStream.firstWhere(
+        (response) => response.containsKey('teams'),
+      orElse: () => {'error':''}
+    );
+
+    if (jsonResponse.containsKey('teams')) {
+      List<dynamic> teamsData = jsonResponse['teams'];
+      for (var team in teamsData) {
+        TeamEntity te = TeamEntity.fromJson(team);
+        _userTeams[_currentUserId]!.add(te);
+      }
+      notifyListeners();
+    } else {
+      print('error');
     }
   }
 
@@ -229,6 +228,37 @@ class TeamManager with ChangeNotifier {
     return await _webSocketService.transmit(data, 'AcceptTeamRequest');
   }
 
+  Future<void> createTeamFolder(String folderName) async {
+    final Directory directory = await getApplicationDocumentsDirectory();
+    final String path = '${directory.path}/$folderName';
+    final Directory folder = Directory(path);
+
+    if (!await folder.exists()) {
+      await folder.create(recursive: true);
+      print('폴더 생성: $path');
+    } else {
+      print('이미 생성된 폴더: $path');
+    }
+  }
+
+  Future<String> deleteTeam(String teamName) async{
+    Map<String, dynamic> data = {
+      'team_no': getTeamNoByTeamName(teamName),
+      'id': _currentUserId,
+    };
+    var response = await _webSocketService.transmit(data, 'DeleteTeam');
+    if(response.containsKey('result')){
+      if(response['result']=='True'){
+        //여기서 로컬폴더도 삭제해야 함.
+        PicManager().deleteTeamPictures(teamName);
+        loadTeam();
+      }
+      return response['result'];
+    }else{
+      return 'error';
+    }
+  }
+
   Future<void> clearCurrentUserData() async {
     _userTeams.remove(_currentUserId);
     _curTeam = '';
@@ -237,8 +267,9 @@ class TeamManager with ChangeNotifier {
   }
 }
 
+
 void showInviteDialog(BuildContext context, int teamNo, String teamName, String memberId) {
-  TeamManager tDB = new TeamManager();
+  TeamManager _teamManager = new TeamManager();
   showDialog(
       barrierDismissible: false,
       context: context,
@@ -251,10 +282,9 @@ void showInviteDialog(BuildContext context, int teamNo, String teamName, String 
               onPressed: () async {
                 Navigator.of(context, rootNavigator: true).pop();
                 // 초대 수락 시 팀 멤버 목록에 추가
-                await tDB.acceptTeamMember(teamNo, teamName, memberId, true);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('$teamName 팀의 초대를 수락하였습니다')),
-                );
+                await _teamManager.acceptTeamMember(teamNo, teamName, memberId, true);
+                _teamManager.createTeamFolder(teamName);
+                PicManager().getNewTeamPictures(teamNo);
               },
               child: const Text(
                 '수락',
@@ -269,10 +299,8 @@ void showInviteDialog(BuildContext context, int teamNo, String teamName, String 
               ),
               onPressed: () async {
                 Navigator.of(context, rootNavigator: true).pop();
-                await tDB.acceptTeamMember(teamNo, teamName, memberId, false);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('$teamName 팀의 초대를 거절하였습니다')),
-                );
+                await _teamManager.acceptTeamMember(teamNo, teamName, memberId, false);
+                showSnackBar('$teamName 팀의 초대를 거절하였습니다', null);
               },
               child: const Text(
                 '거절',

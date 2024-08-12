@@ -39,11 +39,18 @@ class _GoogleMapClusterState extends State<GoogleMapCluster> {
     _loadImages();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   void _updateMarkers(Set<Marker> markers) {
-    setState(() {
-      _markers.clear();
-      _markers.addAll(markers);
-    });
+    if(mounted){
+      setState(() {
+        _markers.clear();
+        _markers.addAll(markers);
+      });
+    }
   }
 
   Future<Marker> Function(Cluster<ImageMarkerCluster>) get _markerBuilder => (cluster) async {

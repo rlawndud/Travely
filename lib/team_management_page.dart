@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:test2/util/globalUI.dart';
 import 'model/team.dart';
 
-
-
 class TeamManagementPage extends StatefulWidget {
-  final List<TeamEntity> teams;
   final String initialCurrentTeam;
   final String userId;
   final ValueChanged<String> onTeamSwitch;
   final ValueChanged<String> onTeamDelete;
 
   const TeamManagementPage({
-    required this.teams,
     required this.initialCurrentTeam,
     required this.userId,
     required this.onTeamSwitch,
@@ -23,27 +20,41 @@ class TeamManagementPage extends StatefulWidget {
   _TeamManagementPageState createState() => _TeamManagementPageState();
 }
 
-
 class _TeamManagementPageState extends State<TeamManagementPage> {
   late String _currentTeam;
+  final TeamManager _teamManager = TeamManager();
+  List<TeamEntity> teams = [];
 
   @override
   void initState() {
     super.initState();
     _currentTeam = widget.initialCurrentTeam;
+    _teamManager.addListener(_onTeamManagerChanged);
+  }
+
+  @override
+  void dispose() {
+    _teamManager.removeListener(_onTeamManagerChanged);
+    super.dispose();
+  }
+
+  void _onTeamManagerChanged(){
+    setState(() {
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    teams = _teamManager.getTeamList();
     return Scaffold(
       appBar: AppBar(
         title: Text('팀 관리'),
         backgroundColor: Colors.pinkAccent,
       ),
       body: ListView.builder(
-        itemCount: widget.teams.length,
+        itemCount: teams.length,
         itemBuilder: (context, index) {
-          final teamName = widget.teams[index].teamName;
+          final teamName = teams[index].teamName;
           return ListTile(
             title: Text(teamName),
             leading: teamName == _currentTeam
@@ -59,8 +70,8 @@ class _TeamManagementPageState extends State<TeamManagementPage> {
   }
 
   List<Map<String, dynamic>>? findTeamMemberByName(String teamName) {
-    // 리스트를 순회하면서 팀 이름이 일치하는 팀을 찾습니다.
-    for (var team in widget.teams) {
+    // 리스트를 순회하면서 팀 이름이 일치하는 팀을 찾음
+    for (var team in teams) {
       if (team.teamName == teamName) {
         return team.members;
       }
@@ -69,7 +80,7 @@ class _TeamManagementPageState extends State<TeamManagementPage> {
   }
 
   List<String>? findTeamMemberNamesByName(String teamName) {
-    for (var team in widget.teams) {
+    for (var team in teams) {
       if (team.teamName == teamName) {
         return team.members.map((member) => member['name'] as String).toList();
       }
@@ -100,17 +111,14 @@ class _TeamManagementPageState extends State<TeamManagementPage> {
                     _currentTeam = teamName;
                   });
                   widget.onTeamSwitch(teamName);
-                  await TeamManager().saveCurTeam(widget.userId, teamName);
+                  await _teamManager.saveCurTeam(widget.userId, teamName);
                 }
               },
               child: Text('변경'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close dialog first
-                setState(() {
-                  _currentTeam = teamName;
-                });
+                Navigator.of(context).pop();
                 _showDeleteConfirmationDialog(context, teamName);
               },
               child: Text('삭제'),
@@ -131,11 +139,8 @@ class _TeamManagementPageState extends State<TeamManagementPage> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close dialog first
+                Navigator.of(context).pop();
                 widget.onTeamDelete(teamName);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('$teamName 팀이 삭제되었습니다')),
-                );
               },
               child: Text('삭제'),
             ),
