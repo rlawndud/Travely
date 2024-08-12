@@ -119,7 +119,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
         final LatLng position = LatLng(latitude, longitude);
 
         setState(() {
-          _friendLocation[friendId] = position;
+          _friendLocation[friendName] = position;
           _customarkers();
         });
       }
@@ -133,7 +133,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
       final friendName = entry.key;
       final position = entry.value;
 
-      markerWidgetsList.add(MapMarker(name: friendName)); // 친구 ID를 표시할 때 사용
+      markerWidgetsList.add(MapMarker(name: friendName));
     }
 
     MarkerGenerator(markerWidgetsList, (bitmaps) {
