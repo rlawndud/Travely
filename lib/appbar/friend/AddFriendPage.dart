@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:test2/network/web_socket.dart';
 
 class AddFriendPage extends StatelessWidget {
@@ -43,7 +44,7 @@ class AddFriendPage extends StatelessWidget {
                 if (friendId.isNotEmpty) {
                   try {
                     final response = await webSocketService.addFriend(currentUserId, friendId);
-                    if (response['error'] == null) {
+                    if (response['result'] == 'True') {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Friend request sent to $friendId')),
                       );
@@ -55,12 +56,13 @@ class AddFriendPage extends StatelessWidget {
                     }
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('An error occurred: $e')),
+                      SnackBar(content: Text('오류 발생')),
                     );
+                    e.printError;
                   }
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Friend ID cannot be empty')),
+                    SnackBar(content: Text('친구 ID는 비울 수 없습니다')),
                   );
                 }
               },

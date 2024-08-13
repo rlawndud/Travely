@@ -132,6 +132,9 @@ class WebSocketService {
       case 'TeamLocationUpdate':
         handleUpdateLocation(jsonData);
         break;
+      case 'JoinedTeamSignal':
+        handleJoinedTeam(jsonData);
+        break;
       default:
         debugPrint('$jsonData');
         break;
@@ -180,6 +183,23 @@ class WebSocketService {
     LocationManager().updateLocation(LocationMarker.fromJson(data));
   }
 
+  void handleJoinedTeam(Map<String, dynamic> data){
+    final globalContext = GlobalVariable.globalScaffoldMessengerKey.currentState;
+
+    if(globalContext!=null){
+      globalContext.showSnackBar(
+        SnackBar(
+          content: Text('${data['from_name']}님이 ${data['teamName']}에 초대하였습니다'),
+          duration: Duration(seconds: 5),
+          action: SnackBarAction(
+            label: '확인',
+            onPressed: (){globalContext.hideCurrentSnackBar();
+            },
+          ),
+        ),
+      );
+    }
+  }
 
 void handleFriendRequestReceived(Map<String, dynamic> data) {
     debugPrint('친구 요청 받음: ${data.toString()}');
@@ -268,6 +288,19 @@ void handleFriendRequestReceived(Map<String, dynamic> data) {
     };
 
     return await transmit(data, 'AddFriend');
+  }
+
+  Future<Map<String, dynamic>> addTeamMembers(int teamNo, String teamName, String addIds, String myId) async {
+    // 전송할 데이터 리스트 생성
+    final data = {
+        'teamNo': teamNo,
+        'teamName': teamName,
+        'addids': addIds,
+        'my_id': myId
+      };
+
+    // transmit 메서드를 사용하여 데이터와 명령어를 서버에 전송
+    return await transmit(data, 'AddTeamMemberS');
   }
 
   Future<Map<String, dynamic>> refreshAddFriend(String userId) async {
