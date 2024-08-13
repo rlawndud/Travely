@@ -40,6 +40,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
   );
 
   final List<String> _logLines = [];
+  final Map<String, String> _friendNames = {};
 
   List<Marker> customMarkers = [];
   List<Marker> mapBitmapsToMarkers(List<Uint8List> bitmaps) {
@@ -116,37 +117,46 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
   Future<void> _listenToFriendLocations() async {
     _webSocketService.responseStream.listen((message) {
       if (message['command'] == 'TeamLocationUpdate') {
-        final friendId = message['id'];
-        final friendName = message['name'];
-        final latitude = message['latitude'];
-        final longitude = message['longitude'];
-        final LatLng position = LatLng(latitude, longitude);
+        final friendId = message['id'] as String?;
+        final friendName = message['userName'] as String;
+        final latitude = message['latitude'] as double?;
+        final longitude = message['longitude'] as double?;
 
-        setState(() {
-          _friendLocation[friendId] = position;
-          _customarkers();
-        });
+        if (friendId != null && latitude != null && longitude != null) {
+          final LatLng position = LatLng(latitude, longitude);
+
+          setState(() {
+            _friendLocation[friendId] = position;
+            _friendNames[friendId] = friendName; // 친구 이름을 저장합니다.
+            _customarkers();
+          });
+        } else {
+          // Null 값이 있는 경우, 디버그나 로깅을 위해 출력할 수 있습니다.
+          print('Received null values: id=$friendId, name=$friendName, lat=$latitude, lng=$longitude');
+        }
       }
     });
   }
 
+
   void _customarkers() {
     List<Widget> markerWidgetsList = [];
     for (var entry in _friendLocation.entries) {
-      final friendId = entry.key;
-      final friendName = entry.key;
+      final friendId = entry.key; // 이 부분은 이제 사용되지 않습니다.
+      final friendName = _friendNames[entry.key]; // 친구 이름을 가져오기 위해 새로운 맵을 사용합니다.
       final position = entry.value;
 
-      markerWidgetsList.add(MapMarker(name: friendName));
+      markerWidgetsList.add(MapMarker(name: friendName!)); // 마커에 표시할 이름을 friendName으로 수정합니다.
     }
 
     MarkerGenerator(markerWidgetsList, (bitmaps) {
       setState(() {
         _markers.clear();
         bitmaps.asMap().forEach((i, bmp) {
-          final friendName = _friendLocation.keys.toList()[i];
-          final position = _friendLocation[friendName]!;
-          final markerId = MarkerId(friendName);
+          final friendId = _friendLocation.keys.toList()[i];
+          final friendName = _friendNames[friendId]; // 친구 이름을 가져오기 위해 수정합니다.
+          final position = _friendLocation[friendId]!;
+          final markerId = MarkerId(friendName!); // MarkerId를 이름으로 생성합니다.
 
           _markers.add(Marker(
             markerId: markerId,
@@ -157,7 +167,6 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
       });
     }).generate(context);
   }
-
 
   Future<void> _updateMapLocation() async {
     if (_currentPosition != null) {
