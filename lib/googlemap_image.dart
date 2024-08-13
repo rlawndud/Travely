@@ -103,15 +103,36 @@ class _GoogleMapClusterState extends State<GoogleMapCluster> {
     canvas.drawCircle(Offset(size / 2, size / 2), size / 2.2, paint2);*/
 
     if (image != null) {
-      final ui.Codec codec = await ui.instantiateImageCodec(image);
+      final ui.Codec codec = await ui.instantiateImageCodec(image, targetWidth: size * 2);
       final ui.FrameInfo fi = await codec.getNextFrame();
       final imageSize = size * 0.8;
-      canvas.drawImageRect(
-        fi.image,
-        Rect.fromLTRB(0, 0, fi.image.width.toDouble(), fi.image.height.toDouble()),
-        Rect.fromLTWH((size - imageSize) / 2, (size - imageSize) / 2, imageSize, imageSize), //(size - imageSize) / 2, (size - imageSize) / 2,
-        Paint(),
+      final double aspectRatio = fi.image.width/fi.image.height;
+
+      double srcWidth, srcHeight, srcX, srcY;
+      if (aspectRatio > 1) {
+        srcHeight = fi.image.height.toDouble();
+        srcWidth = srcHeight;
+        srcX = (fi.image.width - srcWidth) / 2;
+        srcY = 0.0;
+      } else {
+        srcWidth = fi.image.width.toDouble();
+        srcHeight = srcWidth;
+        srcX = 0.0;
+        srcY = (fi.image.height - srcHeight) / 2;
+      }
+
+      final Rect src = Rect.fromLTWH(srcX, srcY, srcWidth, srcHeight);
+      final Rect dst = Rect.fromLTWH(
+          (size - imageSize) / 2,
+          (size - imageSize) / 2,
+          imageSize,
+          imageSize
       );
+
+      canvas.save();
+      canvas.clipRRect(RRect.fromRectAndRadius(dst, Radius.circular(borderRadius - whiteAreaInset)));
+      canvas.drawImageRect(fi.image, src, dst, Paint()..filterQuality = FilterQuality.high);
+      canvas.restore();
     }
 
     if (text != null) {
@@ -141,14 +162,14 @@ class _GoogleMapClusterState extends State<GoogleMapCluster> {
       textPainter.layout();
       textPainter.paint(
         canvas,
-        Offset(size - textPainter.width - size * 0.1, size * 0.1),
+        Offset(size - textPainter.width - size * 0.12, size * 0.07),
       );
 
       textPainter.text = TextSpan(text: text, style: textStyle);
       textPainter.layout();
       textPainter.paint(
         canvas,
-        Offset(size - textPainter.width - size * 0.1, size * 0.1),
+        Offset(size - textPainter.width - size * 0.12, size * 0.07),
       );
     }
 
