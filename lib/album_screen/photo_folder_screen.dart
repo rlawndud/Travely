@@ -45,7 +45,7 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
     await Directory(teamPath).create(recursive: true);
     await Directory('$teamPath/전체사진').create(recursive: true);
     await Directory('$teamPath/지역').create(recursive: true);
-    await Directory('$teamPath/배경').create(recursive: true);
+    // await Directory('$teamPath/배경').create(recursive: true);
     await Directory('$teamPath/계절').create(recursive: true);
     await Directory('$teamPath/멤버').create(recursive: true);
 
@@ -54,10 +54,10 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
       await Directory('$teamPath/지역/$city').create(recursive: true);
     }
 
-    List<String> backgrounds = ['산', '바다', '기타'];
-    for (var background in backgrounds) {
-      await Directory('$teamPath/배경/$background').create(recursive: true);
-    }
+    // List<String> backgrounds = ['산', '바다', '기타'];
+    // for (var background in backgrounds) {
+    //   await Directory('$teamPath/배경/$background').create(recursive: true);
+    // }
 
     List<String> seasons = ['봄', '여름', '가을', '겨울'];
     for (var season in seasons) {
@@ -160,7 +160,7 @@ class TeamAlbumScreen extends StatelessWidget {
         children: [
           _buildAlbumTile(context, '전체사진'),
           _buildAlbumTile(context, '지역'),
-          _buildAlbumTile(context, '배경'),
+          // _buildAlbumTile(context, '배경'),
           _buildAlbumTile(context, '계절'),
           _buildAlbumTile(context, '멤버'),
         ],

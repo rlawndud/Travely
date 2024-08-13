@@ -61,7 +61,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
-    if(state == AppLifecycleState.detached){
+    if(state == AppLifecycleState.detached) {
+      print('강종?');
       _logoutSignal();
     }
   }

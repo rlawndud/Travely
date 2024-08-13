@@ -73,11 +73,13 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
       _positionStream = Geolocator.getPositionStream(
         locationSettings: _locationSettings,
       ).listen((Position position) {
-        setState(() {
-          _currentPosition = position;
-          _updateMapLocation();
-          _sendLocationToServer();
-        });
+        if(mounted){
+          setState(() {
+            _currentPosition = position;
+            _updateMapLocation();
+            _sendLocationToServer();
+          });
+        }
       });
     }
   }
@@ -268,7 +270,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
               _controller.complete(controller);
             },
             initialCameraPosition: const CameraPosition(
-              target: LatLng(36.2048, 127.7669),
+              target: LatLng(36.3505, 127.3848),
               zoom: 13.5,
             ),
             zoomControlsEnabled: true,
