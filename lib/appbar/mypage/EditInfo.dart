@@ -26,6 +26,12 @@ class _EditInfoPageState extends State<EditInfoPage> {
   final ImagePicker _picker = ImagePicker();
   XFile? _image;
 
+  @override
+  void initState() {
+    super.initState();
+    _user = widget.user;
+  }
+
   void _updateInfo() {
     final String newPhoneNumber = _phoneController.text;
     final String newPassword = _newPasswordController.text;

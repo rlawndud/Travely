@@ -6,7 +6,7 @@ import '../../model/member.dart';
 
 class MyPage extends StatelessWidget {
   final Member user;
-  const MyPage({super.key, required this.user});
+  MyPage({required this.user});
 
   @override
   Widget build(BuildContext context) {
