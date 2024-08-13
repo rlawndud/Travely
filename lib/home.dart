@@ -239,9 +239,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               ],
             ),
           ),
-          body: TabBarView(
-            physics: const NeverScrollableScrollPhysics(),
-            children: _pages, // 전체 리스트를 참조
+          body: IndexedStack(
+            index: _selectedIndex,
+            children: _pages,
           ),
           bottomNavigationBar: TabBar(
             onTap: (index) {
