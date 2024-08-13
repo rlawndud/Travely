@@ -13,8 +13,6 @@ import 'package:test2/map_page.dart';
 import 'package:test2/model/imgtest.dart';
 import 'package:test2/model/locationMarker.dart';
 import 'package:test2/model/member.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:test2/image_upload_page.dart';
 import 'package:test2/model/picture.dart';
 import 'package:test2/album_screen/photo_folder_screen.dart';
 import 'package:test2/network/web_socket.dart';
@@ -244,8 +242,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               ],
             ),
           ),
-          body: TabBarView(
-            physics: const NeverScrollableScrollPhysics(),
+          body: IndexedStack(
+            index: _selectedIndex,
             children: _pages,
           ),
           bottomNavigationBar: TabBar(
@@ -304,4 +302,5 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       ],
     );
   }
+
 }
