@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:test2/model/picture.dart';
 import 'package:test2/util/globalUI.dart';
@@ -249,13 +250,30 @@ class TeamManager with ChangeNotifier {
     var response = await _webSocketService.transmit(data, 'DeleteTeam');
     if(response.containsKey('result')){
       if(response['result']=='True'){
-        //여기서 로컬폴더도 삭제해야 함.
-        PicManager().deleteTeamPictures(teamName);
-        loadTeam();
+        await _deleteTeamFolder(teamName);
+        await PicManager().deleteTeamPictures(teamName);
+        await loadTeam();
       }
       return response['result'];
     }else{
       return 'error';
+    }
+  }
+
+  Future<void> _deleteTeamFolder(String teamName) async {
+    try{
+      final Directory appDir = await getApplicationDocumentsDirectory();
+      final String teamPath = '${appDir.path}/$_currentUserId/$teamName';
+      final Directory folder = Directory(teamPath);
+
+      if(await folder.exists()){
+        await folder.delete(recursive: true);
+        debugPrint('팀 폴더 삭제 완료: $teamPath');
+      } else {
+        debugPrint('삭제할 팀 폴더가 존재하지 않습니다: $teamPath');
+      }
+    }catch(e){
+      debugPrint('팀 폴더 삭제 중 오류: $e');
     }
   }
 
