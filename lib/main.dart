@@ -45,4 +45,3 @@ Route? generateRoute(RouteSettings routeSettings){
       return null;
   }
 }
-

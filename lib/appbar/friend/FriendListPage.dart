@@ -4,7 +4,7 @@ import 'FriendRequestModel.dart';
 class FriendListPage extends StatelessWidget {
   final List<FriendRequest> acceptedFriends;
 
-  const FriendListPage({Key? key, required this.acceptedFriends}) : super(key: key);
+  const FriendListPage({super.key, required this.acceptedFriends});
 
   @override
  Widget build (BuildContext context) {

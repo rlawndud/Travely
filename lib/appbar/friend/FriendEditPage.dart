@@ -6,10 +6,10 @@ class FriendEditPage extends StatelessWidget {
   final void Function(FriendRequest) removeFriend;
 
   const FriendEditPage({
-    Key? key,
+    super.key,
     required this.acceptedFriends,
     required this.removeFriend,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -9,12 +9,12 @@ class ImageDetailScreen extends StatelessWidget {
   final String subCategory;
 
   const ImageDetailScreen({
-    Key? key,
+    super.key,
     required this.picture,
     required this.teamName,
     required this.category,
     required this.subCategory,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +46,6 @@ class ImageDetailScreen extends StatelessWidget {
   }
 
   String _getImageAnalysis() {
-
     return picture.printPredict();
   }
 }

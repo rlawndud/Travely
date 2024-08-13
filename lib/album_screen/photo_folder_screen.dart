@@ -7,7 +7,7 @@ import 'package:test2/model/picture.dart';
 import 'package:test2/model/team.dart';
 
 class PhotoFolderScreen extends StatefulWidget {
-  const PhotoFolderScreen({Key? key}) : super(key: key);
+  const PhotoFolderScreen({super.key});
 
   @override
   _PhotoFolderScreenState createState() => _PhotoFolderScreenState();
@@ -187,6 +187,3 @@ class TeamAlbumScreen extends StatelessWidget {
     );
   }
 }
-
-
-

@@ -36,5 +36,4 @@ class PermissionManager{
   void openPermissionSetting() {
     openAppSettings();
   }
-
 }
