@@ -136,7 +136,6 @@ class _FriendState extends State<Friend> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => FriendRequestsPage(
-                    webSocketService: _webSocketService,
                     currentUserId: currentUserId,
                     onFriendAccepted: (request) {
                       setState(() {

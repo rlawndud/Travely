@@ -3,13 +3,11 @@ import 'package:test2/network/web_socket.dart';
 import 'FriendRequestModel.dart';
 
 class FriendRequestsPage extends StatefulWidget {
-  final WebSocketService webSocketService;
   final String currentUserId;
   final Function(FriendRequest) onFriendAccepted;
 
   const FriendRequestsPage({
     Key? key,
-    required this.webSocketService,
     required this.currentUserId,
     required this.onFriendAccepted,
   }) : super(key: key);
@@ -19,19 +17,20 @@ class FriendRequestsPage extends StatefulWidget {
 }
 
 class _FriendRequestsPageState extends State<FriendRequestsPage> {
-  late WebSocketService _webSocketService;
+  final WebSocketService _webSocketService = WebSocketService();
   List<FriendRequest> friendRequests = [];
+  late String currentUserId;
 
   @override
   void initState() {
     super.initState();
-    _webSocketService = widget.webSocketService;
     _loadFriendRequests();
+    currentUserId = widget.currentUserId;
   }
 
   Future<void> _loadFriendRequests() async {
     try {
-      final response = await _webSocketService.refreshAddFriend(widget.currentUserId);
+      final response = await _webSocketService.refreshAddFriend(currentUserId);
 
       print('Server response: $response');  // 응답 로그 출력
 
@@ -59,9 +58,9 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
 
   void _acceptFriendRequest(FriendRequest request) async {
     try {
-      final response = await widget.webSocketService.acceptFriendRequest(
+      final response = await _webSocketService.acceptFriendRequest(
         request.id,
-        widget.currentUserId,
+        currentUserId,
         true,
       );
       print('메롱티비');
@@ -94,9 +93,9 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
 
   void _declineFriendRequest(FriendRequest request) async {
     try {
-      final response = await widget.webSocketService.declineFriendRequest(
+      final response = await _webSocketService.declineFriendRequest(
         request.id,
-        widget.currentUserId,
+        currentUserId,
       );
 
       print('Server response after decline: $response');  // 응답 로그 출력
