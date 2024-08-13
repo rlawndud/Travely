@@ -121,7 +121,7 @@ class _FriendState extends State<Friend> {
                   builder: (context) => FriendListPage(
                     currentUserId: currentUserId,
                     webSocketService: _webSocketService,
-                    currentTeam: TeamManager().currentTeam, // 여기에 currentTeam 값 전달
+                    currentTeam: TeamManager().currentTeam,
                   ),
                 ),
               );
