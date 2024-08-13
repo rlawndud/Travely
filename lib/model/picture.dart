@@ -27,17 +27,19 @@ class PictureEntity {
 
   factory PictureEntity.fromJson(Map<String, dynamic> json) {
     var preFaceData = json['pre_face'];
-    List<String> preFaceList;
+    List<String> preFaceList=[];
+    // print('fromJson(1) : ${json['date']}, $preFaceData');
 
     if (preFaceData is String) {
-      if(preFaceData.contains('#')){
-        preFaceList = preFaceData.split('#').where((name) => name.isNotEmpty).toList();
-      }else{
-        preFaceList = preFaceData.isEmpty ? [] : [preFaceData];
+      preFaceList = preFaceData.split('#').where((name) => name.isNotEmpty).toList();
+    } else if (preFaceData is List) {
+      for(var face in preFaceData){
+        preFaceList.add(face);
       }
     } else {
       preFaceList = [];
     }
+    // print('fromJson(2) : ${json['date']}, $preFaceList');
 
     return PictureEntity(
       json['img_num'] as int,
@@ -61,7 +63,7 @@ class PictureEntity {
       'id': user_id,
       'img_data': img_data,
       'teamno': team_num,
-      'pre_face': jsonEncode(pre_face),
+      'pre_face': pre_face,
       'pre_background': pre_background,
       'pre_caption': pre_caption,
       'latitude': latitude,
@@ -85,7 +87,7 @@ class PictureEntity {
 class PicManager with ChangeNotifier {
   static final PicManager _instance = PicManager._internal();
   final WebSocketService _webSocketService = WebSocketService();
-  Map<String, List<PictureEntity>> _userPictures = {};
+  final Map<String, List<PictureEntity>> _userPictures = {};
   static String _currentUserId = '';
   bool _isInitialized = false;
   final _imageStreamController = StreamController<PictureEntity>.broadcast();
@@ -144,6 +146,7 @@ class PicManager with ChangeNotifier {
 
       for (var item in data['pictures']) {
         PictureEntity pic = PictureEntity.fromJson(item);
+        // print('이미지 불러오기(로컬) : ${pic.date} : , ${pic.pre_face}');
         _userPictures[_currentUserId]!.add(pic);
         _imageStreamController.add(pic);
         await Future.delayed(Duration(milliseconds: 10));
@@ -153,10 +156,18 @@ class PicManager with ChangeNotifier {
     }
   }
 
+  Future<void> deleteTeamPictures(String teamName) async{
+    int? teamNo = TeamManager().getTeamNoByTeamName(teamName);
+    _userPictures[_currentUserId] = _userPictures[_currentUserId]?.where((pic)=>pic.team_num != teamNo).toList()??[];
+    await savePictures();
+    notifyListeners();
+  }
+
   Future<void> syncWithServer() async {
-    int? lastImageNum = _userPictures[_currentUserId]?.isEmpty ?? true
-        ? null
-        : _userPictures[_currentUserId]!.last.img_num;
+    int? lastImageNum = _userPictures[_currentUserId]?.isEmpty ?? true ? null
+        : _userPictures[_currentUserId]!
+        .map((pic)=>pic.img_num)
+        .reduce((max, current) => max > current? max:current);
 
     Map<String, dynamic> data = {
       'team': TeamManager().getTeamNoList(),
@@ -168,6 +179,14 @@ class PicManager with ChangeNotifier {
     if (response.containsKey('result')) {
       print('현재 업데이트할 이미지가 없음');
     }
+  }
+
+  Future<void> getNewTeamPictures(int teamNo) async{
+    Map<String, dynamic> data = {
+      'team': teamNo,
+      'last_img_num': null,
+    };
+    await _webSocketService.transmit(data, 'GetAllImage');
   }
 
   Future<void> clearCurrentUserData() async {

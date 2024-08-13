@@ -6,8 +6,12 @@ import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:sound_mode/sound_mode.dart';
+import 'package:sound_mode/utils/ringer_mode_statuses.dart';
+import 'package:soundpool/soundpool.dart';
 import 'package:test2/model/memberImg.dart';
 import 'package:test2/network/web_socket.dart';
+import 'package:vibration/vibration.dart';
 
 import 'model/picture.dart';
 import 'model/team.dart';
@@ -27,6 +31,10 @@ class _CameraScreenState extends State<CameraScreen> {
   FlashMode _currentFlashMode = FlashMode.off;
   static XFile? _lastCapturedImage;
 
+  Soundpool? _pool;
+  int? _soundId;
+  RingerModeStatus _soundMode = RingerModeStatus.unknown;
+
   @override
   void initState() {
     super.initState();
@@ -36,7 +44,37 @@ class _CameraScreenState extends State<CameraScreen> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
+    _initSoundpool();
   }
+
+  // == 카메라 사운드==================================
+  void _initSoundpool() async {
+    _pool = Soundpool.fromOptions(options: SoundpoolOptions(streamType: StreamType.notification));
+    _soundId = await _loadSound();
+  }
+  Future<int> _loadSound() async => await rootBundle.load("assets/722833__maodin204__camera-shutter.wav").then((ByteData soundData){
+      return _pool!.load(soundData);
+    });
+  Future<void> _checkSilentMode() async {
+    RingerModeStatus ringerStatus = RingerModeStatus.unknown;
+    try {
+      ringerStatus = await SoundMode.ringerModeStatus;
+    } catch (err) {
+      ringerStatus = RingerModeStatus.unknown;
+    }
+    setState(() {
+      _soundMode = ringerStatus;
+    });
+  }
+  Future<void> _playSound() async {
+    if(await Vibration.hasVibrator()??false){
+      Vibration.vibrate(duration: 20, amplitude: 5);
+    }
+    if(_soundMode == RingerModeStatus.normal && _pool != null && _soundId != null){
+      await _pool!.play(_soundId!);
+    }
+  }
+  //=================================================
 
   Future<void> _initializeCamera() async {
     if (_controller != null) {
@@ -45,7 +83,7 @@ class _CameraScreenState extends State<CameraScreen> {
     _cameras = await availableCameras();
     _controller = CameraController(
       _cameras![_selectedCameraIdx],
-      ResolutionPreset.ultraHigh,
+      ResolutionPreset.veryHigh,
       enableAudio: false,
     );
     try {
@@ -67,6 +105,7 @@ class _CameraScreenState extends State<CameraScreen> {
         });
       }
     });
+    _pool?.dispose();
     super.dispose();
   }
 
@@ -90,6 +129,10 @@ class _CameraScreenState extends State<CameraScreen> {
             return '권한 부족';
           }
         }
+
+        await _checkSilentMode();
+        await _playSound();
+
         Position position = await Geolocator.getCurrentPosition();
         String formatDate = DateFormat('yyyy/MM/dd HH:mm:ss').format(DateTime.now());
         Map<String, dynamic> data = {
@@ -100,6 +143,7 @@ class _CameraScreenState extends State<CameraScreen> {
           'date': formatDate,
         };
         debugPrint('location: ${data['location']}, date: ${data['date']}');
+
         var response = await _webSocketService.transmit(data, 'AddImage');
         if(response['result']=='True'){
           setState(() {

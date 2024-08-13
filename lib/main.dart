@@ -5,9 +5,18 @@ import 'package:test2/login.dart';
 import 'package:test2/model/member.dart';
 import 'package:test2/signup.dart';
 import 'package:test2/splash.dart';
+import 'package:provider/provider.dart';
+import 'package:test2/appbar/friend/FriendlistManagement.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => FriendListManagement()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -16,12 +25,19 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: GlobalVariable.globalScaffoldMessengerKey,
       navigatorKey: GlobalVariable.navigatorKey,
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
+        primaryColor: Colors.white,
         primarySwatch: Colors.blue,
       ),
+      builder: (context, child){
+        return Scaffold(
+          body: child,
+        );
+      },
       home: const Splash(),
       routes: {
         '/login': (context) => Login(),
@@ -32,15 +48,17 @@ class MyApp extends StatelessWidget {
   }
 }
 
-Route? generateRoute(RouteSettings routeSettings){
-  switch(routeSettings.name){
+Route? generateRoute(RouteSettings routeSettings) {
+  switch (routeSettings.name) {
     case '/home':
-      return MaterialPageRoute(builder: (context){
+      return MaterialPageRoute(builder: (context) {
         var map = routeSettings.arguments as Map<String, dynamic>;
-        return Home(
-          user: map['user'] as Member,
-        );
-      }, settings: routeSettings,);
+        Member user = map['user'] as Member;
+
+        return Home(user: user);
+      },
+        settings: routeSettings,
+      );
     default:
       return null;
   }

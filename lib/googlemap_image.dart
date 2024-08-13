@@ -1,11 +1,11 @@
+import 'dart:ui' as ui;
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test2/model/image_marker_cluster.dart';
-import 'dart:ui' as ui;
-import 'dart:async';
 import 'package:test2/model/picture.dart';
 import 'package:test2/model/team.dart';
 
@@ -41,11 +41,18 @@ class _GoogleMapClusterState extends State<GoogleMapCluster> {
     _loadImages();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   void _updateMarkers(Set<Marker> markers) {
-    setState(() {
-      _markers.clear();
-      _markers.addAll(markers);
-    });
+    if(mounted){
+      setState(() {
+        _markers.clear();
+        _markers.addAll(markers);
+      });
+    }
   }
 
   Future<Marker> Function(Cluster<ImageMarkerCluster>) get _markerBuilder => (cluster) async {

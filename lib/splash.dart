@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:test2/model/team.dart';
 import 'package:test2/model/userLoginState.dart';
 import 'package:test2/util/auto_login.dart';
 import 'package:test2/network/web_socket.dart';
@@ -42,17 +43,22 @@ class _SplashState extends State<Splash> {
   }
 
   Future<void> _checkLogin() async {
-    if(_isAuth){
-      //서버로 아이디 비밀번호 전달 후 회원정보 획득
-      var userDTO = new UserLoginState(Id!, Pw!);
-      debugPrint('$Id,$Pw');
-      var response = await _webSocketService.transmit(userDTO.toJson(),'Login');
-      debugPrint(response.toString());
-      Member mem = Member.fromJson(response);
-      // Member mem = new Member('id', 'password', 'name', 'phone');
-      //홈화면으로 이동
-      Navigator.pushReplacementNamed(context, '/home', arguments: {'user':mem});
-    }else{
+    try{
+      if(_isAuth){
+        //서버로 아이디 비밀번호 전달 후 회원정보 획득
+        var userDTO = new UserLoginState(Id!, Pw!);
+        debugPrint('$Id,$Pw');
+        var response = await _webSocketService.transmit(userDTO.toJson(),'Login');
+        debugPrint(response.toString());
+        Member mem = Member.fromJson(response);
+        // Member mem = new Member('id', 'password', 'name', 'phone');
+        await TeamManager().initialize(mem.id);
+        //홈화면으로 이동
+        Navigator.pushReplacementNamed(context, '/home', arguments: {'user':mem});
+      }else{
+        Navigator.pushReplacementNamed(context, '/login');
+      }
+    }catch(e){
       Navigator.pushReplacementNamed(context, '/login');
     }
   }

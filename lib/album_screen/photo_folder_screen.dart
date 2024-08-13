@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:test2/album_screen/subcategory_screen.dart';
 import 'package:test2/model/picture.dart';
@@ -45,18 +46,13 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
     await Directory(teamPath).create(recursive: true);
     await Directory('$teamPath/전체사진').create(recursive: true);
     await Directory('$teamPath/지역').create(recursive: true);
-    await Directory('$teamPath/배경').create(recursive: true);
+    // await Directory('$teamPath/배경').create(recursive: true);
     await Directory('$teamPath/계절').create(recursive: true);
     await Directory('$teamPath/멤버').create(recursive: true);
 
     List<String> cities = ['서울', '대전', '부산', '인천', '대구', '울산', '광주', '제주도', '기타 지역'];
     for (var city in cities) {
       await Directory('$teamPath/지역/$city').create(recursive: true);
-    }
-
-    List<String> backgrounds = ['산', '바다', '기타'];
-    for (var background in backgrounds) {
-      await Directory('$teamPath/배경/$background').create(recursive: true);
     }
 
     List<String> seasons = ['봄', '여름', '가을', '겨울'];
@@ -80,18 +76,6 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
     }
     return [];
   }
-
-  /*void _subscribeToNewImages() {
-    _picSubscription = _picManager.imageStream.listen((newImage) {
-      setState(() {});
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('새로운 사진이 추가되었습니다: ${newImage.img_num}'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    });
-  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +130,7 @@ class TeamAlbumScreen extends StatelessWidget {
   final String teamName;
   final List<String> teamMembers;
 
-  TeamAlbumScreen({Key? key, required this.teamName, required this.teamMembers}) : super(key: key);
+  const TeamAlbumScreen({super.key, required this.teamName, required this.teamMembers});
 
   @override
   Widget build(BuildContext context) {
@@ -160,7 +144,7 @@ class TeamAlbumScreen extends StatelessWidget {
         children: [
           _buildAlbumTile(context, '전체사진'),
           _buildAlbumTile(context, '지역'),
-          _buildAlbumTile(context, '배경'),
+          // _buildAlbumTile(context, '배경'),
           _buildAlbumTile(context, '계절'),
           _buildAlbumTile(context, '멤버'),
         ],
@@ -169,7 +153,6 @@ class TeamAlbumScreen extends StatelessWidget {
   }
 
   Widget _buildAlbumTile(BuildContext context, String category) {
-    print('_buildAlbumTile : $teamMembers');
     return ListTile(
       title: Text(category),
       onTap: () {

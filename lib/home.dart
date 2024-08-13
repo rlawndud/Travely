@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:test2/appbar/friend/Friend.dart';
 import 'package:test2/appbar/mypage/My_Page.dart';
 import 'package:test2/appbar/Settings.dart';
@@ -8,12 +10,15 @@ import 'package:test2/camera_screen.dart';
 import 'package:test2/googlemap_image.dart';
 import 'package:test2/googlemap_location.dart';
 import 'package:test2/model/imgtest.dart';
+import 'package:test2/model/locationMarker.dart';
 import 'package:test2/model/member.dart';
 import 'package:test2/model/picture.dart';
 import 'package:test2/album_screen/photo_folder_screen.dart';
+import 'package:test2/network/web_socket.dart';
 import 'package:test2/team_page.dart';
 import 'package:test2/util/permission.dart';
 import 'model/team.dart';
+import 'package:test2/value/global_variable.dart';
 
 class Home extends StatefulWidget {
   final Member user;
@@ -23,37 +28,55 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with WidgetsBindingObserver {
   late Member _user;
-  late TeamManager _teamManager;
-  late PicManager _picManager;
-  String _selectedMapType = '앨범';
+  final TeamManager _teamManager = TeamManager();
+  final PicManager _picManager = PicManager();
+  String _selectedMapType = '팀원의 위치';
 
   @override
   void initState() {
     super.initState();
     _user = widget.user;
     _checkPermissions();
-    _teamManager = TeamManager();
-    _picManager = PicManager();
     _initializeManager();
     _teamManager.addListener(_updateUI);
     _pages = <Widget>[
       TeamPage(userId: _user.id),
       const PhotoFolderScreen(), // 앨범 페이지
-      _buildMapWidget(), // 홈 페이지
-      CameraScreen(), // 촬영 페이지 //키면 바로 카메라 실행되게
+      _buildMapWidget(), // 홈 페이지-지도
+      // MapPage(userId: _user.id, userName: _user.name),
+      CameraScreen(), // 촬영 페이지
     ];
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _teamManager.removeListener(_updateUI);
     super.dispose();
   }
 
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    if(state == AppLifecycleState.detached) {
+      print('강종?');
+      _logoutSignal();
+    }
+  }
+
+  Future<void> _logoutSignal() async {
+    try{
+      await WebSocketService().transmit({'id': _user.id}, 'Logout');
+    }catch(e){
+      e.printError;
+    }
+  }
+
   void _updateUI() {
     setState(() {});  // UI 갱신
+    print('home-location : ${LocationManager().done}');
   }
 
   Future<void> _checkPermissions() async {
@@ -61,7 +84,6 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _initializeManager() async {
-    await _teamManager.initialize(_user.id);
     await _picManager.initialize(_user.id);
     setState(() {});
   }
@@ -75,15 +97,52 @@ class _HomeState extends State<Home> {
     });
   }
 
+  Future<bool> _showBackDialog() async{
+    if (GlobalVariable.homeScaffoldKey.currentState!.isDrawerOpen) {
+      GlobalVariable.homeScaffoldKey.currentState!.closeDrawer();
+      return false;
+    } else {
+      return await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('앱 종료'),
+          content: Text('정말로 앱을 종료하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('취소'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop(true);
+              },
+              child: Text('종료'),
+            ),
+          ],
+        ),
+      ) ?? false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Travely',
-      theme: ThemeData(primaryColor: Colors.white),
-      home: DefaultTabController(
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if(didPop){
+          return;
+        }
+        final shouldPop = await _showBackDialog();
+        if(shouldPop){
+          await _logoutSignal();
+          dispose();
+          SystemNavigator.pop();
+        }
+      },
+      child: DefaultTabController(
         length: 4, // Tab의 개수에 맞게 수정
         child: Scaffold(
+          key: GlobalVariable.homeScaffoldKey,
           appBar: AppBar(
             title: const Text('Travely',
                 style: TextStyle(
@@ -113,8 +172,9 @@ class _HomeState extends State<Home> {
                   currentAccountPicture: CircleAvatar(
                     backgroundImage: AssetImage('assets/cat.jpg'),
                   ),
-                  accountName: _teamManager.currentTeam.isNotEmpty?Text('${_teamManager.currentTeam}',style: TextStyle(fontWeight: FontWeight.bold),)
-                      :Text('현재 설정된 팀이 없음'),
+                  accountName: _teamManager.currentTeam.isNotEmpty
+                      ? Text('${_teamManager.currentTeam}', style: TextStyle(fontWeight: FontWeight.bold),)
+                      : Text('현재 설정된 팀이 없음'),
                   accountEmail: Text('${_user.id}'),
                   decoration: BoxDecoration(
                     color: Colors.pinkAccent[100],
@@ -146,7 +206,9 @@ class _HomeState extends State<Home> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const Friend()),
+                      MaterialPageRoute(
+                        builder: (context) => Friend(user: _user,),
+                      ),
                     );
                   },
                   trailing: const Icon(Icons.navigate_next),
@@ -159,7 +221,7 @@ class _HomeState extends State<Home> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SettingsPage(user: _user,)), // 여기 수정
+                      MaterialPageRoute(builder: (context) => SettingsPage(user: _user,)),
                     );
                   },
                   trailing: const Icon(Icons.navigate_next),
@@ -172,7 +234,7 @@ class _HomeState extends State<Home> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => album(id: _user.id,)), // 여기 수정
+                      MaterialPageRoute(builder: (context) => album(id: _user.id,)),
                     );
                   },
                   trailing: const Icon(Icons.navigate_next),
@@ -180,9 +242,9 @@ class _HomeState extends State<Home> {
               ],
             ),
           ),
-          body: TabBarView(
-            physics: const NeverScrollableScrollPhysics(),
-            children: _pages, // 전체 리스트를 참조
+          body: IndexedStack(
+            index: _selectedIndex,
+            children: _pages,
           ),
           bottomNavigationBar: TabBar(
             onTap: (index) {
@@ -206,7 +268,7 @@ class _HomeState extends State<Home> {
   Widget _buildMapWidget() {
     return Stack(
       children: [
-        _selectedMapType == '앨범' ? GoogleMapCluster() : GoogleMapLocation(userId: _user.id, userName: _user.name),
+        _selectedMapType == '팀원의 위치' ? GoogleMapLocation(userId: _user.id, userName: _user.name,) : GoogleMapCluster(),
         Positioned(
           top: 10,
           left: 10,
@@ -218,7 +280,7 @@ class _HomeState extends State<Home> {
             ),
             child: DropdownButton<String>(
               value: _selectedMapType,
-              items: ['앨범', 'GPS']
+              items: ['팀원의 위치', '앨범']
                   .map((String value) => DropdownMenuItem<String>(
                 value: value,
                 child: Text(value),

@@ -4,7 +4,6 @@ import 'package:test2/model/memberImg.dart';
 import 'package:test2/model/picture.dart';
 import 'package:test2/model/team.dart';
 
-
 class PhotoGridScreen extends StatefulWidget {
   final String teamName;
   final String category;

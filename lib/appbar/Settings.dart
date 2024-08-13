@@ -10,7 +10,6 @@ import 'package:test2/network/web_socket.dart';
 
 class SettingsPage extends StatefulWidget {
   final Member user;
-
   const SettingsPage({super.key, required this.user});
 
   @override

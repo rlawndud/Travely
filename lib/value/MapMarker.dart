@@ -17,11 +17,11 @@ class MapMarker extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(
-                  color: Colors.white
+                color: Colors.white
               ),
               borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(14),
-                  topRight: Radius.circular(14)
+                topLeft: Radius.circular(14),
+                topRight: Radius.circular(14)
               ),
             ),
             child: Center(
@@ -31,9 +31,9 @@ class MapMarker extends StatelessWidget {
                   name,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold
+                    color: Colors.black,
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold
                   ),
                 ),
               ),
@@ -44,19 +44,19 @@ class MapMarker extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.pinkAccent,
               border: Border.all(
-                  color: Colors.pinkAccent
+                color: Colors.pinkAccent
               ),
               borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(14),
-                  bottomRight: Radius.circular(14)
+                bottomLeft: Radius.circular(14),
+                bottomRight: Radius.circular(14)
               ),
             ),
           ),
           ClipPath(
             clipper: CustomClipPath(),
             child: Container(
-                height: 35.0,
-                color: Colors.pinkAccent
+              height: 35.0,
+              color: Colors.pinkAccent
             ),
           ),
         ],

@@ -2,26 +2,19 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:test2/network/web_socket.dart';
 import 'package:test2/value/MapMarker.dart';
-import 'package:test2/value/Markergeneration.dart';
 
 import 'model/team.dart';
+import 'value/Markergeneration.dart';
 
 class GoogleMapLocation extends StatefulWidget {
   final String userId;
   final String userName;
 
-  const GoogleMapLocation._({required this.userId, required this.userName});
-
-  static GoogleMapLocation? _instance;
-
-  factory GoogleMapLocation({required String userId, required String userName}) {
-    _instance ??= GoogleMapLocation._(userId: userId, userName: userName);
-    return _instance!;
-  }
+  const GoogleMapLocation({super.key, required this.userId, required this.userName});
 
   @override
   _GoogleMapLocationState createState() => _GoogleMapLocationState();
@@ -32,16 +25,14 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
   final Set<Marker> _markers = {};
   final Map<MarkerId, int> _markerClickCounts = {};
   final Map<String, LatLng> _friendLocation = {};
-  bool _isAddingMarker = false;
-  bool _isDeletingMarker = false;
+  final bool _isAddingMarker = false;
+  final bool _isDeletingMarker = false;
   bool _isLogVisible = false;
-  TeamManager teamManager = TeamManager();
 
   Position? _currentPosition;
   late StreamSubscription<Position> _positionStream;
   late Timer _locationUpdateTimer;
   late WebSocketService _webSocketService;
-  StreamSubscription? _friendLocationSubscription;
 
   final LocationSettings _locationSettings = const LocationSettings(
     accuracy: LocationAccuracy.best,
@@ -49,7 +40,6 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
   );
 
   final List<String> _logLines = [];
-  bool _isInitialized = false;
 
   List<Marker> customMarkers = [];
   List<Marker> mapBitmapsToMarkers(List<Uint8List> bitmaps) {
@@ -66,25 +56,19 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
   @override
   void initState() {
     super.initState();
-    if (!_isInitialized) {
-      _initializeServices();
-    }
-  }
-
-  void _initializeServices() {
-    _webSocketService = WebSocketService();
     _initLocationTracking();
+    _webSocketService = WebSocketService();
+    _webSocketService.init();
     _startLocationUpdateTimer();
     _startListeningToFriendLocationsIfNeeded();
-    _isInitialized = true;
   }
 
   Future<void> _initLocationTracking() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
+    LocationPermission permissionStatus = await Geolocator.checkPermission();
+    if (permissionStatus == LocationPermission.denied) {
+      permissionStatus = await Geolocator.requestPermission();
     }
-    if (permission != LocationPermission.denied) {
+    if (permissionStatus  != LocationPermission.denied) {
       _positionStream = Geolocator.getPositionStream(
         locationSettings: _locationSettings,
       ).listen((Position position) {
@@ -100,6 +84,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
   }
 
   void _startListeningToFriendLocationsIfNeeded() {
+    TeamManager teamManager = TeamManager();
     if (teamManager.currentTeam.isNotEmpty) {
       _listenToFriendLocations();
     } else {
@@ -108,18 +93,17 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
   }
 
   void _startLocationUpdateTimer() {
-    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 3), (Timer timer) async {
-      if (mounted) {
-        await _sendLocationToServer();
-      }
+    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 15), (Timer timer) async {
+      await _sendLocationToServer();
     });
   }
 
   Future<void> _sendLocationToServer() async {
-    if(_currentPosition!=null && mounted){
+    TeamManager teamManager = TeamManager();
+    if(_currentPosition!=null){
       final data = {
         'id': widget.userId,
-        'name': widget.userName,
+        'name' : widget.userName,
         'latitude': _currentPosition!.latitude,
         'longitude': _currentPosition!.longitude,
         'teamNo': teamManager.getTeamNoByTeamName(teamManager.currentTeam),
@@ -129,8 +113,8 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
     }
   }
 
-  void _listenToFriendLocations() {
-    _friendLocationSubscription = _webSocketService.responseStream.listen((message) {
+  Future<void> _listenToFriendLocations() async {
+    _webSocketService.responseStream.listen((message) {
       if (message['command'] == 'TeamLocationUpdate') {
         final friendId = message['id'];
         final friendName = message['name'];
@@ -174,6 +158,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
     }).generate(context);
   }
 
+
   Future<void> _updateMapLocation() async {
     if (_currentPosition != null) {
       final GoogleMapController mapController = await _controller.future;
@@ -204,8 +189,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
 
   void _logPosition(Position position) {
     final timeStamp = DateTime.now().toIso8601String();
-    final log = '[$timeStamp]\n'
-        '위도: ${position.latitude}, 경도: ${position.longitude}';
+    final log = '[$timeStamp]\n위도: ${position.latitude}, 경도: ${position.longitude}';
 
     setState(() {
       _logLines.add(log);
@@ -285,7 +269,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
               _controller.complete(controller);
             },
             initialCameraPosition: const CameraPosition(
-              target: LatLng(36.2048, 127.7669),
+              target: LatLng(36.3505, 127.3848),
               zoom: 13.5,
             ),
             zoomControlsEnabled: true,
