@@ -222,6 +222,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
     return Scaffold(
       body: Stack(
+        fit: StackFit.expand,
         children: <Widget>[
           // 카메라 프리뷰
           Transform.scale(

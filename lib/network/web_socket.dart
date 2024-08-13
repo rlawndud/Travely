@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:test2/appbar/friend/FriendRequestModel.dart';
@@ -23,7 +24,7 @@ class WebSocketService {
   WebSocketService._internal();
 
   late WebSocketChannel channel;
-  Uri websocketUrl = Uri.parse('ws://220.90.180.89:8080');
+  Uri websocketUrl = Uri.parse('ws://www.travely.store:8080');
   bool _isInitialized = false;
   late StreamSubscription _subscription;
   final _responseController = StreamController<Map<String, dynamic>>.broadcast();
@@ -40,19 +41,23 @@ class WebSocketService {
   }
 
   void _connect(){
-    channel = IOWebSocketChannel.connect(websocketUrl);
-    debugPrint(channel.toString());
-    _subscription = channel.stream.listen(
-        _handleMessage,
-        onError: (error) {
-          debugPrint('웹소켓 에러: $error');
-          _responseController.add({'error': '웹소켓 에러', 'details': error.toString()});
-        },
-        onDone: (){
-          debugPrint('웹소켓 연결 종료');
-          _scheduleReconnection();
-        }
-    );
+    try{
+      channel = IOWebSocketChannel.connect(websocketUrl);
+      debugPrint(channel.toString());
+      _subscription = channel.stream.listen(
+          _handleMessage,
+          onError: (error) {
+            debugPrint('웹소켓 에러: $error');
+            _responseController.add({'error': '웹소켓 에러', 'details': error.toString()});
+          },
+          onDone: (){
+            debugPrint('웹소켓 연결 종료');
+            _scheduleReconnection();
+          }
+      );
+    }catch(e){
+      debugPrint('웹소켓 연결 에러:$e');
+    }
   }
 
   void _handleMessage(dynamic message) async {

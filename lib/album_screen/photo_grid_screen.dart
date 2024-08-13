@@ -74,7 +74,8 @@ class _PhotoGridScreenState extends State<PhotoGridScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => ImageDetailScreen(
-                    picture: _filteredPictures[index],
+                    pictures: _filteredPictures,
+                    initialIndex: index,
                     teamName: widget.teamName,
                     category: widget.category,
                     subCategory: widget.subCategory,

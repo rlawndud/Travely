@@ -18,6 +18,7 @@ import 'package:test2/album_screen/photo_folder_screen.dart';
 import 'package:test2/network/web_socket.dart';
 import 'package:test2/team_page.dart';
 import 'package:test2/util/permission.dart';
+import 'package:test2/value/color.dart';
 import 'model/team.dart';
 import 'package:test2/value/global_variable.dart';
 
@@ -109,15 +110,32 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           title: Text('앱 종료'),
           content: Text('정말로 앱을 종료하시겠습니까?'),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text('취소'),
+            SizedBox(
+              width: 80,
+              height: 40,
+              child: ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                style: ElevatedButton.styleFrom(
+                  elevation: 0,
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                ),
+                child: Text('취소'),
+              ),
             ),
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop(true);
-              },
-              child: Text('종료'),
+            SizedBox(
+              width: 80,
+              height: 40,
+              child: ElevatedButton(
+                onPressed: () async {
+                  Navigator.of(context).pop(true);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: mainColor,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text('종료'),
+              ),
             ),
           ],
         ),
@@ -247,19 +265,22 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
             index: _selectedIndex,
             children: _pages,
           ),
-          bottomNavigationBar: TabBar(
-            onTap: (index) {
-              _onItemTapped(index);
-            },
-            tabs: const [
-              Tab(icon: Icon(Icons.group, color: Colors.black), text: '팀'),
-              Tab(icon: Icon(Icons.photo_album, color: Colors.black), text: '앨범'),
-              Tab(icon: Icon(Icons.home, color: Colors.black), text: '홈'),
-              Tab(icon: Icon(Icons.camera_alt, color: Colors.black), text: '촬영'),
-              //Tab(icon: Icon(Icons.edit_note, color: Colors.black),
-              //text: 'SnapNote',
-              //),
-            ],
+          bottomNavigationBar: Material(
+            color: Colors.white,
+            child: TabBar(
+              onTap: (index) {
+                _onItemTapped(index);
+              },
+              tabs: const [
+                Tab(icon: Icon(Icons.group, color: Colors.black), text: '팀'),
+                Tab(icon: Icon(Icons.photo_album, color: Colors.black), text: '앨범'),
+                Tab(icon: Icon(Icons.home, color: Colors.black), text: '홈'),
+                Tab(icon: Icon(Icons.camera_alt, color: Colors.black), text: '촬영'),
+                //Tab(icon: Icon(Icons.edit_note, color: Colors.black),
+                //text: 'SnapNote',
+                //),
+              ],
+            ),
           ),
         ),
       ),

@@ -123,10 +123,12 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
         final longitude = message['longitude'];
         final LatLng position = LatLng(latitude, longitude);
 
-        setState(() {
-          _friendLocation[friendId] = position;
-          _customarkers();
-        });
+        if(mounted){
+          setState(() {
+            _friendLocation[friendId] = position; // friendName으로 테스트 후 에러명 확인
+            _customarkers();
+          });
+        }
       }
     });
   }
@@ -271,7 +273,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
             },
             initialCameraPosition: const CameraPosition(
               target: LatLng(36.3505, 127.3848),
-              zoom: 13.5,
+              zoom: 13.5, //와이파이로 데모할 시 더 가까이에 줌
             ),
             zoomControlsEnabled: true,
             myLocationEnabled: true,
