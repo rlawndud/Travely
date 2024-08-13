@@ -6,7 +6,6 @@ import 'package:test2/Settings.dart';
 import 'package:test2/model/imgtest.dart';
 import 'package:test2/model/member.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:test2/Settings.dart'; // 올바른 Settings 파일 import
 import 'package:test2/image_upload_page.dart';
 import 'package:test2/model/picture.dart';
 import 'package:test2/album_screen/photo_folder_screen.dart';
@@ -38,8 +37,8 @@ class _HomeState extends State<Home> {
     _pages = <Widget>[
       TeamPage(userId: _user.id),
       const PhotoFolderScreen(), // 앨범 페이지
-      GoogleMapSample(), // 홈 페이지
-      const ImageUploadPage(), // 촬영 페이지 //키면 바로 카메라 실행되게
+      GoogleMapSample(), // 구글 맵 페이지
+      const ImageUploadPage(), // 촬영 페이지
     ];
   }
 
@@ -107,8 +106,9 @@ class _HomeState extends State<Home> {
                   currentAccountPicture: CircleAvatar(
                     backgroundImage: AssetImage('assets/cat.jpg'),
                   ),
-                  accountName: _teamManager.currentTeam.isNotEmpty?Text('${_teamManager.currentTeam}',style: TextStyle(fontWeight: FontWeight.bold),)
-                      :Text('현재 설정된 팀이 없음'),
+                  accountName: _teamManager.currentTeam.isNotEmpty
+                      ? Text('${_teamManager.currentTeam}', style: TextStyle(fontWeight: FontWeight.bold),)
+                      : Text('현재 설정된 팀이 없음'),
                   accountEmail: Text('${_user.id}'),
                   decoration: BoxDecoration(
                     color: Colors.pinkAccent[100],
@@ -140,7 +140,9 @@ class _HomeState extends State<Home> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const Friend()),
+                      MaterialPageRoute(
+                        builder: (context) => Friend(),
+                      ),
                     );
                   },
                   trailing: Icon(Icons.navigate_next),
@@ -153,7 +155,7 @@ class _HomeState extends State<Home> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SettingsPage(user: _user,)), // 여기 수정
+                      MaterialPageRoute(builder: (context) => SettingsPage(user: _user,)),
                     );
                   },
                   trailing: Icon(Icons.navigate_next),
@@ -166,7 +168,7 @@ class _HomeState extends State<Home> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => album(id: _user.id,)), // 여기 수정
+                      MaterialPageRoute(builder: (context) => album(id: _user.id,)),
                     );
                   },
                   trailing: Icon(Icons.navigate_next),
@@ -175,20 +177,17 @@ class _HomeState extends State<Home> {
             ),
           ),
           body: TabBarView(
-            children: _pages, // 전체 리스트를 참조
+            children: _pages,
           ),
           bottomNavigationBar: TabBar(
             onTap: (index) {
-              _onItemTapped(index); // 인덱스 그대로 전달
+              _onItemTapped(index);
             },
             tabs: const [
               Tab(icon: Icon(Icons.group, color: Colors.black), text: '팀'),
               Tab(icon: Icon(Icons.photo_album, color: Colors.black), text: '앨범'),
               Tab(icon: Icon(Icons.home, color: Colors.black), text: '홈'),
               Tab(icon: Icon(Icons.camera_alt, color: Colors.black), text: '촬영'),
-              //Tab(icon: Icon(Icons.edit_note, color: Colors.black),
-              //text: 'SnapNote',
-              //),
             ],
           ),
         ),
@@ -196,7 +195,6 @@ class _HomeState extends State<Home> {
     );
   }
 }
-
 
 class GoogleMapSample extends StatefulWidget {
   @override
@@ -292,8 +290,8 @@ class _GoogleMapSampleState extends State<GoogleMapSample> {
           GoogleMap(
             onMapCreated: _onMapCreated,
             initialCameraPosition: CameraPosition(
-              target: LatLng(36.2048, 127.7669),
-              zoom: 7.0,
+              target: LatLng(36.2048, 127.7669), // 기본 위치
+              zoom: 7.0, // 기본 줌 레벨
             ),
             zoomControlsEnabled: false,
             markers: _markers,

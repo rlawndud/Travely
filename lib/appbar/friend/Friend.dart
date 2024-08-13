@@ -1,54 +1,93 @@
 import 'package:flutter/material.dart';
-import 'package:test2/appbar/friend/AddFriendPage.dart'; // 오타 수정
-import 'FriendRequestsPage.dart';
-import 'FriendRequestModel.dart';
-import 'FriendListPage.dart';
-import 'FriendEditPage.dart'; // 새로 추가된 파일
+import 'package:provider/provider.dart';
+import 'package:test2/network/web_socket.dart';
+import 'package:test2/appbar/friend/AddFriendPage.dart';
+import 'package:test2/appbar/friend/FriendListPage.dart';
+import 'package:test2/appbar/friend/FriendRequestsPage.dart';
+import 'package:test2/appbar/friend/FriendEditPage.dart';
+import 'package:test2/appbar/friend/FriendRequestModel.dart';
+import 'package:test2/appbar/friend/User_Provider.dart';
 
 class Friend extends StatefulWidget {
-  const Friend({super.key}); // const 생성자
-
   @override
   _FriendState createState() => _FriendState();
 }
 
 class _FriendState extends State<Friend> {
+  final WebSocketService _webSocketService = WebSocketService();
+  List<FriendRequest> acceptedFriends = [];
   List<FriendRequest> friendRequests = [];
-  List<FriendRequest> acceptedFriends = []; // 수락된 친구 리스트
 
-  void _addFriendRequest(String senderId, String senderName) {
-    setState(() {
-      friendRequests.add(FriendRequest(senderId: senderId, senderName: senderName));
-    });
-  }
+  late String currentUserId;
+  late String currentUserName;
 
-  void _acceptFriendRequest(FriendRequest request) {
-    setState(() {
-      friendRequests.remove(request);
-      acceptedFriends.add(request); // 수락된 친구를 리스트에 추가
-    });
-    print('Accepted friend request from: ${request.senderName}');
-  }
-
-  void _declineFriendRequest(FriendRequest request) {
-    setState(() {
-      friendRequests.remove(request);
-    });
-    print('Declined friend request from: ${request.senderName}');
-  }
-
-  void _removeFriend(FriendRequest friend) {
-    setState(() {
-      acceptedFriends.remove(friend); // 친구 삭제
-    });
-    print('Removed friend: ${friend.senderName}');
+  @override
+  void initState() {
+    super.initState();
+    _webSocketService.init();
+    _fetchFriendRequests();
+    _webSocketService.addListener(_handleWebSocketMessage);
   }
 
   @override
-  Widget build(BuildContext context) {
-    final String currentUserName = 'John Doe'; // 적절한 사용자 이름을 입력
-    final String currentUserId = 'user123'; // 적절한 사용자 ID를 입력
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final userProvider = context.read<UserProvider>();
+    currentUserId = userProvider.userId;
+    currentUserName = userProvider.userName;
+  }
 
+  void _handleWebSocketMessage(Map<String, dynamic> data) {
+    if (data.containsKey('command')) {
+      setState(() {
+        // 데이터를 기반으로 UI 업데이트
+      });
+    }
+  }
+
+  void _fetchFriendRequests() async {
+    try {
+      final response = await _webSocketService.refreshAddFriend(currentUserId);
+
+      if (response['error'] == null) {
+        setState(() {
+          final toIds = response['to_ids'] as List<dynamic>;
+          final toNames = response['to_names'] as List<dynamic>;
+
+          //서버로부터 받은 정보를 이용해 리스트 업데이트
+          friendRequests = List<FriendRequest>.generate(
+            toIds.length,
+                (index) => FriendRequest(id: toIds[index] as String, name: toNames[index] as String),
+          );
+        });
+      } else {
+        print('친구 요청 로드 실패: ${response['error']}');
+      }
+    } catch (e) {
+      print('Error loading friend requests: $e');
+    }
+  }
+
+
+  void _deleteFriend(FriendRequest friend) async {
+    try {
+      final response = await _webSocketService.DeleteFriend(currentUserId, friend.id);
+      if (response['error'] == null) {
+        setState(() {
+          acceptedFriends.remove(friend);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${friend.name} has been removed from your friends list.')),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error removing friend: $e');
+    }
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('𝑭𝒓𝒊𝒆𝒏𝒅'),
@@ -67,10 +106,9 @@ class _FriendState extends State<Friend> {
                   builder: (context) => AddFriendPage(
                     currentUserName: currentUserName,
                     currentUserId: currentUserId,
-                    addFriendRequest: _addFriendRequest, // 콜백 함수 전달
                   ),
                 ),
-              );
+              ).then((_) => _fetchFriendRequests());
             },
           ),
           ListTile(
@@ -82,7 +120,9 @@ class _FriendState extends State<Friend> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => FriendListPage(
-                    acceptedFriends: acceptedFriends, // 수락된 친구 리스트 전달
+                    currentUserId: currentUserId,
+                    webSocketService: _webSocketService,
+                    currentTeam: 'your_current_team', // 여기에 currentTeam 값 전달
                   ),
                 ),
               );
@@ -97,12 +137,16 @@ class _FriendState extends State<Friend> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => FriendRequestsPage(
-                    friendRequests: friendRequests,
-                    acceptFriendRequest: _acceptFriendRequest,
-                    declineFriendRequest: _declineFriendRequest,
+                    webSocketService: _webSocketService,
+                    currentUserId: currentUserId,
+                    onFriendAccepted: (request) {
+                      setState(() {
+                        acceptedFriends.add(request);
+                      });
+                    },
                   ),
                 ),
-              );
+              ).then((_) => _fetchFriendRequests());
             },
           ),
           ListTile(
@@ -114,15 +158,24 @@ class _FriendState extends State<Friend> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => FriendEditPage(
-                    acceptedFriends: acceptedFriends, // 수락된 친구 리스트 전달
-                    removeFriend: _removeFriend, // 친구 삭제 콜백 함수 전달
+                    acceptedFriends: acceptedFriends,
+                    removeFriend: _deleteFriend,
+                    currentUserId: currentUserId,  // 추가
+                    webSocketService: _webSocketService,  // 추가
                   ),
                 ),
-              );
+              ).then((_) => _fetchFriendRequests());
             },
-          ),
+          )
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    print('Disposing Friend state');
+    _webSocketService.removeListener(_handleWebSocketMessage);
+    super.dispose();
   }
 }

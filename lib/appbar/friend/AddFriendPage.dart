@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:test2/network/web_socket.dart';
 
 class AddFriendPage extends StatelessWidget {
   final String currentUserName;
   final String currentUserId;
-  final Function(String, String) addFriendRequest; // 파라미터 추가
+  final WebSocketService webSocketService;
 
-  const AddFriendPage({
-    super.key,
+  AddFriendPage({
+    Key? key,
     required this.currentUserName,
     required this.currentUserId,
-    required this.addFriendRequest, // 생성자에서 필수 파라미터로 선언
-  });
+    WebSocketService? webSocketService,
+  })  : webSocketService = webSocketService ?? WebSocketService(),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController friendNameController = TextEditingController();
+    final TextEditingController friendIdController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
@@ -26,21 +28,40 @@ class AddFriendPage extends StatelessWidget {
         child: Column(
           children: [
             TextField(
-              controller: friendNameController,
+              controller: friendIdController,
               decoration: InputDecoration(
-                labelText: 'Friend Name',
-                labelStyle: TextStyle(color: Colors.blueAccent), // 추가
-                border: OutlineInputBorder(), // 추가
+                labelText: 'Friend ID',
+                labelStyle: TextStyle(color: Colors.blueAccent),
+                border: OutlineInputBorder(),
               ),
-              style: TextStyle(color: Colors.black), // 추가
+              style: TextStyle(color: Colors.black),
             ),
-            SizedBox(height: 16), // 추가
+            SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {
-                final String friendName = friendNameController.text;
-                if (friendName.isNotEmpty) {
-                  addFriendRequest(currentUserId, friendName);
-                  Navigator.pop(context);
+              onPressed: () async {
+                final String friendId = friendIdController.text;
+                if (friendId.isNotEmpty) {
+                  try {
+                    final response = await webSocketService.addFriend(currentUserId, friendId);
+                    if (response['error'] == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Friend request sent to $friendId')),
+                      );
+                      Navigator.pop(context);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error: ${response['error']}')),
+                      );
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('An error occurred: $e')),
+                    );
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Friend ID cannot be empty')),
+                  );
                 }
               },
               child: const Text('Add Friend'),
