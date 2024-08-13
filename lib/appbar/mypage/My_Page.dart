@@ -2,8 +2,11 @@ import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:test2/appbar/mypage/EditInfo.dart';
 
+import '../../model/member.dart';
+
 class MyPage extends StatelessWidget {
-  const MyPage({super.key});
+  final Member user;
+  const MyPage({super.key, required this.user});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +24,7 @@ class MyPage extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => EditInfoPage()),
+                MaterialPageRoute(builder: (context) => EditInfoPage(user: user)),
               );
             },
           ),

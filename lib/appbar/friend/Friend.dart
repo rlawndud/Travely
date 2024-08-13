@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:test2/model/member.dart';
 import 'package:test2/network/web_socket.dart';
 import 'package:test2/appbar/friend/AddFriendPage.dart';
 import 'package:test2/appbar/friend/FriendListPage.dart';
@@ -9,6 +10,8 @@ import 'package:test2/appbar/friend/FriendRequestModel.dart';
 import 'package:test2/appbar/friend/User_Provider.dart';
 
 class Friend extends StatefulWidget {
+  final Member user;
+  const Friend({super.key, required this.user});
   @override
   _FriendState createState() => _FriendState();
 }
@@ -27,21 +30,17 @@ class _FriendState extends State<Friend> {
     _webSocketService.init();
     _fetchFriendRequests();
     _webSocketService.addListener(_handleWebSocketMessage);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final userProvider = context.read<UserProvider>();
-    currentUserId = userProvider.userId;
-    currentUserName = userProvider.userName;
+    currentUserId = widget.user.id;
+    currentUserName = widget.user.name;
   }
 
   void _handleWebSocketMessage(Map<String, dynamic> data) {
     if (data.containsKey('command')) {
-      setState(() {
-        // 데이터를 기반으로 UI 업데이트
-      });
+      if(mounted){
+        setState(() {
+          // 데이터를 기반으로 UI 업데이트
+        });
+      }
     }
   }
 

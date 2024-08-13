@@ -193,7 +193,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const MyPage()),
+                      MaterialPageRoute(builder: (context) => MyPage(user: _user)),
                     );
                   },
                   trailing: const Icon(Icons.navigate_next),
@@ -207,7 +207,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Friend(),
+                        builder: (context) => Friend(user: _user,),
                       ),
                     );
                   },

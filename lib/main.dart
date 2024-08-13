@@ -13,7 +13,6 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => FriendListManagement()),
       ],
       child: const MyApp(),
@@ -56,9 +55,6 @@ Route? generateRoute(RouteSettings routeSettings) {
       return MaterialPageRoute(builder: (context) {
         var map = routeSettings.arguments as Map<String, dynamic>;
         Member user = map['user'] as Member;
-
-        // UserProvider에 사용자 정보 설정
-        context.read<UserProvider>().setUser(user.id, user.name);
 
         return Home(user: user);
       },
