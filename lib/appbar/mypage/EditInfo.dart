@@ -2,24 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
+import '../../model/member.dart';
+
 class EditInfoPage extends StatefulWidget {
-  const EditInfoPage({super.key});
+  final Member user;
+  const EditInfoPage({super.key, required this.user});
 
   @override
   _EditInfoPageState createState() => _EditInfoPageState();
 }
 
 class _EditInfoPageState extends State<EditInfoPage> {
+  late Member _user;
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _currentPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
 
-  String currentPhoneNumber = '010-1234-5678';
-  String email = 'user@example.com';
-  String userId = 'user123';
   String profileImageUrl = 'https://via.placeholder.com/150';
-  String currentPassword = 'currentPassword123';
 
   bool isCurrentPasswordValid = false;
 
@@ -52,7 +52,7 @@ class _EditInfoPageState extends State<EditInfoPage> {
 
   void _validateCurrentPassword(String value) {
     setState(() {
-      isCurrentPasswordValid = value == currentPassword;
+      isCurrentPasswordValid = value == _user.password;
     });
   }
 
@@ -140,11 +140,11 @@ class _EditInfoPageState extends State<EditInfoPage> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    Text('아이디: $userId', style: const TextStyle(color: Colors.white)),
+                    Text('아이디: ${_user.id}', style: const TextStyle(color: Colors.white)),
                     const SizedBox(height: 5),
-                    Text('이메일: $email', style: const TextStyle(color: Colors.white)),
+                    Text('이름: ${_user.name}', style: const TextStyle(color: Colors.white)),
                     const SizedBox(height: 5),
-                    Text('현재 전화번호: $currentPhoneNumber', style: const TextStyle(color: Colors.white)),
+                    Text('현재 전화번호: ${_user.phone}', style: const TextStyle(color: Colors.white)),
                   ],
                 ),
               ),

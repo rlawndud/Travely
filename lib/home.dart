@@ -133,7 +133,7 @@ class _HomeState extends State<Home> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const MyPage()),
+                      MaterialPageRoute(builder: (context) => MyPage(user: _user)),
                     );
                   },
                   trailing: const Icon(Icons.navigate_next),
