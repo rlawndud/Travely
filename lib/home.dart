@@ -245,7 +245,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
             ),
           ),
           body: TabBarView(
-            children: _pages,
             physics: const NeverScrollableScrollPhysics(),
             children: _pages,
           ),
