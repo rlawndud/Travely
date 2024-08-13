@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:test2/model/member.dart';
+import 'package:test2/model/team.dart';
 import 'package:test2/network/web_socket.dart';
 import 'package:test2/appbar/friend/AddFriendPage.dart';
 import 'package:test2/appbar/friend/FriendListPage.dart';
@@ -120,7 +121,7 @@ class _FriendState extends State<Friend> {
                   builder: (context) => FriendListPage(
                     currentUserId: currentUserId,
                     webSocketService: _webSocketService,
-                    currentTeam: 'your_current_team', // 여기에 currentTeam 값 전달
+                    currentTeam: TeamManager().currentTeam,
                   ),
                 ),
               );
@@ -135,7 +136,6 @@ class _FriendState extends State<Friend> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => FriendRequestsPage(
-                    webSocketService: _webSocketService,
                     currentUserId: currentUserId,
                     onFriendAccepted: (request) {
                       setState(() {
