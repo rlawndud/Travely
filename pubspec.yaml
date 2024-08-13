@@ -10,7 +10,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  camera: 0.10.6
+
+
+  provider: ^6.0.5
+  camera: ^0.10.0
   path_provider: ^2.0.11
   http: ^1.2.2
   firebase_auth: ^5.0.0    #

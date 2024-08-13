@@ -13,6 +13,8 @@ import 'package:test2/map_page.dart';
 import 'package:test2/model/imgtest.dart';
 import 'package:test2/model/locationMarker.dart';
 import 'package:test2/model/member.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:test2/image_upload_page.dart';
 import 'package:test2/model/picture.dart';
 import 'package:test2/album_screen/photo_folder_screen.dart';
 import 'package:test2/network/web_socket.dart';
@@ -172,8 +174,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                   currentAccountPicture: CircleAvatar(
                     backgroundImage: AssetImage('assets/cat.jpg'),
                   ),
-                  accountName: _teamManager.currentTeam.isNotEmpty?Text('${_teamManager.currentTeam}',style: TextStyle(fontWeight: FontWeight.bold),)
-                      :Text('현재 설정된 팀이 없음'),
+                  accountName: _teamManager.currentTeam.isNotEmpty
+                      ? Text('${_teamManager.currentTeam}', style: TextStyle(fontWeight: FontWeight.bold),)
+                      : Text('현재 설정된 팀이 없음'),
                   accountEmail: Text('${_user.id}'),
                   decoration: BoxDecoration(
                     color: Colors.pinkAccent[100],
@@ -205,7 +208,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const Friend()),
+                      MaterialPageRoute(
+                        builder: (context) => Friend(),
+                      ),
                     );
                   },
                   trailing: const Icon(Icons.navigate_next),
@@ -218,7 +223,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => SettingsPage(user: _user,)), // 여기 수정
+                      MaterialPageRoute(builder: (context) => SettingsPage(user: _user,)),
                     );
                   },
                   trailing: const Icon(Icons.navigate_next),
@@ -231,7 +236,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => album(id: _user.id,)), // 여기 수정
+                      MaterialPageRoute(builder: (context) => album(id: _user.id,)),
                     );
                   },
                   trailing: const Icon(Icons.navigate_next),
@@ -240,8 +245,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
             ),
           ),
           body: TabBarView(
+            children: _pages,
             physics: const NeverScrollableScrollPhysics(),
-            children: _pages, // 전체 리스트를 참조
+            children: _pages,
           ),
           bottomNavigationBar: TabBar(
             onTap: (index) {
@@ -299,5 +305,4 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       ],
     );
   }
-
 }

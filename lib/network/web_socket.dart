@@ -1,17 +1,21 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:test2/model/locationMarker.dart';
+import 'package:test2/appbar/friend/FriendRequestModel.dart';
 import 'package:test2/model/picture.dart';
 import 'package:test2/value/global_variable.dart';
 import 'package:test2/model/team.dart';
+import 'package:test2/team_page.dart';
+import 'package:provider/provider.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:test2/appbar/friend/FriendlistManagement.dart';
 
 class WebSocketService {
   static final WebSocketService _webSocketService =
-      WebSocketService._internal();
+  WebSocketService._internal();
 
   factory WebSocketService() {
     return _webSocketService;
@@ -25,40 +29,20 @@ class WebSocketService {
   late StreamSubscription _subscription;
   final _responseController = StreamController<Map<String, dynamic>>.broadcast();
   String buffer = "";
-  Timer? _reconnectionTimer;
-  final int _reconnectInterval = 5000;
-
-  Stream<Map<String, dynamic>> get responseStream => _responseController.stream;
 
   void init() {
     if (_isInitialized) return;
-    _connect();
-    _isInitialized = true;
-  }
 
-  void _connect(){
     channel = IOWebSocketChannel.connect(websocketUrl);
     debugPrint(channel.toString());
-    _subscription = channel.stream.listen(
-      _handleMessage,
-      onError: (error) {
-        debugPrint('웹소켓 에러: $error');
-        _responseController.add({'error': '웹소켓 에러', 'details': error.toString()});
-      },
-      onDone: (){
-        debugPrint('웹소켓 연결 종료');
-        _scheduleReconnection();
-      }
-    );
-  }
-  void _handleMessage(dynamic message) async {
-    try {
-      buffer += message;
-      if (buffer.contains("@"))
-      {
-        int endIndex = buffer.indexOf('@');
-        String jsonMessage = buffer.substring(0, endIndex);
-        buffer = "";
+    _subscription = channel.stream.listen((message) {
+      try {
+        buffer += message;
+        if (buffer.contains("@"))
+        {
+          int endIndex = buffer.indexOf('@');
+          String jsonMessage = buffer.substring(0, endIndex);
+          buffer = "";
 
         var jsonData = jsonDecode(jsonMessage);
 
@@ -115,16 +99,12 @@ class WebSocketService {
       case 'UpdateImage':
         handleUpdateImage(jsonData);
         break;
-       case 'UpdateImageSignal':
-         print('서버가 호출함');
-         PicManager().syncWithServer();
-         break;
-      case 'UpdateTeamSignal':
-        handleUpdateTeam();
+      case 'UpdateImageSignal':
+        PicManager().syncWithServer();
         break;
-      case 'TeamLocationUpdate':
-        handleUpdateLocation(jsonData);
-        break;
+    // case 'UpdateTeamSignal':
+    //   TeamManager().loadTeam();
+    //   break;
       default:
         debugPrint('$jsonData');
         break;
@@ -163,11 +143,145 @@ class WebSocketService {
     }
   }
 
-  void handleUpdateTeam() {
-    TeamManager().updateTeam();
+  void handleFriendRequestReceived(Map<String, dynamic> data) {
+    debugPrint('친구 요청 받음: ${data.toString()}');
+    final context = GlobalVariable.navigatorKey.currentContext;
+    if (context != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('새로운 친구 요청이 있습니다: ${data['friendName']}')),
+      );
+    } else {
+      debugPrint('Navigator context is null');
+    }
   }
 
-  void handleUpdateLocation(Map<String, dynamic> data){
-    LocationManager().updateLocation(LocationMarker.fromJson(data));
+  void handleFriendListUpdated(Map<String, dynamic> data) {
+    debugPrint('친구 목록 업데이트됨: ${data.toString()}');
+
+    if (data.containsKey('friends') && data['friends'] is List) {
+      List<FriendRequest> updatedFriendList = (data['friends'] as List<dynamic>)
+          .map((friend) => FriendRequest.fromJson(friend as Map<String, dynamic>))
+          .toList();
+
+      // 글로벌 컨텍스트를 통해 Provider에 접근
+      final context = GlobalVariable.navigatorKey.currentContext;
+      if (context != null) {
+        // FriendListManagement 싱글톤 인스턴스를 사용하여 목록 업데이트
+        Provider.of<FriendListManagement>(context, listen: false)
+            .updateFriendList(updatedFriendList);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('친구 목록이 업데이트되었습니다.')),
+        );
+      } else {
+        debugPrint('Navigator context is null');
+      }
+    } else {
+      debugPrint('친구 목록 데이터가 올바르지 않습니다');
+    }
+  }
+
+  Future<Map<String, dynamic>> updateProfile(Map<String, dynamic> profileData, Uint8List? imageBytes) async {
+    try {
+      final data = {
+        'profileData': profileData,
+        if (imageBytes != null) 'image': base64Encode(imageBytes),
+      };
+      return await transmit(data, 'UpdateProfile');
+    } catch (e) {
+      debugPrint('Error updating profile: $e');
+      return {'error': 'Error updating profile', 'details': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> updatePhoneNumber(String phoneNumber) async {
+    try {
+      final data = {'phoneNumber': phoneNumber};
+      return await transmit(data, 'UpdatePhoneNumber');
+    } catch (e) {
+      debugPrint('Error updating phone number: $e');
+      return {'error': 'Error updating phone number', 'details': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> updatePassword(String newPassword) async {
+    try {
+      final data = {'newPassword': newPassword};
+      return await transmit(data, 'UpdatePassword');
+    } catch (e) {
+      debugPrint('Error updating password: $e');
+      return {'error': 'Error updating password', 'details': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> validatePassword(Map<String, dynamic> data) async {
+    try {
+      return await transmit(data, 'ValidatePassword');
+    } catch (e) {
+      debugPrint('Error validating password: $e');
+      return {'error': 'Error validating password', 'details': e.toString()};
+    }
+  }
+
+  Future<Map<String, dynamic>> addFriend(String fromId, String toId) async {
+    final data = {
+      'from_id': fromId,
+      'to_id': toId,
+    };
+
+    return await transmit(data, 'AddFriend');
+  }
+
+  Future<Map<String, dynamic>> refreshAddFriend(String userId) async {
+    final data = {
+      'id': userId,
+    };
+    return await transmit(data, 'RefreshAddFriend');
+  }
+
+  Future<Map<String, dynamic>> getMyFriend(String userId) async {
+    final data = {
+      'id': userId,
+    };
+
+    // 서버로 데이터 전송하고 응답받기
+    final response = await transmit(data, 'GetMyFriend');
+    // 만약 response가 이미 Map<String, dynamic>이라면, jsonDecode가 필요하지 않음
+    return response;
+  }
+
+  Future<Map<String, dynamic>> DeleteFriend(String fromId, String toId) async {
+    final data = {
+      'from_id': fromId,
+      'to_id': toId,
+    };
+    return await transmit(data, 'DeleteFriend');
+  }
+
+
+  Future<Map<String, dynamic>> acceptFriendRequest(String fromId, String toId, bool areWe) async {
+    final data = {
+      'from_id': fromId,
+      'to_id': toId,
+      'are_we': areWe,
+    };
+    return await transmit(data, 'AcceptFriend');
+  }
+
+  Future<Map<String, dynamic>> declineFriendRequest(String fromId, String toId) async {
+    final data = {
+      'from_id': fromId,
+      'to_id': toId,
+    };
+    return await transmit(data, 'DeclineFriendRequest');
+  }
+
+  void addListener(Function(Map<String, dynamic>) listener) {
+    _responseController.stream.listen(listener);
+  }
+
+  void removeListener(Function(Map<String, dynamic>) listener) {
+    // StreamController에서는 직접적인 removeListener 메서드가 없으므로,
+    // 실제로 리스너를 제거하는 로직은 필요에 따라 구현해야 합니다.
   }
 }
