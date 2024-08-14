@@ -301,7 +301,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
             ),
             child: DropdownButton<String>(
               value: _selectedMapType,
-              items: ['팀원의 위치', '앨범']
+              items: ['팀원의 위치', '지도 위 앨범']
                   .map((String value) => DropdownMenuItem<String>(
                 value: value,
                 child: Text(value),
