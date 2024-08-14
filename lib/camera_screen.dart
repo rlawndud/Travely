@@ -34,16 +34,40 @@ class _CameraScreenState extends State<CameraScreen> {
   int? _soundId;
   RingerModeStatus _soundMode = RingerModeStatus.unknown;
 
+  bool _isCameraScreenVisible = false;
+
   @override
   void initState() {
     super.initState();
     _initializeCamera();
+    _initSoundpool();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-    _initSoundpool();
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    _disposeCamera();
+    _pool?.dispose();
+    super.dispose();
+  }
+
+  //인덱스를 누를 때, 노티주고 리스너를 통해서 인덱스가 4번이면 이닛사용. 그외엔 디스포즈 또는 유지.
+  void _checkVisibility(){
+    final bool isVisible = TickerMode.of(context);
+    if(isVisible && !_isCameraScreenVisible){
+      _isCameraScreenVisible = true;
+      _initializeCamera();
+      print('카메라 사용중!');
+    }else if(!isVisible && _isCameraScreenVisible){
+      _isCameraScreenVisible = false;
+      _disposeCamera();
+      print('카메라 사용안함!');
+    }
   }
 
   // == 카메라 사운드==================================
@@ -51,9 +75,11 @@ class _CameraScreenState extends State<CameraScreen> {
     _pool = Soundpool.fromOptions(options: SoundpoolOptions(streamType: StreamType.notification));
     _soundId = await _loadSound();
   }
+
   Future<int> _loadSound() async => await rootBundle.load("assets/722833__maodin204__camera-shutter.wav").then((ByteData soundData){
       return _pool!.load(soundData);
     });
+
   Future<void> _checkSilentMode() async {
     RingerModeStatus ringerStatus = RingerModeStatus.unknown;
     try {
@@ -94,9 +120,7 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  void _disposeCamera(){
     _controller?.dispose().then((_){
       if(mounted){
         setState(() {
@@ -104,14 +128,6 @@ class _CameraScreenState extends State<CameraScreen> {
         });
       }
     });
-    _pool?.dispose();
-    super.dispose();
-  }
-
-  @override
-  void deactivate() {
-    _controller?.dispose();
-    super.deactivate();
   }
 
   Future<String> uploadImage(XFile image) async {

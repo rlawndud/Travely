@@ -125,7 +125,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
 
         if(mounted){
           setState(() {
-            _friendLocation[friendId] = position; // friendName으로 테스트 후 에러명 확인
+            _friendLocation[friendId] = position;
             _friendName[friendId] = friendName;
             _customarkers();
           });
