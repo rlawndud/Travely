@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:test2/network/web_socket.dart';
-import 'package:test2/util/permission.dart';
 import 'package:test2/value/MapMarker.dart';
 
 import 'model/team.dart';
@@ -41,6 +40,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
   );
 
   final List<String> _logLines = [];
+  final Map<String, String> _friendName = {};
 
   List<Marker> customMarkers = [];
   List<Marker> mapBitmapsToMarkers(List<Uint8List> bitmaps) {
@@ -118,7 +118,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
     _webSocketService.responseStream.listen((message) {
       if (message['command'] == 'TeamLocationUpdate') {
         final friendId = message['id'];
-        final friendName = message['name'];
+        final friendName = message['userName'];
         final latitude = message['latitude'];
         final longitude = message['longitude'];
         final LatLng position = LatLng(latitude, longitude);
@@ -126,6 +126,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
         if(mounted){
           setState(() {
             _friendLocation[friendId] = position; // friendName으로 테스트 후 에러명 확인
+            _friendName[friendId] = friendName;
             _customarkers();
           });
         }
@@ -137,19 +138,20 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
     List<Widget> markerWidgetsList = [];
     for (var entry in _friendLocation.entries) {
       final friendId = entry.key;
-      final friendName = entry.key;
+      final friendName = _friendName[friendId];
       final position = entry.value;
 
-      markerWidgetsList.add(MapMarker(name: friendName));
+      markerWidgetsList.add(MapMarker(name: friendName!));
     }
 
     MarkerGenerator(markerWidgetsList, (bitmaps) {
       setState(() {
         _markers.clear();
         bitmaps.asMap().forEach((i, bmp) {
-          final friendName = _friendLocation.keys.toList()[i];
-          final position = _friendLocation[friendName]!;
-          final markerId = MarkerId(friendName);
+          final friendId = _friendLocation.keys.toList()[i];
+          final friendName = _friendName[friendId];
+          final position = _friendLocation[friendId]!;
+          final markerId = MarkerId(friendName!);
 
           _markers.add(Marker(
             markerId: markerId,
@@ -272,8 +274,8 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
               _controller.complete(controller);
             },
             initialCameraPosition: const CameraPosition(
-              target: LatLng(36.3505, 127.3848),
-              zoom: 13.5, //와이파이로 데모할 시 더 가까이에 줌
+              target: LatLng(36.3360, 127.4454),
+              zoom: 17, //와이파이로 데모할 시 더 가까이에 줌
             ),
             zoomControlsEnabled: true,
             myLocationEnabled: true,
