@@ -24,7 +24,7 @@ class WebSocketService {
   WebSocketService._internal();
 
   late WebSocketChannel channel;
-  Uri websocketUrl = Uri.parse('ws://www.travely.store:8080');
+  Uri websocketUrl = Uri.parse('ws://220.90.180.89:8080');
   bool _isInitialized = false;
   late StreamSubscription _subscription;
   final _responseController = StreamController<Map<String, dynamic>>.broadcast();
