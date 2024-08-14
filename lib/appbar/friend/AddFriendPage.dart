@@ -8,12 +8,11 @@ class AddFriendPage extends StatelessWidget {
   final WebSocketService webSocketService;
 
   AddFriendPage({
-    Key? key,
+    super.key,
     required this.currentUserName,
     required this.currentUserId,
     WebSocketService? webSocketService,
-  })  : webSocketService = webSocketService ?? WebSocketService(),
-        super(key: key);
+  })  : webSocketService = webSocketService ?? WebSocketService();
 
   @override
   Widget build(BuildContext context) {

@@ -14,11 +14,11 @@ class FriendListPage extends StatefulWidget {
   final String currentTeam;
 
   const FriendListPage({
-    Key? key,
+    super.key,
     required this.currentUserId,
     required this.webSocketService,
     required this.currentTeam,
-  }) : super(key: key);
+  });
 
   @override
   _FriendListPageState createState() => _FriendListPageState();
@@ -128,8 +128,6 @@ class _FriendListPageState extends State<FriendListPage> {
       );
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {

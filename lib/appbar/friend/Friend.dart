@@ -13,6 +13,7 @@ import 'package:test2/appbar/friend/User_Provider.dart';
 class Friend extends StatefulWidget {
   final Member user;
   const Friend({super.key, required this.user});
+
   @override
   _FriendState createState() => _FriendState();
 }

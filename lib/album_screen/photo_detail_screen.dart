@@ -10,13 +10,13 @@ class ImageDetailScreen extends StatefulWidget {
   final String subCategory;
 
   const ImageDetailScreen({
-    Key? key,
+    super.key,
     required this.pictures,
     required this.initialIndex,
     required this.teamName,
     required this.category,
     required this.subCategory,
-  }) : super(key: key);
+  });
 
   @override
   _ImageDetailScreenState createState() => _ImageDetailScreenState();

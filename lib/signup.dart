@@ -1,15 +1,12 @@
 import 'dart:io';
-import 'package:flutter/cupertino.dart';
+
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:test2/model/memberImg.dart';
 import 'package:test2/network/web_socket.dart';
 import 'package:test2/value/color.dart';
-
-import 'model/member.dart';
+import 'package:test2/model/member.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});

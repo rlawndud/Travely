@@ -5,7 +5,6 @@ import 'package:test2/login.dart';
 import 'package:test2/model/member.dart';
 import 'package:test2/signup.dart';
 import 'package:test2/splash.dart';
-import 'package:test2/appbar/friend/User_Provider.dart';
 import 'package:provider/provider.dart';
 import 'package:test2/appbar/friend/FriendlistManagement.dart';
 

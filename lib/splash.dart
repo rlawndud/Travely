@@ -3,7 +3,7 @@ import 'package:test2/model/team.dart';
 import 'package:test2/model/userLoginState.dart';
 import 'package:test2/util/auto_login.dart';
 import 'package:test2/network/web_socket.dart';
-import 'model/member.dart';
+import 'package:test2/model/member.dart';
 
 class Splash extends StatefulWidget {
   const Splash({super.key});

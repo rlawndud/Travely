@@ -46,7 +46,7 @@ class LocationManager with ChangeNotifier {
   final WebSocketService _webSocketService = WebSocketService();
   final TeamManager _teamManager = TeamManager();
   late StreamSubscription<Position> _positionStream;
-  Map<int, List<LocationMarker>> _teamLocations = {};
+  final Map<int, List<LocationMarker>> _teamLocations = {};
   static String _currentUserId = '';
   static String _currentUserName = '';
   Timer? _locationUpdateTimer;
@@ -146,10 +146,6 @@ class LocationManager with ChangeNotifier {
     notifyListeners();
   }
 
-  // Future<void> _syncLocationOnMap(){
-  //
-  // }
-
   void stopTracking() {
     _positionStream.cancel();
     _currentPosition = null;
@@ -158,11 +154,11 @@ class LocationManager with ChangeNotifier {
     notifyListeners();
   }
 
+  @override
   void dispose() {
     _positionStream.cancel();
     _locationUpdateTimer?.cancel();
     _locationStreamController.close();
     super.dispose();
   }
-
 }
