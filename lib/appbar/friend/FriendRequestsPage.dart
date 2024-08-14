@@ -24,8 +24,8 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
   @override
   void initState() {
     super.initState();
-    _loadFriendRequests();
     currentUserId = widget.currentUserId;
+    _loadFriendRequests();
   }
 
   Future<void> _loadFriendRequests() async {
@@ -34,7 +34,12 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
 
       print('Server response: $response');  // 응답 로그 출력
 
-      if (response['error'] == null) {
+      if (response.containsKey('error')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('친구 요청 로드 실패: ${response['error']}')),
+        );
+        
+      } else {
         setState(() {
           final toIds = response['to_ids'] as List<dynamic>;
           final toNames = response['to_names'] as List<dynamic>;
@@ -45,10 +50,6 @@ class _FriendRequestsPageState extends State<FriendRequestsPage> {
                 (index) => FriendRequest(id: toIds[index] as String, name: toNames[index] as String),
           );
         });
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('친구 요청 로드 실패: ${response['error']}')),
-        );
       }
     } catch (e) {
       print('Error loading friend requests: $e');

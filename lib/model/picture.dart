@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:test2/model/team.dart';
 import 'package:test2/network/web_socket.dart';
@@ -76,6 +77,14 @@ class PictureEntity {
 
   String printPredict() {
     return '촬영날짜: $date\n장소: $location\n사진 속 인물: $pre_face\n사진 배경: $pre_background\n요약문장: $pre_caption';
+  }
+
+  String printSentence(){
+    String sentence = '';
+
+    var date_time = date.split(' ')[1].split(':');
+
+    return sentence;
   }
 
   @override

@@ -24,7 +24,7 @@ class WebSocketService {
   WebSocketService._internal();
 
   late WebSocketChannel channel;
-  Uri websocketUrl = Uri.parse('ws://220.90.180.89:8080');
+  Uri websocketUrl = Uri.parse('ws://210.93.86.87:8080');
   bool _isInitialized = false;
   late StreamSubscription _subscription;
   final _responseController = StreamController<Map<String, dynamic>>.broadcast();
@@ -42,6 +42,9 @@ class WebSocketService {
 
   void _connect(){
     try{
+      /*HttpClient client = HttpClient()
+        ..badCertificateCallback = ((X509Certificate cert, String host, int port) => true);
+*/
       channel = IOWebSocketChannel.connect(websocketUrl);
       debugPrint(channel.toString());
       _subscription = channel.stream.listen(
@@ -55,6 +58,24 @@ class WebSocketService {
             _scheduleReconnection();
           }
       );
+      /*WebSocket.connect(websocketUrl.toString(), customClient: client).then((ws) {
+        channel = IOWebSocketChannel(ws);
+        debugPrint(channel.toString());
+        _subscription = channel.stream.listen(
+          _handleMessage,
+          onError: (error) {
+            debugPrint('웹소켓 에러: $error');
+            _responseController.add({'error': '웹소켓 에러', 'details': error.toString()});
+          },
+          onDone: () {
+            debugPrint('웹소켓 연결 종료');
+            _scheduleReconnection();
+          },
+        );
+      }).catchError((error) {
+        debugPrint('웹소켓 연결 에러: $error');
+        _scheduleReconnection();
+      });*/
     }catch(e){
       debugPrint('웹소켓 연결 에러:$e');
     }
