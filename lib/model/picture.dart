@@ -96,7 +96,7 @@ class PictureEntity {
 class PicManager with ChangeNotifier {
   static final PicManager _instance = PicManager._internal();
   final WebSocketService _webSocketService = WebSocketService();
-  Map<String, List<PictureEntity>> _userPictures = {};
+  final Map<String, List<PictureEntity>> _userPictures = {};
   static String _currentUserId = '';
   bool _isInitialized = false;
   final _imageStreamController = StreamController<PictureEntity>.broadcast();

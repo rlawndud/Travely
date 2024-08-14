@@ -11,12 +11,12 @@ class FriendEditPage extends StatefulWidget {
   final WebSocketService webSocketService;
 
   const FriendEditPage({
-    Key? key,
+    super.key,
     required this.acceptedFriends,
     required this.removeFriend,
     required this.currentUserId,
     required this.webSocketService,
-  }) : super(key: key);
+  });
 
   @override
   _FriendEditPageState createState() => _FriendEditPageState();

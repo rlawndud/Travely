@@ -37,5 +37,3 @@ Uint8List BytesToImage(String imgStr) {
   // return MemoryImage(bytes);
   return bytes;
 }
-
-

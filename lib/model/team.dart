@@ -3,14 +3,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:test2/model/picture.dart';
 import 'package:test2/util/globalUI.dart';
 import 'package:test2/value/color.dart';
-
-import '../network/web_socket.dart';
+import 'package:test2/network/web_socket.dart';
 
 class Team {
   int teamNo;
@@ -80,7 +77,7 @@ class TeamEntity{
 class TeamManager with ChangeNotifier {
   final WebSocketService _webSocketService = WebSocketService();
   static final TeamManager _instance = TeamManager._internal();
-  Map<String, List<TeamEntity>> _userTeams = {};
+  final Map<String, List<TeamEntity>> _userTeams = {};
   static String _curTeam = '';
   static String _currentUserId='';
   bool _isInitialized = false;

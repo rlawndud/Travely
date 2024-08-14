@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class TeamSettingScreen extends StatefulWidget {
   final String teamName;
   final List<String> teamMembers;
-  const TeamSettingScreen({Key? key, required this.teamName, required this.teamMembers}) : super(key: key);
+  const TeamSettingScreen({super.key, required this.teamName, required this.teamMembers});
 
   @override
   _TeamSettingScreenState createState() => _TeamSettingScreenState();

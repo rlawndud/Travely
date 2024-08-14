@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-import '../../model/member.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:test2/model/member.dart';
 
 class EditInfoPage extends StatefulWidget {
   final Member user;

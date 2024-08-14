@@ -11,11 +11,11 @@ class PhotoGridScreen extends StatefulWidget {
   final String subCategory;
 
   const PhotoGridScreen({
-    Key? key,
+    super.key,
     required this.teamName,
     required this.category,
     required this.subCategory,
-  }) : super(key: key);
+  });
 
   @override
   _PhotoGridScreenState createState() => _PhotoGridScreenState();

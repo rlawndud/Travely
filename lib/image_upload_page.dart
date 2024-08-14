@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
 class ImageUploadPage extends StatelessWidget {
-  const ImageUploadPage({Key? key}) : super(key: key);
+  const ImageUploadPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +21,8 @@ class ImageUploadPage extends StatelessWidget {
 }
 
 class ImageUpload extends StatefulWidget {
+  const ImageUpload({super.key});
+
   @override
   State<ImageUpload> createState() => _ImageUploadState();
 }

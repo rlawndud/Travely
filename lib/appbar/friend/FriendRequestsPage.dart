@@ -7,10 +7,10 @@ class FriendRequestsPage extends StatefulWidget {
   final Function(FriendRequest) onFriendAccepted;
 
   const FriendRequestsPage({
-    Key? key,
+    super.key,
     required this.currentUserId,
     required this.onFriendAccepted,
-  }) : super(key: key);
+  });
 
   @override
   _FriendRequestsPageState createState() => _FriendRequestsPageState();

@@ -15,6 +15,8 @@ class Login extends StatelessWidget {
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _pwController = TextEditingController();
 
+  Login({super.key});
+
   void _login(BuildContext context) async {
 
     String id = _idController.text.toString();

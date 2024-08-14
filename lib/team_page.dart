@@ -8,7 +8,7 @@ import 'team_management_page.dart';
 class TeamPage extends StatefulWidget {
   final String userId;
 
-  const TeamPage({Key? key, required this.userId}) : super(key: key);
+  const TeamPage({super.key, required this.userId});
 
   @override
   _TeamPageState createState() => _TeamPageState();

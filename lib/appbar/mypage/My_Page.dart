@@ -1,8 +1,7 @@
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:test2/appbar/mypage/EditInfo.dart';
-
-import '../../model/member.dart';
+import 'package:test2/model/member.dart';
 
 class MyPage extends StatelessWidget {
   final Member user;

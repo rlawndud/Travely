@@ -1,4 +1,3 @@
-
 class UserLoginState{
   String id;
   String password;
