@@ -47,7 +47,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       const PhotoFolderScreen(), // 앨범 페이지
       _buildMapWidget(), // 홈 페이지-지도
       // MapPage(userId: _user.id, userName: _user.name),
-      CameraScreen(key: UniqueKey(),), // 촬영 페이지
+      const CameraScreen(), // 촬영 페이지
     ];
     WidgetsBinding.instance.addObserver(this);
   }
