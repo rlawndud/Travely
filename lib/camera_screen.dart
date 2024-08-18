@@ -134,13 +134,6 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<String> uploadImage(XFile image) async {
-    // 이전 이미지 파일 삭제
-    if (_lastCapturedImage != null) {
-      final lastImageFile = File(_lastCapturedImage!.path);
-      if (await lastImageFile.exists()) {
-        await lastImageFile.delete();
-      }
-    }
     _lastCapturedImage = image;
     String currentTeam = TeamManager().currentTeam;
     if(currentTeam==''){
