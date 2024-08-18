@@ -25,20 +25,21 @@ class FriendListPage extends StatefulWidget {
 }
 
 class _FriendListPageState extends State<FriendListPage> {
-  late final WebSocketService _webSocketService;
+  final WebSocketService _webSocketService = WebSocketService();
   final teamManager = TeamManager();
   bool isLoading = true;
+  late String currentUserId;
 
   @override
   void initState() {
     super.initState();
-    _webSocketService = WebSocketService();
+    currentUserId = widget.currentUserId;
     _loadAcceptedFriends();
   }
 
   Future<void> _loadAcceptedFriends() async {
     try {
-      final response = await _webSocketService.getMyFriend(widget.currentUserId);
+      final response = await _webSocketService.getMyFriend(currentUserId);
 
       if (response['error'] == null) {
         final myFriendsId = response['my_friends_id'] as List<dynamic>? ?? [];

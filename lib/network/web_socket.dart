@@ -23,7 +23,7 @@ class WebSocketService {
   WebSocketService._internal();
 
   late WebSocketChannel channel;
-  Uri websocketUrl = Uri.parse('ws://210.93.86.87:8080');
+  Uri websocketUrl = Uri.parse('ws://210.93.86.87:8080'); //220.90.180.89(내부망) //210.93.86.87(외부망)
   bool _isInitialized = false;
   late StreamSubscription _subscription;
   final _responseController = StreamController<Map<String, dynamic>>.broadcast();

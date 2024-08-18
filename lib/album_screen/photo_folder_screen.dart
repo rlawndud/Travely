@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:test2/album_screen/subcategory_screen.dart';
 import 'package:test2/model/picture.dart';
 import 'package:test2/model/team.dart';
+import 'package:test2/search_page.dart';
 
 class PhotoFolderScreen extends StatefulWidget {
   const PhotoFolderScreen({super.key});
@@ -142,29 +143,96 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
   }
 }
 
-class TeamAlbumScreen extends StatelessWidget {
+
+class TeamAlbumScreen extends StatefulWidget {
   final String teamName;
   final List<String> teamMembers;
 
   TeamAlbumScreen({Key? key, required this.teamName, required this.teamMembers}) : super(key: key);
 
   @override
+  _TeamAlbumScreenState createState() => _TeamAlbumScreenState();
+}
+
+class _TeamAlbumScreenState extends State<TeamAlbumScreen> {
+  bool _isSearchMode = false;
+  final TextEditingController _searchController = TextEditingController();
+  late SearchPage _searchPage;
+  late int _teamNo;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeTeamNo();
+    _searchPage = SearchPage(initialQuery: '', teamNo: _teamNo);
+  }
+
+  void _initializeTeamNo() {
+    final teamManager = TeamManager();
+    _teamNo = teamManager.getTeamNoByTeamName(widget.teamName) ?? -1;
+    if (_teamNo == -1) {
+      print('Error: 팀 번호를 찾을 수 없습니다.');
+    }
+  }
+
+  void _performSearch(String query) {
+    setState(() {
+      _isSearchMode = true;
+      _searchPage = SearchPage(initialQuery: query, teamNo: _teamNo);
+    });
+  }
+  @override
   Widget build(BuildContext context) {
-    print('TeamAlbumScreen : $teamName, ${teamMembers.toString()}');
+    print('TeamAlbumScreen : ${widget.teamName}, ${widget.teamMembers.toString()}');
     return Scaffold(
       appBar: AppBar(
-        title: Text('$teamName 팀 앨범'),
+        title: _isSearchMode
+            ? TextField(
+          controller: _searchController,
+          decoration: InputDecoration(
+            hintText: '${widget.teamName} 팀 사진 검색',
+            border: InputBorder.none,
+            hintStyle: TextStyle(color: Colors.white70),
+          ),
+          style: TextStyle(color: Colors.white),
+          autofocus: true,
+          onSubmitted: (value) {
+            _performSearch(value);
+          },
+        )
+        : Text('${widget.teamName} 팀 앨범'),
         backgroundColor: Colors.pinkAccent,
-      ),
-      body: ListView(
-        children: [
-          _buildAlbumTile(context, '전체사진'),
-          _buildAlbumTile(context, '지역'),
-          // _buildAlbumTile(context, '배경'),
-          _buildAlbumTile(context, '계절'),
-          _buildAlbumTile(context, '멤버'),
+        actions: [
+          IconButton(
+            icon: Icon(_isSearchMode ? Icons.close : Icons.search),
+            onPressed: () {
+              setState(() {
+                if (_isSearchMode) {
+                  if (_searchController.text.isNotEmpty) {
+                    _searchController.clear();
+                    _performSearch('');
+                  } else {
+                    _isSearchMode = false;
+                  }
+                } else {
+                  _isSearchMode = true;
+                }
+              });
+            },
+          ),
         ],
       ),
+      body: _isSearchMode
+          ? _searchPage
+          : ListView(
+              children: [
+                _buildAlbumTile(context, '전체사진'),
+                _buildAlbumTile(context, '지역'),
+                // _buildAlbumTile(context, '배경'),
+                _buildAlbumTile(context, '계절'),
+                _buildAlbumTile(context, '멤버'),
+              ],
+            ),
     );
   }
 
@@ -176,9 +244,9 @@ class TeamAlbumScreen extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => SubCategoryScreen(
-              teamName: teamName,
+              teamName: widget.teamName,
               category: category,
-              teamMembers: teamMembers,
+              teamMembers: widget.teamMembers,
             ),
           ),
         );

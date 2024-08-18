@@ -15,6 +15,7 @@ import 'package:test2/model/member.dart';
 import 'package:test2/model/picture.dart';
 import 'package:test2/album_screen/photo_folder_screen.dart';
 import 'package:test2/network/web_socket.dart';
+import 'package:test2/search_page.dart';
 import 'package:test2/team_page.dart';
 import 'package:test2/util/permission.dart';
 import 'package:test2/value/color.dart';
@@ -34,6 +35,11 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   final TeamManager _teamManager = TeamManager();
   final PicManager _picManager = PicManager();
   String _selectedMapType = '팀원의 위치';
+  bool _isSearchMode = false;
+  int _previouseIndex = 0;
+  final TextEditingController _searchController = TextEditingController();
+  late SearchPage _searchPage;
+
 
   @override
   void initState() {
@@ -42,6 +48,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     _checkPermissions();
     _initializeManager();
     _teamManager.addListener(_updateUI);
+    _searchPage = SearchPage(initialQuery: '');
     _pages = <Widget>[
       TeamPage(userId: _user.id),
       const PhotoFolderScreen(), // 앨범 페이지
@@ -95,6 +102,19 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      if (_isSearchMode) {
+        _isSearchMode = false;
+        _searchController.clear();
+      }
+    });
+  }
+
+  void _performSearch(String query){
+    print('홈 perfomSearch $query');
+    setState(() {
+      _isSearchMode = true;
+      _previouseIndex = _selectedIndex;
+      _searchPage = SearchPage(initialQuery: query);
     });
   }
 
@@ -162,7 +182,20 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         child: Scaffold(
           key: GlobalVariable.homeScaffoldKey,
           appBar: AppBar(
-            title: const Text('Travely',
+            title: _isSearchMode ? TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: '사진에 대한 검색어를 입력해주세요',
+                border: InputBorder.none,
+                hintStyle: TextStyle(color: Colors.white70),
+              ),
+              style: TextStyle(color: Colors.white),
+              autofocus: true,
+              onSubmitted: (value) {
+                _performSearch(value);
+              },
+            )
+                : const Text('Travely',
                 style: TextStyle(
                   fontFamily: 'Agro',
                   fontSize: 22,
@@ -174,12 +207,26 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
             backgroundColor: Colors.pinkAccent[200],
             actions: <Widget>[
               IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () => _onItemTapped(0),
-              ),
-              IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () => _onItemTapped(1),
+                icon: Icon(_isSearchMode ? Icons.close : Icons.search),
+                onPressed: () {
+                  setState(() {
+                    if (_isSearchMode) {
+                      if (_searchController.text.isNotEmpty) {
+                        // 검색어가 있을 경우, 입력창을 비웁니다.
+                        _searchController.clear();
+                        _performSearch('');
+                      } else {
+                        // 검색어가 없을 경우, 검색 모드를 종료하고 원래 페이지로
+                        _isSearchMode = false;
+                        _selectedIndex = _previouseIndex;
+                      }
+                    } else {
+                      // 검색 모드가 아닐 때, 검색 모드로 전환
+                      _isSearchMode = true;
+                      _previouseIndex = _selectedIndex;
+                    }
+                  });
+                },
               ),
             ],
           ),
@@ -260,8 +307,10 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               ],
             ),
           ),
-          body: IndexedStack(
-            index: _selectedIndex,
+          body: _isSearchMode
+          ? _searchPage
+          : TabBarView(
+            physics: const NeverScrollableScrollPhysics(),
             children: _pages,
           ),
           bottomNavigationBar: Material(
