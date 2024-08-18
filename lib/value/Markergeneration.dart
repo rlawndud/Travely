@@ -52,7 +52,7 @@ class _MarkerHelper extends StatefulWidget {
   final List<Widget> markerWidgets;
   final Function(List<Uint8List>) callback;
 
-  const _MarkerHelper({Key? key, required this.markerWidgets, required this.callback}) : super(key: key);
+  const _MarkerHelper({super.key, required this.markerWidgets, required this.callback});
 
   @override
   _MarkerHelperState createState() => _MarkerHelperState();

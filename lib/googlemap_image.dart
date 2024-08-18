@@ -3,7 +3,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
+import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart' as gmc;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test2/model/image_marker_cluster.dart';
 import 'package:test2/model/picture.dart';
@@ -17,7 +17,7 @@ class GoogleMapCluster extends StatefulWidget {
 }
 
 class _GoogleMapClusterState extends State<GoogleMapCluster> {
-  late ClusterManager<ImageMarkerCluster> _clusterManager;
+  late gmc.ClusterManager<ImageMarkerCluster> _clusterManager;
   final Set<Marker> _markers = {};
   final CameraPosition _initialCameraPosition = CameraPosition(
     target: LatLng(36.2048, 127.7669),
@@ -31,7 +31,7 @@ class _GoogleMapClusterState extends State<GoogleMapCluster> {
   }
 
   void _initClusterManager() {
-    _clusterManager = ClusterManager<ImageMarkerCluster>(
+    _clusterManager = gmc.ClusterManager<ImageMarkerCluster>(
       [],
       _updateMarkers,
       markerBuilder: _markerBuilder,
@@ -55,7 +55,7 @@ class _GoogleMapClusterState extends State<GoogleMapCluster> {
     }
   }
 
-  Future<Marker> Function(Cluster<ImageMarkerCluster>) get _markerBuilder => (cluster) async {
+  Future<Marker> Function(gmc.Cluster<ImageMarkerCluster>) get _markerBuilder => (cluster) async {
     return Marker(
       markerId: MarkerId(cluster.getId()),
       position: cluster.location,

@@ -25,12 +25,13 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
   final Set<Marker> _markers = {};
   final Map<MarkerId, int> _markerClickCounts = {};
   final Map<String, LatLng> _friendLocation = {};
-  final bool _isAddingMarker = false;
-  final bool _isDeletingMarker = false;
+  bool _isAddingMarker = false;
+  bool _isDeletingMarker = false;
   bool _isLogVisible = false;
 
   Position? _currentPosition;
-  late StreamSubscription<Position> _positionStream;
+  StreamSubscription<Position>? _positionStream;
+  StreamSubscription<dynamic>? _friendLocationStream;
   late Timer _locationUpdateTimer;
   late WebSocketService _webSocketService;
 
@@ -41,18 +42,6 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
 
   final List<String> _logLines = [];
   final Map<String, String> _friendName = {};
-
-  List<Marker> customMarkers = [];
-  List<Marker> mapBitmapsToMarkers(List<Uint8List> bitmaps) {
-    bitmaps.asMap().forEach((i, bmp) {
-      customMarkers.add(Marker(
-        markerId: MarkerId('$i'),
-        position: _friendLocation.values.toList()[i], // 마커 위치 수정
-        icon: BitmapDescriptor.fromBytes(bmp),
-      ));
-    });
-    return customMarkers;
-  }
 
   @override
   void initState() {
@@ -69,19 +58,21 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
     if (permissionStatus == LocationPermission.denied) {
       permissionStatus = await Geolocator.requestPermission();
     }
-    if (permissionStatus  != LocationPermission.denied) {
-      _positionStream = Geolocator.getPositionStream(
-        locationSettings: _locationSettings,
-      ).listen((Position position) {
-        if(mounted){
-          setState(() {
-            _currentPosition = position;
-            _updateMapLocation();
-            _sendLocationToServer();
-          });
+    if (permissionStatus != LocationPermission.denied) {
+      _positionStream = Geolocator.getPositionStream(locationSettings: _locationSettings).listen((Position position) {
+        if (mounted) {
+          _updateCurrentPosition(position);
         }
       });
     }
+  }
+
+  void _updateCurrentPosition(Position position) {
+    setState(() {
+      _currentPosition = position;
+      _updateMapLocation();
+      _sendLocationToServer();
+    });
   }
 
   void _startListeningToFriendLocationsIfNeeded() {
@@ -94,28 +85,28 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
   }
 
   void _startLocationUpdateTimer() {
-    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 15), (Timer timer) async {
-      await _sendLocationToServer();
+    _locationUpdateTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      _sendLocationToServer();
     });
   }
 
   Future<void> _sendLocationToServer() async {
-    TeamManager teamManager = TeamManager();
-    if(_currentPosition!=null){
+    if (_currentPosition != null) {
+      TeamManager teamManager = TeamManager();
       final data = {
         'id': widget.userId,
-        'name' : widget.userName,
+        'name': widget.userName,
         'latitude': _currentPosition!.latitude,
         'longitude': _currentPosition!.longitude,
         'teamNo': teamManager.getTeamNoByTeamName(teamManager.currentTeam),
-        'teamName': teamManager.currentTeam
+        'teamName': teamManager.currentTeam,
       };
       await _webSocketService.transmit(data, 'UpdateLocation');
     }
   }
 
   Future<void> _listenToFriendLocations() async {
-    _webSocketService.responseStream.listen((message) {
+    _friendLocationStream = _webSocketService.responseStream.listen((message) {
       if (message['command'] == 'TeamLocationUpdate') {
         final friendId = message['id'];
         final friendName = message['userName'];
@@ -123,35 +114,35 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
         final longitude = message['longitude'];
         final LatLng position = LatLng(latitude, longitude);
 
-        if(mounted){
-          setState(() {
-            _friendLocation[friendId] = position;
-            _friendName[friendId] = friendName;
-            _customarkers();
-          });
+        if (mounted) {
+          _updateFriendLocation(friendId, friendName, position);
         }
       }
     });
   }
 
-  void _customarkers() {
-    List<Widget> markerWidgetsList = [];
-    for (var entry in _friendLocation.entries) {
-      final friendId = entry.key;
-      final friendName = _friendName[friendId];
-      final position = entry.value;
+  void _updateFriendLocation(String friendId, String friendName, LatLng position) {
+    setState(() {
+      _friendLocation[friendId] = position;
+      _friendName[friendId] = friendName;
+      _customarkers();
+    });
+  }
 
-      markerWidgetsList.add(MapMarker(name: friendName!));
-    }
+  void _customarkers() {
+    final markerWidgetsList = _friendLocation.entries.map((entry) {
+      final friendName = _friendName[entry.key];
+      return MapMarker(name: friendName!);
+    }).toList();
 
     MarkerGenerator(markerWidgetsList, (bitmaps) {
       setState(() {
         _markers.clear();
         bitmaps.asMap().forEach((i, bmp) {
           final friendId = _friendLocation.keys.toList()[i];
-          final friendName = _friendName[friendId];
+          final friendName = _friendName[friendId]!;
           final position = _friendLocation[friendId]!;
-          final markerId = MarkerId(friendName!);
+          final markerId = MarkerId(friendName);
 
           _markers.add(Marker(
             markerId: markerId,
@@ -163,31 +154,16 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
     }).generate(context);
   }
 
-
   Future<void> _updateMapLocation() async {
     if (_currentPosition != null) {
-      final GoogleMapController mapController = await _controller.future;
-      final LatLng position = LatLng(
-        _currentPosition!.latitude,
-        _currentPosition!.longitude,
-      );
+      final mapController = await _controller.future;
+      final position = LatLng(_currentPosition!.latitude, _currentPosition!.longitude);
 
       mapController.animateCamera(CameraUpdate.newLatLng(position));
 
-      const MarkerId markerId = MarkerId('current_location');
-      final Marker marker = Marker(
-        markerId: markerId,
-        position: position,
-        infoWindow: InfoWindow(
-          title: '내 위치',
-          snippet: '위도: ${_currentPosition!.latitude}, 경도: ${_currentPosition!.longitude}',
-        ),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-      );
-
       setState(() {
+        const markerId = MarkerId('current_location');
         _markers.removeWhere((m) => m.markerId == markerId);
-        // _markers.add(marker);
       });
     }
   }
@@ -204,17 +180,17 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
 
   @override
   void dispose() {
-    _positionStream.cancel();
+    _positionStream?.cancel();
+    _friendLocationStream?.cancel();
+    _locationUpdateTimer.cancel();
     super.dispose();
   }
 
   void _addMarker(LatLng position) {
+    final markerId = MarkerId(position.toString());
     setState(() {
-      final markerId = MarkerId(position.toString());
-      if (!_markerClickCounts.containsKey(markerId)) {
-        _markerClickCounts[markerId] = 0;
-      }
-      final marker = Marker(
+      _markerClickCounts[markerId] ??= 0;
+      _markers.add(Marker(
         markerId: markerId,
         position: position,
         infoWindow: InfoWindow(
@@ -231,8 +207,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
             _incrementMarkerClickCount(markerId);
           }
         },
-      );
-      _markers.add(marker);
+      ));
     });
   }
 
@@ -244,24 +219,22 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
   }
 
   void _incrementMarkerClickCount(MarkerId markerId) {
+    final count = _markerClickCounts[markerId] = _markerClickCounts[markerId]! + 1;
+    final hue = count > 5 ? BitmapDescriptor.hueRed : BitmapDescriptor.hueBlue;
+
     setState(() {
-      _markerClickCounts[markerId] = _markerClickCounts[markerId]! + 1;
-      final updatedMarker = _markers.firstWhere((marker) => marker.markerId == markerId);
-      _markers.remove(updatedMarker);
-      _markers.add(updatedMarker.copyWith(
-        iconParam: BitmapDescriptor.defaultMarkerWithHue(
-          _markerClickCounts[markerId]! > 5 ? BitmapDescriptor.hueRed : BitmapDescriptor.hueBlue,
-        ),
-      ));
+      final marker = _markers.firstWhere((marker) => marker.markerId == markerId);
+      _markers.remove(marker);
+      _markers.add(marker.copyWith(iconParam: BitmapDescriptor.defaultMarkerWithHue(hue)));
     });
   }
 
   void _hideLogContent() {
-    setState(() {
-      if (_isLogVisible) {
+    if (_isLogVisible) {
+      setState(() {
         _isLogVisible = false;
-      }
-    });
+      });
+    }
   }
 
   @override
@@ -270,12 +243,10 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
       body: Stack(
         children: [
           GoogleMap(
-            onMapCreated: (GoogleMapController controller) {
-              _controller.complete(controller);
-            },
+            onMapCreated: (controller) => _controller.complete(controller),
             initialCameraPosition: const CameraPosition(
               target: LatLng(36.3360, 127.4454),
-              zoom: 17, //와이파이로 데모할 시 더 가까이에 줌
+              zoom: 17,
             ),
             zoomControlsEnabled: true,
             myLocationEnabled: true,
@@ -301,7 +272,7 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
                   backgroundColor: Colors.orange,
                   child: const Icon(Icons.wrap_text_outlined),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
               ],
             ),
           ),
@@ -311,19 +282,17 @@ class _GoogleMapLocationState extends State<GoogleMapLocation> {
               left: 10,
               right: 10,
               child: Container(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 color: Colors.white,
                 height: 200,
                 child: ListView.builder(
                   itemCount: _logLines.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(
-                        _logLines[index],
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    );
-                  },
+                  itemBuilder: (context, index) => ListTile(
+                    title: Text(
+                      _logLines[index],
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
                 ),
               ),
             ),

@@ -50,6 +50,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   void dispose() {
+    _controller?.dispose();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _disposeCamera();
     _pool?.dispose();
@@ -57,7 +58,7 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   //인덱스를 누를 때, 노티주고 리스너를 통해서 인덱스가 4번이면 이닛사용. 그외엔 디스포즈 또는 유지.
-  void _checkVisibility(){
+  void _checkVisibility() async {
     final bool isVisible = TickerMode.of(context);
     if(isVisible && !_isCameraScreenVisible){
       _isCameraScreenVisible = true;
@@ -72,7 +73,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   // == 카메라 사운드==================================
   void _initSoundpool() async {
-    _pool = Soundpool.fromOptions(options: SoundpoolOptions(streamType: StreamType.notification));
+    _pool = Soundpool.fromOptions(options: const SoundpoolOptions(streamType: StreamType.notification));
     _soundId = await _loadSound();
   }
 
@@ -106,31 +107,41 @@ class _CameraScreenState extends State<CameraScreen> {
       await _controller!.dispose();
     }
     _cameras = await availableCameras();
+    if (_cameras == null || _cameras!.isEmpty) return; // 카메라가 없으면 초기화 중단
+
     _controller = CameraController(
       _cameras![_selectedCameraIdx],
       ResolutionPreset.veryHigh,
       enableAudio: false,
     );
+
     try {
       await _controller!.initialize();
       await _controller!.setFlashMode(_currentFlashMode);
       if (mounted) setState(() {});
     } catch (e) {
       debugPrint('카메라 초기화 오류: $e');
+      await _controller?.dispose();
+      _controller = null; // 초기화 실패 시, 컨트롤러 해제
     }
   }
 
-  void _disposeCamera(){
-    _controller?.dispose().then((_){
-      if(mounted){
-        setState(() {
-          _controller = null;
-        });
-      }
-    });
+  void _disposeCamera() async {
+    if (_controller != null) {
+      await _controller!.dispose();
+      _controller = null;
+    }
   }
 
   Future<String> uploadImage(XFile image) async {
+    // 이전 이미지 파일 삭제
+    if (_lastCapturedImage != null) {
+      final lastImageFile = File(_lastCapturedImage!.path);
+      if (await lastImageFile.exists()) {
+        await lastImageFile.delete();
+      }
+    }
+    _lastCapturedImage = image;
     String currentTeam = TeamManager().currentTeam;
     if(currentTeam==''){
       return '팀 미설정';
@@ -229,12 +240,8 @@ class _CameraScreenState extends State<CameraScreen> {
       );
     }
 
-    // 화면의 크기를 구합니다.
     final size = MediaQuery.of(context).size;
-    // 카메라 프리뷰의 크기를 계산합니다.
     var scale = size.aspectRatio * _controller!.value.aspectRatio;
-
-    // 카메라가 화면보다 길 경우, scale을 조정합니다.
     if (scale < 1) scale = 1 / scale;
 
     return Scaffold(
@@ -328,14 +335,14 @@ class _CameraScreenState extends State<CameraScreen> {
                             SnackBar(
                               content: Text(message),
                               backgroundColor: backgroundColor,
-                              duration: Duration(seconds: 2),
+                              duration: const Duration(seconds: 2),
                             ),
                           );
                         }
                       } catch (e) {
                         debugPrint('사진촬영오류: $e');
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('사진 촬영 중 오류가 발생했습니다.'),
+                          const SnackBar(content: Text('사진 촬영 중 오류가 발생했습니다.'),
                             backgroundColor: Colors.red,
                             duration: Duration(seconds: 2),),
                         );
@@ -355,7 +362,6 @@ class _CameraScreenState extends State<CameraScreen> {
 
 class CustomCameraButton extends StatefulWidget {
   final VoidCallback onPressed;
-
   const CustomCameraButton({super.key, required this.onPressed});
 
   @override
@@ -368,18 +374,26 @@ class _CustomCameraButtonState extends State<CustomCameraButton> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapDown: (_) => _updatePressedState(true),
       onTapUp: (_) {
-        setState(() => _isPressed = false);
+        _updatePressedState(false);
         widget.onPressed();
       },
-      onTapCancel: () => setState(() => _isPressed = false),
+      onTapCancel: () => _updatePressedState(false),
       child: Icon(
         _isPressed ? Icons.circle_outlined : Icons.circle,
         color: Colors.white,
         size: 80,
       ),
     );
+  }
+
+  void _updatePressedState(bool isPressed) {
+    if (_isPressed != isPressed) {
+      setState(() {
+        _isPressed = isPressed;
+      });
+    }
   }
 }
 
