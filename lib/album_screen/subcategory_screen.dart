@@ -4,7 +4,8 @@ import 'package:test2/album_screen/photo_grid_screen.dart';
 class SubCategoryScreen extends StatelessWidget {
   final String teamName;
   final String category;
-  final List<String> teamMembers;
+  // final List<String> teamMembers;
+  final List<Map<String, dynamic>> teamMembers;
 
   const SubCategoryScreen({super.key, required this.teamName, required this.category, required this.teamMembers});
 
@@ -16,6 +17,7 @@ class SubCategoryScreen extends StatelessWidget {
         teamName: teamName,
         category: category,
         subCategory: '',
+        teamMembers: [],
       );
     }
 
@@ -36,6 +38,7 @@ class SubCategoryScreen extends StatelessWidget {
                     teamName: teamName,
                     category: category,
                     subCategory: subCategory,
+                    teamMembers: teamMembers,
                   ),
                 ),
               );
@@ -55,7 +58,8 @@ class SubCategoryScreen extends StatelessWidget {
       case '배경':
         return ['산', '바다', '기타'];
       case '멤버':
-        return teamMembers;
+      case '촬영자':
+        return teamMembers.map((member) => member['name'] as String).toList();
       default:
         return [];
     }

@@ -9,12 +9,14 @@ class PhotoGridScreen extends StatefulWidget {
   final String teamName;
   final String category;
   final String subCategory;
+  final List<Map<String, dynamic>> teamMembers;
 
   const PhotoGridScreen({
     super.key,
     required this.teamName,
     required this.category,
     required this.subCategory,
+    required this.teamMembers,
   });
 
   @override
@@ -115,6 +117,13 @@ class _PhotoGridScreenState extends State<PhotoGridScreen> {
         return isTeam && picture.pre_background == widget.subCategory;
       } else if (widget.category == '멤버'){
         return isTeam && picture.pre_face.contains(widget.subCategory);
+      } else if (widget.category == '촬영자'){
+        // 아이디 검색 및 이름 폴더
+        var matchingMember = widget.teamMembers.firstWhere(
+              (member) => member['id'] == picture.user_id,
+          orElse: () => {'name': '알 수 없음'},
+        );
+        return isTeam && matchingMember['name'] == widget.subCategory;
       }
       return false;
     }).toList();

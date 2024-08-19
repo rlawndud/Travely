@@ -73,10 +73,10 @@ class _ImageDetailScreenState extends State<ImageDetailScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(13.0),
                 child: Text(
                   _getImageAnalysis(picture),
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 15),
                 ),
               ),
             ],

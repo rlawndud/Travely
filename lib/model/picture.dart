@@ -76,15 +76,7 @@ class PictureEntity {
   }
 
   String printPredict() {
-    return '촬영날짜: $date\n장소: $location\n사진 속 인물: $pre_face\n사진 배경: $pre_background\n요약문장: $pre_caption';
-  }
-
-  String printSentence(){
-    String sentence = '';
-
-    var date_time = date.split(' ')[1].split(':');
-
-    return sentence;
+    return '촬영날짜: $date\n장소: $location\n촬영자: $user_id\n사진 속 인물: $pre_face\n사진 배경: $pre_background\n요약문장: $pre_caption';
   }
 
   @override

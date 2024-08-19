@@ -17,8 +17,9 @@ class PhotoFolderScreen extends StatefulWidget {
 class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
   final TeamManager _teamManager = TeamManager();
   final PicManager _picManager = PicManager();
-  List<dynamic> team_teamMembers = [];
-  List<String> teamMembers = [];
+  /*List<dynamic> team_teamMembers = [];
+  List<String> teamMembers = [];*/
+  List<TeamEntity> teams = [];
 
   @override
   void initState() {
@@ -32,7 +33,7 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
   }
 
   Future<void> _loadTeamFolders() async {
-    List<TeamEntity> teams = _teamManager.getTeamList();
+    teams = _teamManager.getTeamList();
     for (var team in teams) {
       await _createTeamFolderStructure(team.teamName);
     }
@@ -49,6 +50,7 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
     // await Directory('$teamPath/배경').create(recursive: true);
     await Directory('$teamPath/계절').create(recursive: true);
     await Directory('$teamPath/멤버').create(recursive: true);
+    await Directory('$teamPath/멤버').create(recursive: true);
 
     List<String> cities = ['서울', '대전', '부산', '인천', '대구', '울산', '광주', '제주도', '기타 지역'];
     for (var city in cities) {
@@ -64,11 +66,16 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
     for (var season in seasons) {
       await Directory('$teamPath/계절/$season').create(recursive: true);
     }
-    teamMembers = _findTeamMemberByName(teamName);
-    team_teamMembers.add(teamMembers);
-    for (var name in teamMembers){
-      await Directory('$teamPath/멤버/$name').create(recursive: true);
+    // teamMembers = _findTeamMemberByName(teamName);
+    // team_teamMembers.add(teamMembers);
+    // for (var name in teamMembers){
+    //   await Directory('$teamPath/멤버/$name').create(recursive: true);
+    // }
+    TeamEntity team = teams.firstWhere((t) => t.teamName == teamName);
+    for (var member in team.members) {
+      await Directory('$teamPath/멤버/${member['name']}').create(recursive: true);
     }
+    print('${team.teamName} : ${team.members}');
 
   }
 
@@ -82,21 +89,8 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
     return [];
   }
 
-  /*void _subscribeToNewImages() {
-    _picSubscription = _picManager.imageStream.listen((newImage) {
-      setState(() {});
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('새로운 사진이 추가되었습니다: ${newImage.img_num}'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    });
-  }*/
-
   @override
   Widget build(BuildContext context) {
-    final List<TeamEntity> teams = _teamManager.getTeamList();
 
     return Scaffold(
       appBar: AppBar(
@@ -125,7 +119,7 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => TeamAlbumScreen(teamName: teamName, teamMembers: team_teamMembers[index],),
+            builder: (context) => TeamAlbumScreen(teamName: teamName, teamMembers: teams[index].members,),
           ),
         );
       },
@@ -146,7 +140,8 @@ class _PhotoFolderScreenState extends State<PhotoFolderScreen> {
 
 class TeamAlbumScreen extends StatefulWidget {
   final String teamName;
-  final List<String> teamMembers;
+  // final List<String> teamMembers;
+  final List<Map<String, dynamic>> teamMembers;
 
   TeamAlbumScreen({Key? key, required this.teamName, required this.teamMembers}) : super(key: key);
 
@@ -165,6 +160,12 @@ class _TeamAlbumScreenState extends State<TeamAlbumScreen> {
     super.initState();
     _initializeTeamNo();
     _searchPage = SearchPage(initialQuery: '', teamNo: _teamNo);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _initializeTeamNo() {
@@ -231,6 +232,7 @@ class _TeamAlbumScreenState extends State<TeamAlbumScreen> {
                 // _buildAlbumTile(context, '배경'),
                 _buildAlbumTile(context, '계절'),
                 _buildAlbumTile(context, '멤버'),
+                _buildAlbumTile(context, '촬영자'),
               ],
             ),
     );

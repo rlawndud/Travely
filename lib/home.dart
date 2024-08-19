@@ -9,6 +9,7 @@ import 'package:test2/appbar/Settings.dart';
 import 'package:test2/camera_screen.dart';
 import 'package:test2/googlemap_image.dart';
 import 'package:test2/googlemap_location.dart';
+import 'package:test2/map_page.dart';
 import 'package:test2/model/imgtest.dart';
 import 'package:test2/model/locationMarker.dart';
 import 'package:test2/model/member.dart';
@@ -34,7 +35,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   late Member _user;
   final TeamManager _teamManager = TeamManager();
   final PicManager _picManager = PicManager();
-  String _selectedMapType = '팀원의 위치';
   bool _isSearchMode = false;
   int _previouseIndex = 0;
   final TextEditingController _searchController = TextEditingController();
@@ -52,7 +52,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     _pages = <Widget>[
       TeamPage(userId: _user.id),
       const PhotoFolderScreen(), // 앨범 페이지
-      _buildMapWidget(), // 홈 페이지-지도
+      MapPage(userId: _user.id, userName: _user.name), // 홈 페이지-지도
       // MapPage(userId: _user.id, userName: _user.name),
       const CameraScreen(), // 촬영 페이지
     ];
@@ -62,6 +62,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _searchController.dispose();
     _teamManager.removeListener(_updateUI);
     super.dispose();
   }
@@ -332,44 +333,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildMapWidget() {
-    return Stack(
-      children: [
-        _selectedMapType == '팀원의 위치' ? GoogleMapLocation(userId: _user.id, userName: _user.name,) : GoogleMapCluster(),
-        Positioned(
-          top: 10,
-          left: 10,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: DropdownButton<String>(
-              value: _selectedMapType,
-              items: ['팀원의 위치', '지도 위 앨범']
-                  .map((String value) => DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              ))
-                  .toList(),
-              onChanged: (String? newValue) {
-                if (newValue != null) {
-                  print(newValue);
-                  setState(() {
-                    _selectedMapType = newValue;
-                    _pages[2] = _buildMapWidget();
-                  });
-                }
-              },
-              underline: Container(),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

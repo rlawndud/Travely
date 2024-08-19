@@ -20,8 +20,9 @@ class _GoogleMapClusterState extends State<GoogleMapCluster> {
   late ClusterManager<ImageMarkerCluster> _clusterManager;
   final Set<Marker> _markers = {};
   final CameraPosition _initialCameraPosition = CameraPosition(
-    target: LatLng(36.2048, 127.7669),
-    zoom: 7.0,
+    // target: LatLng(36.2048, 127.7669),
+    target: LatLng(36.3362613,127.4454628),
+    zoom: 17.5,
   );
 
   @override
