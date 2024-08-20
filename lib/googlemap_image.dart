@@ -5,9 +5,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:test2/model/image_marker_cluster.dart';
-import 'package:test2/model/picture.dart';
-import 'package:test2/model/team.dart';
+import 'package:travley/model/image_marker_cluster.dart';
+import 'package:travley/model/picture.dart';
+import 'package:travley/model/team.dart';
 
 class GoogleMapCluster extends StatefulWidget {
   const GoogleMapCluster({super.key});

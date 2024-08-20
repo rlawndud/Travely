@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:test2/value/global_variable.dart';
-import 'package:test2/home.dart';
-import 'package:test2/login.dart';
-import 'package:test2/model/member.dart';
-import 'package:test2/signup.dart';
-import 'package:test2/splash.dart';
+import 'package:travley/value/global_variable.dart';
+import 'package:travley/home.dart';
+import 'package:travley/login.dart';
+import 'package:travley/model/member.dart';
+import 'package:travley/signup.dart';
+import 'package:travley/splash.dart';
 import 'package:provider/provider.dart';
-import 'package:test2/appbar/friend/FriendlistManagement.dart';
+import 'package:travley/appbar/friend/FriendlistManagement.dart';
 
 void main() {
   runApp(

@@ -4,10 +4,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:test2/model/picture.dart';
-import 'package:test2/util/globalUI.dart';
-import 'package:test2/value/color.dart';
-import 'package:test2/network/web_socket.dart';
+import 'package:travley/model/picture.dart';
+import 'package:travley/util/globalUI.dart';
+import 'package:travley/value/color.dart';
+import 'package:travley/network/web_socket.dart';
 
 class Team {
   int teamNo;

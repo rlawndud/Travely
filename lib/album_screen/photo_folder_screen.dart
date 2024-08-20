@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:async';
 import 'package:path_provider/path_provider.dart';
-import 'package:test2/album_screen/subcategory_screen.dart';
-import 'package:test2/model/picture.dart';
-import 'package:test2/model/team.dart';
-import 'package:test2/search_page.dart';
+import 'package:travley/album_screen/subcategory_screen.dart';
+import 'package:travley/model/picture.dart';
+import 'package:travley/model/team.dart';
+import 'package:travley/search_page.dart';
 
 class PhotoFolderScreen extends StatefulWidget {
   const PhotoFolderScreen({super.key});

@@ -1,7 +1,7 @@
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
-import 'package:test2/appbar/mypage/EditInfo.dart';
-import 'package:test2/model/member.dart';
+import 'package:travley/appbar/mypage/EditInfo.dart';
+import 'package:travley/model/member.dart';
 
 class MyPage extends StatelessWidget {
   final Member user;

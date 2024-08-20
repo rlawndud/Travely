@@ -3,15 +3,15 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:test2/appbar/friend/FriendRequestModel.dart';
-import 'package:test2/model/picture.dart';
-import 'package:test2/value/global_variable.dart';
-import 'package:test2/model/team.dart';
-import 'package:test2/model/locationMarker.dart';
+import 'package:travley/appbar/friend/FriendRequestModel.dart';
+import 'package:travley/model/picture.dart';
+import 'package:travley/value/global_variable.dart';
+import 'package:travley/model/team.dart';
+import 'package:travley/model/locationMarker.dart';
 import 'package:provider/provider.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:test2/appbar/friend/FriendlistManagement.dart';
+import 'package:travley/appbar/friend/FriendlistManagement.dart';
 
 class WebSocketService {
   static final WebSocketService _webSocketService = WebSocketService._internal();

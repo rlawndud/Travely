@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:test2/model/team.dart';
-import 'package:test2/network/web_socket.dart';
+import 'package:travley/model/team.dart';
+import 'package:travley/network/web_socket.dart';
 
 class LocationMarker{
   String userId;

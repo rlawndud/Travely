@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:test2/model/team.dart';
-import 'package:test2/model/userLoginState.dart';
-import 'package:test2/util/auto_login.dart';
-import 'package:test2/network/web_socket.dart';
-import 'package:test2/model/member.dart';
+import 'package:travley/model/team.dart';
+import 'package:travley/model/userLoginState.dart';
+import 'package:travley/util/auto_login.dart';
+import 'package:travley/network/web_socket.dart';
+import 'package:travley/model/member.dart';
 
 class Splash extends StatefulWidget {
   const Splash({super.key});

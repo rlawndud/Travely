@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:test2/model/memberImg.dart';
-import 'package:test2/network/web_socket.dart';
-import 'package:test2/value/color.dart';
-import 'package:test2/model/member.dart';
+import 'package:travley/model/memberImg.dart';
+import 'package:travley/network/web_socket.dart';
+import 'package:travley/value/color.dart';
+import 'package:travley/model/member.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});

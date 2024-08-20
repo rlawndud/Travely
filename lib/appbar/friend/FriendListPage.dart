@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import 'package:test2/model/team.dart';
+import 'package:travley/model/team.dart';
 import 'FriendRequestModel.dart';
 import 'FriendlistManagement.dart';
-import 'package:test2/network/web_socket.dart';
-import 'package:test2/value/global_variable.dart';
+import 'package:travley/network/web_socket.dart';
+import 'package:travley/value/global_variable.dart';
 
 // FriendListPage 클래스 정의
 class FriendListPage extends StatefulWidget {

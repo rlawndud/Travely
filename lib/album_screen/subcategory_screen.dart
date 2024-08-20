@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:test2/album_screen/photo_grid_screen.dart';
+import 'package:travley/album_screen/photo_grid_screen.dart';
 
 class SubCategoryScreen extends StatelessWidget {
   final String teamName;

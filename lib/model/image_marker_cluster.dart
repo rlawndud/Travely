@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:test2/model/memberImg.dart';
+import 'package:travley/model/memberImg.dart';
 
 class ImageMarkerCluster with ClusterItem {
   final LatLng position;

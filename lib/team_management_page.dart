@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:test2/model/team.dart';
+import 'package:travley/model/team.dart';
 
 class TeamManagementPage extends StatefulWidget {
   final String initialCurrentTeam;

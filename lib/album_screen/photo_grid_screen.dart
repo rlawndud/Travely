@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:test2/album_screen/photo_detail_screen.dart';
-import 'package:test2/model/memberImg.dart';
-import 'package:test2/model/picture.dart';
-import 'package:test2/model/team.dart';
+import 'package:travley/album_screen/photo_detail_screen.dart';
+import 'package:travley/model/memberImg.dart';
+import 'package:travley/model/picture.dart';
+import 'package:travley/model/team.dart';
 
 
 class PhotoGridScreen extends StatefulWidget {

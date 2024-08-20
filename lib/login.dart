@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:test2/network/web_socket.dart';
-import 'package:test2/util/auto_login.dart';
-import 'package:test2/value/color.dart';
+import 'package:travley/network/web_socket.dart';
+import 'package:travley/util/auto_login.dart';
+import 'package:travley/value/color.dart';
 
 import 'model/member.dart';
 import 'model/team.dart';

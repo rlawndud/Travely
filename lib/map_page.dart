@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:test2/googlemap_image.dart';
-import 'package:test2/googlemap_location.dart';
+import 'package:travley/googlemap_image.dart';
+import 'package:travley/googlemap_location.dart';
 
 class MapPage extends StatefulWidget {
   final String userId;

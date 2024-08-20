@@ -5,8 +5,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:test2/model/team.dart';
-import 'package:test2/network/web_socket.dart';
+import 'package:travley/model/team.dart';
+import 'package:travley/network/web_socket.dart';
 
 class PictureEntity {
   int img_num;

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:test2/model/member.dart';
-import 'package:test2/model/team.dart';
-import 'package:test2/network/web_socket.dart';
-import 'package:test2/appbar/friend/AddFriendPage.dart';
-import 'package:test2/appbar/friend/FriendListPage.dart';
-import 'package:test2/appbar/friend/FriendRequestsPage.dart';
-import 'package:test2/appbar/friend/FriendEditPage.dart';
-import 'package:test2/appbar/friend/FriendRequestModel.dart';
-import 'package:test2/appbar/friend/User_Provider.dart';
+import 'package:travley/model/member.dart';
+import 'package:travley/model/team.dart';
+import 'package:travley/network/web_socket.dart';
+import 'package:travley/appbar/friend/AddFriendPage.dart';
+import 'package:travley/appbar/friend/FriendListPage.dart';
+import 'package:travley/appbar/friend/FriendRequestsPage.dart';
+import 'package:travley/appbar/friend/FriendEditPage.dart';
+import 'package:travley/appbar/friend/FriendRequestModel.dart';
+import 'package:travley/appbar/friend/User_Provider.dart';
 
 class Friend extends StatefulWidget {
   final Member user;

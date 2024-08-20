@@ -9,11 +9,11 @@ import 'package:intl/intl.dart';
 import 'package:sound_mode/sound_mode.dart';
 import 'package:sound_mode/utils/ringer_mode_statuses.dart';
 import 'package:soundpool/soundpool.dart';
-import 'package:test2/model/memberImg.dart';
-import 'package:test2/network/web_socket.dart';
+import 'package:travley/model/memberImg.dart';
+import 'package:travley/network/web_socket.dart';
 import 'package:vibration/vibration.dart';
-import 'package:test2/model/picture.dart';
-import 'package:test2/model/team.dart';
+import 'package:travley/model/picture.dart';
+import 'package:travley/model/team.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});

@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:test2/model/userLoginState.dart';
+import 'package:travley/model/userLoginState.dart';
 
 class AutoLogin{
   static String PREFERENCES_NAME = 'auto_login';

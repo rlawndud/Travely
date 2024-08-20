@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:test2/appbar/friend/FriendRequestModel.dart';
+import 'package:travley/appbar/friend/FriendRequestModel.dart';
 
 class FriendListProvider with ChangeNotifier {
   List<FriendRequest> _friendList = [];

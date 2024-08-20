@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:test2/model/memberImg.dart';
-import 'package:test2/model/picture.dart';
+import 'package:travley/model/memberImg.dart';
+import 'package:travley/model/picture.dart';
 
 class ImageDetailScreen extends StatefulWidget {
   final List<PictureEntity> pictures;

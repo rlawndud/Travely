@@ -19,7 +19,7 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
 
     <application
-        android:label="test2"
+        android:label="travley"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <meta-data

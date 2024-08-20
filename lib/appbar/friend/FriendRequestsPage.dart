@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:test2/network/web_socket.dart';
+import 'package:travley/network/web_socket.dart';
 import 'FriendRequestModel.dart';
 
 class FriendRequestsPage extends StatefulWidget {

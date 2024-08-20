@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'FriendRequestModel.dart';
-import 'package:test2/network/web_socket.dart';
+import 'package:travley/network/web_socket.dart';
 import 'FriendlistManagement.dart';
 
 class FriendEditPage extends StatefulWidget {
