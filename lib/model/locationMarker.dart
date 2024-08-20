@@ -41,6 +41,7 @@ class LocationMarker{
   }
 }
 
+//실제 기능에선 사용되지 않고 있음 그러나 제외하면 에러 발생
 class LocationManager with ChangeNotifier {
   static final LocationManager _instance = LocationManager._internal();
   final WebSocketService _webSocketService = WebSocketService();

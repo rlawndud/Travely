@@ -109,12 +109,6 @@ class _PhotoGridScreenState extends State<PhotoGridScreen> {
         return isTeam && picture.location.contains(widget.subCategory);
       } else if (widget.category == '계절') {
         return isTeam && picture.season == widget.subCategory;
-      } else if (widget.category == '배경') {
-        if (widget.subCategory == '기타') {
-          List<String> mainBackgrounds = ['산', '바다'];
-          return isTeam && !mainBackgrounds.contains(picture.pre_background);
-        }
-        return isTeam && picture.pre_background == widget.subCategory;
       } else if (widget.category == '멤버'){
         return isTeam && picture.pre_face.contains(widget.subCategory);
       } else if (widget.category == '촬영자'){

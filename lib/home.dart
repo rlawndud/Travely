@@ -7,10 +7,7 @@ import 'package:test2/appbar/friend/Friend.dart';
 import 'package:test2/appbar/mypage/My_Page.dart';
 import 'package:test2/appbar/Settings.dart';
 import 'package:test2/camera_screen.dart';
-import 'package:test2/googlemap_image.dart';
-import 'package:test2/googlemap_location.dart';
 import 'package:test2/map_page.dart';
-import 'package:test2/model/imgtest.dart';
 import 'package:test2/model/locationMarker.dart';
 import 'package:test2/model/member.dart';
 import 'package:test2/model/picture.dart';
@@ -53,7 +50,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       TeamPage(userId: _user.id),
       const PhotoFolderScreen(), // 앨범 페이지
       MapPage(userId: _user.id, userName: _user.name), // 홈 페이지-지도
-      // MapPage(userId: _user.id, userName: _user.name),
       const CameraScreen(), // 촬영 페이지
     ];
     WidgetsBinding.instance.addObserver(this);
@@ -213,7 +209,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                   setState(() {
                     if (_isSearchMode) {
                       if (_searchController.text.isNotEmpty) {
-                        // 검색어가 있을 경우, 입력창을 비웁니다.
+                        // 검색어가 있을 경우, 입력창을 비움
                         _searchController.clear();
                         _performSearch('');
                       } else {
@@ -298,10 +294,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                   focusColor: Colors.black38,
                   title: const Text('도움말'),
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => album(id: _user.id,)),
-                    );
+                    // 도움말 컨텐츠 추가 필요
                   },
                   trailing: const Icon(Icons.navigate_next),
                 ),
@@ -325,9 +318,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                 Tab(icon: Icon(Icons.photo_album, color: Colors.black), text: '앨범'),
                 Tab(icon: Icon(Icons.home, color: Colors.black), text: '홈'),
                 Tab(icon: Icon(Icons.camera_alt, color: Colors.black), text: '촬영'),
-                //Tab(icon: Icon(Icons.edit_note, color: Colors.black),
-                //text: 'SnapNote',
-                //),
               ],
             ),
           ),

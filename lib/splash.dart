@@ -51,7 +51,6 @@ class _SplashState extends State<Splash> {
         var response = await _webSocketService.transmit(userDTO.toJson(),'Login');
         debugPrint(response.toString());
         Member mem = Member.fromJson(response);
-        // Member mem = new Member('id', 'password', 'name', 'phone');
         await TeamManager().initialize(mem.id);
         //홈화면으로 이동
         Navigator.pushReplacementNamed(context, '/home', arguments: {'user':mem});

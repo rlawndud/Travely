@@ -41,9 +41,6 @@ class WebSocketService {
 
   void _connect(){
     try{
-      /*HttpClient client = HttpClient()
-        ..badCertificateCallback = ((X509Certificate cert, String host, int port) => true);
-*/
       channel = IOWebSocketChannel.connect(websocketUrl);
       debugPrint(channel.toString());
       _subscription = channel.stream.listen(
@@ -57,24 +54,6 @@ class WebSocketService {
             _scheduleReconnection();
           }
       );
-      /*WebSocket.connect(websocketUrl.toString(), customClient: client).then((ws) {
-        channel = IOWebSocketChannel(ws);
-        debugPrint(channel.toString());
-        _subscription = channel.stream.listen(
-          _handleMessage,
-          onError: (error) {
-            debugPrint('웹소켓 에러: $error');
-            _responseController.add({'error': '웹소켓 에러', 'details': error.toString()});
-          },
-          onDone: () {
-            debugPrint('웹소켓 연결 종료');
-            _scheduleReconnection();
-          },
-        );
-      }).catchError((error) {
-        debugPrint('웹소켓 연결 에러: $error');
-        _scheduleReconnection();
-      });*/
     }catch(e){
       debugPrint('웹소켓 연결 에러:$e');
     }
@@ -91,7 +70,6 @@ class WebSocketService {
 
 
         var jsonData = jsonDecode(jsonMessage);
-
 
         //형식 확인용
         debugPrint('message: ${message.toString()}');
@@ -226,6 +204,7 @@ class WebSocketService {
     }
   }
 
+// --------- 친구 기능 ------------------------------------------
 void handleFriendRequestReceived(Map<String, dynamic> data) {
     debugPrint('친구 요청 받음: ${data.toString()}');
     final context = GlobalVariable.navigatorKey.currentContext;
@@ -328,6 +307,7 @@ void handleFriendRequestReceived(Map<String, dynamic> data) {
     return await transmit(data, 'AddTeamMemberS');
   }
 
+// --------- 친구 기능 ------------------------------------------
   Future<Map<String, dynamic>> refreshAddFriend(String userId) async {
     final data = {
       'id': userId,
@@ -342,7 +322,6 @@ void handleFriendRequestReceived(Map<String, dynamic> data) {
 
     // 서버로 데이터 전송하고 응답받기
     final response = await transmit(data, 'GetMyFriend');
-    // 만약 response가 이미 Map<String, dynamic>이라면, jsonDecode가 필요하지 않음
     return response;
   }
 
@@ -377,7 +356,5 @@ void handleFriendRequestReceived(Map<String, dynamic> data) {
   }
 
   void removeListener(Function(Map<String, dynamic>) listener) {
-    // StreamController에서는 직접적인 removeListener 메서드가 없으므로,
-    // 실제로 리스너를 제거하는 로직은 필요에 따라 구현해야 합니다.
   }
 }
