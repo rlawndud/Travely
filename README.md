@@ -1,5 +1,5 @@
 # Travely
-client : 
+client : https://github.com/rlawndud/Travely.git
 
 main server : 
 
