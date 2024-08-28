@@ -3,7 +3,7 @@ client : https://github.com/rlawndud/Travely.git
 
 main server : https://github.com/rlawndud/Travely_Server.git
 
-model server :
+model server : https://github.com/rlawndud/Travely_AiServer.git
 
 ## 화면 구성
 ### **로그인 - 회원가입**
