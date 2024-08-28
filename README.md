@@ -1,7 +1,7 @@
 # Travely
 client : https://github.com/rlawndud/Travely.git
 
-main server : 
+main server : https://github.com/rlawndud/Travely_Server.git
 
 model server :
 
