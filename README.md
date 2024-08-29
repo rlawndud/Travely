@@ -6,10 +6,53 @@
 🎒[Travely-AI Server](https://github.com/rlawndud/Travely_AiServer.git)
 
 ## 목차
-[실행 방법](#실행-방법)<br>
-[화면 구성](#화면-구성)<br>
-[팀이란?](#팀이란)<br>
-[기술 스택](#기술-스택)
+[1.Travely의 팀이란?](#Travely의-팀이란)<br>
+[2.화면 구성](#화면-구성)<br>
+[3.실행 방법](#실행-방법)<br>
+[4.기술 스택](#기술-스택)
+
+## Travely의 팀이란?
+
+사진 촬영 시 팀 앨범에서 실시간으로 팀원 간 사진 공유가 가능하며, 지도에서 다른 팀원과 위치를 공유할 수 있습니다.
+
+## 화면 구성
+### **로그인 - 회원가입**
+
+![image](https://github.com/user-attachments/assets/e07c9ee4-46d1-449a-bf1a-35b02fc6caa2)
+![image](https://github.com/user-attachments/assets/84fb919e-b903-4393-9ba0-350dce862400)
+
+:회원가입 시, 회원의 얼굴 사진을 정면, 상하좌우의 측면으로 5장의 사진을 촬영한 후 회원가입을 진행해야 합니다.
+
+### **여행 팀 생성 및 구성**
+
+![image](https://github.com/user-attachments/assets/6c6b0784-b177-4231-b371-8d9178a1896b)
+![image](https://github.com/user-attachments/assets/719f0707-8429-447f-aee6-1e37c02098c8)
+
+:팀 이름을 입력하고 생성버튼을 눌러 팀을 생성하고,
+팀원의 아이디를 입력하고 초대버튼을 눌러 현재 팀으로 설정된 팀에 초대할 수 있습니다.
+
+여행 시작 버튼을 누르면 현재 팀의 얼굴모델이 생성되어, **사진촬영이 가능**해집니다.
+
+### **앨범**
+![image](https://github.com/user-attachments/assets/cb09c188-a754-4ffa-bde4-1e5882a3fff7)
+![image](https://github.com/user-attachments/assets/f62b9fd8-c0f2-4048-8677-e4f4783cd913)
+![image](https://github.com/user-attachments/assets/83f7b1cc-c79e-4cdc-b829-901b73a60597)
+![image](https://github.com/user-attachments/assets/d7b5e231-1978-498e-be21-84b1656d025f)
+
+얼굴인식, 배경예측, 이미지 문장생성의 결과를 이미지 상세보기에서 확인할 수 있습니다.
+
+**검색 기능**
+
+![image](https://github.com/user-attachments/assets/4d518a6b-935b-4679-af14-afc554a1d7b6)
+
+### **지도 관련 기능(팀원위치 공유, 위치기반 앨범)**
+
+![image](https://github.com/user-attachments/assets/7c4fb183-fc85-4888-8fb6-81f47911bfda)
+![image](https://github.com/user-attachments/assets/f99d6c13-c5c7-45ea-8d43-c6ba25fbf34f)
+
+### **카메라**
+![image](https://github.com/user-attachments/assets/78fa6228-f4a4-4e9c-92b2-3b82a4fa41f7)
+
 ## 실행 방법
 실행환경 및 라이브러리는 하단 기술 스택 참조
 ### Main Server
@@ -65,48 +108,6 @@ if not os.path.exists(Face_MODEL_DIR):
    ▸ [Travely.apk 드라이브](https://drive.google.com/file/d/1EaEVQhjnvwcDheTc9i5SGJP3PjgChc6n/view?usp=sharing)
 2. Travely 실행
 3. 회원가입 후 어플리케이션 사용
-
-## 화면 구성
-### **로그인 - 회원가입**
-
-![image](https://github.com/user-attachments/assets/e07c9ee4-46d1-449a-bf1a-35b02fc6caa2)
-![image](https://github.com/user-attachments/assets/84fb919e-b903-4393-9ba0-350dce862400)
-
-:회원가입 시, 회원의 얼굴 사진을 정면, 상하좌우의 측면으로 5장의 사진을 촬영한 후 회원가입을 진행한다.
-
-### **여행 팀 생성 및 구성**
-
-![image](https://github.com/user-attachments/assets/6c6b0784-b177-4231-b371-8d9178a1896b)
-![image](https://github.com/user-attachments/assets/719f0707-8429-447f-aee6-1e37c02098c8)
-
-:팀 이름을 입력하고 생성버튼을 눌러 팀을 생성하고,
-팀원의 아이디를 입력하고 초대버튼을 눌러 현재 팀으로 설정된 팀에 초대할 수 있다.
-
-여행 시작 버튼을 누르면 현재 팀의 얼굴모델이 생성되어, **사진촬영이 가능**해진다.
-
-### **앨범**
-![image](https://github.com/user-attachments/assets/cb09c188-a754-4ffa-bde4-1e5882a3fff7)
-![image](https://github.com/user-attachments/assets/f62b9fd8-c0f2-4048-8677-e4f4783cd913)
-![image](https://github.com/user-attachments/assets/83f7b1cc-c79e-4cdc-b829-901b73a60597)
-![image](https://github.com/user-attachments/assets/d7b5e231-1978-498e-be21-84b1656d025f)
-
-얼굴인식, 배경예측, 이미지 문장생성의 결과를 이미지 상세보기에서 확인할 수 있다.
-
-**검색 기능**
-
-![image](https://github.com/user-attachments/assets/4d518a6b-935b-4679-af14-afc554a1d7b6)
-
-### **지도 관련 기능(팀원위치 공유, 위치기반 앨범)**
-
-![image](https://github.com/user-attachments/assets/7c4fb183-fc85-4888-8fb6-81f47911bfda)
-![image](https://github.com/user-attachments/assets/f99d6c13-c5c7-45ea-8d43-c6ba25fbf34f)
-
-### **카메라**
-![image](https://github.com/user-attachments/assets/78fa6228-f4a4-4e9c-92b2-3b82a4fa41f7)
-
-## 팀이란?
-
-사진 촬영 시 팀 앨범에서 실시간으로 팀원 간 사진 공유가 가능하며, 지도에서 다른 팀원과 위치를 공유할 수 있다.
 
 ## 📚기술 스택
 ### Environment
