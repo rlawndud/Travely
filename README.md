@@ -6,10 +6,11 @@
 🎒[Travely-AI Server](https://github.com/rlawndud/Travely_AiServer.git)
 
 ## 목차
-[1.Travely의 팀이란?](#Travely의-팀이란)<br>
-[2.화면 구성](#화면-구성)<br>
-[3.실행 방법](#실행-방법)<br>
-[4.기술 스택](#기술-스택)
+[1. Travely의 팀이란?](#Travely의-팀이란)<br>
+[2. 화면 구성](#화면-구성)<br>
+[3. 실행 방법](#실행-방법)<br>
+[4. 팀원 소개](#팀원-소개)<br>
+[5. 기술 스택](#기술-스택)
 
 ## Travely의 팀이란?
 
@@ -108,6 +109,13 @@ if not os.path.exists(Face_MODEL_DIR):
    ▸ [Travely.apk 드라이브](https://drive.google.com/file/d/1EaEVQhjnvwcDheTc9i5SGJP3PjgChc6n/view?usp=sharing)
 2. Travely 실행
 3. 회원가입 후 어플리케이션 사용
+
+## 팀원 소개
+|제목|내용|설명|
+|------|---|---|
+|테스트1|테스트2|테스트3|
+|테스트1|테스트2|테스트3|
+|테스트1|테스트2|테스트3|
 
 ## 📚기술 스택
 ### Environment
