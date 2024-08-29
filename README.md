@@ -1,8 +1,6 @@
 # Travely
-🎒[Travely-Client](https://github.com/rlawndud/Travely.git)
-
-🎒[Travely-Main Server](https://github.com/rlawndud/Travely_Server.git)
-
+🎒[Travely-Client](https://github.com/rlawndud/Travely.git)<br>
+🎒[Travely-Main Server](https://github.com/rlawndud/Travely_Server.git)<br>
 🎒[Travely-AI Server](https://github.com/rlawndud/Travely_AiServer.git)
 
 ## 목차
