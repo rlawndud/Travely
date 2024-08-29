@@ -57,7 +57,7 @@ if not os.path.exists(Face_MODEL_DIR):
 ### Client
 ※ 메인 서버 및 AI서버가 실행되어 있어야 함.
 1. Travely.apk 파일 다운로드 <br>
-   ▸ https://drive.google.com/file/d/1LJCNgwVyseMBLMw0ZE9IG6cTNG8WeoA6/view?usp=sharing
+   ▸ [Travely.apk 드라이브](https://drive.google.com/file/d/1EaEVQhjnvwcDheTc9i5SGJP3PjgChc6n/view?usp=sharing)
 2. Travely 실행
 3. 회원가입 후 어플리케이션 사용
 
