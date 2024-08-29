@@ -5,6 +5,11 @@
 
 🎒[Travely-AI Server](https://github.com/rlawndud/Travely_AiServer.git)
 
+## 목차
+[실행 방법]()
+[화면 구성]()
+[팀이란?]()
+[기술 스택]()
 ## 실행 방법
 실행환경 및 라이브러리는 하단 기술 스택 참조
 ### Main Server
@@ -64,7 +69,8 @@ if not os.path.exists(Face_MODEL_DIR):
 ## 화면 구성
 ### **로그인 - 회원가입**
 
-![image](https://github.com/user-attachments/assets/324d91b4-f56b-44ed-8f40-481a2bf6d793)
+![image](https://github.com/user-attachments/assets/e07c9ee4-46d1-449a-bf1a-35b02fc6caa2)
+![image](https://github.com/user-attachments/assets/84fb919e-b903-4393-9ba0-350dce862400)
 
 :회원가입 시, 회원의 얼굴 사진을 정면, 상하좌우의 측면으로 5장의 사진을 촬영한 후 회원가입을 진행한다.
 
@@ -78,10 +84,25 @@ if not os.path.exists(Face_MODEL_DIR):
 
 여행 시작 버튼을 누르면 현재 팀의 얼굴모델이 생성되어, **사진촬영이 가능**해진다.
 
+### **앨범**
+![image](https://github.com/user-attachments/assets/cb09c188-a754-4ffa-bde4-1e5882a3fff7)
+![image](https://github.com/user-attachments/assets/f62b9fd8-c0f2-4048-8677-e4f4783cd913)
+![image](https://github.com/user-attachments/assets/83f7b1cc-c79e-4cdc-b829-901b73a60597)
+![image](https://github.com/user-attachments/assets/d7b5e231-1978-498e-be21-84b1656d025f)
+
+얼굴인식, 배경예측, 이미지 문장생성의 결과를 이미지 상세보기에서 확인할 수 있다.
+
+**검색 기능**
+
+![image](https://github.com/user-attachments/assets/4d518a6b-935b-4679-af14-afc554a1d7b6)
+
 ### **지도 관련 기능(팀원위치 공유, 위치기반 앨범)**
 
 ![image](https://github.com/user-attachments/assets/7c4fb183-fc85-4888-8fb6-81f47911bfda)
 ![image](https://github.com/user-attachments/assets/f99d6c13-c5c7-45ea-8d43-c6ba25fbf34f)
+
+### **카메라**
+![image](https://github.com/user-attachments/assets/78fa6228-f4a4-4e9c-92b2-3b82a4fa41f7)
 
 ## 팀이란?
 
