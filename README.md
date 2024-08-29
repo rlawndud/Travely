@@ -1,9 +1,9 @@
 # Travely
-client : https://github.com/rlawndud/Travely.git
+🎒[Travely-Client](https://github.com/rlawndud/Travely.git)
 
-main server : https://github.com/rlawndud/Travely_Server.git
+🎒[Travely-Main Server](https://github.com/rlawndud/Travely_Server.git)
 
-AI server : https://github.com/rlawndud/Travely_AiServer.git
+🎒[Travely-AI Server](https://github.com/rlawndud/Travely_AiServer.git)
 
 ## 실행 방법
 실행환경 및 라이브러리는 하단 기술 스택 참조
